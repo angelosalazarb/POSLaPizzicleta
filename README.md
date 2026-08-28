@@ -1,0 +1,124 @@
+# POS La Pizzicleta — caja ligera con tickets 80mm
+
+Sistema de facturación sencillo para la sede sur mientras llega el POS definitivo.
+Servidor web local en el Mac; se accede desde el PC de caja por el navegador y los
+tickets se imprimen en la térmica SAT (papel POS80) desde Chrome.
+
+- Facturas como **pestañas** ("cuentas"): cantidad × ítem × precio, texto libre.
+- **Autocompletado desde la carta**: al escribir el ítem sugiere los productos del
+  menú de niceeat (nombre, categoría y precio) y al elegir uno llena el precio solo.
+  El catálogo vive en `data/menu.json` (91 productos scrapeados de
+  lapizzicleta.niceeat.co el 2026-08-27); es un JSON editable a mano si cambian
+  precios o hay productos nuevos.
+- **Descuento** por cuenta en $ o %, el total nunca baja de 0.
+- **Propina** debajo del descuento, en % (típico 10) o $ fijo: muestra el valor
+  calculado y el **A pagar** = total + propina. Sale en el ticket y en el export.
+- **Método de pago** por cuenta (Efectivo / Datáfono / Nequi / Transferencia,
+  Efectivo por defecto): sale en el ticket ("Pago: ..."), en el export CSV y
+  "Ventas de hoy" muestra el desglose del día por método para el cierre de caja.
+- Todo se guarda solo (SQLite en `data/pos.db`): las pestañas sobreviven refrescos
+  y se ven igual desde el Mac y desde el PC de caja.
+- Vista **Ventas de hoy** con total del día, reimpresión y **export CSV** por rango
+  de fechas (compatible con Excel, para alimentar el consolidado TERRA).
+- **Cierre de caja** (al final de Ventas de hoy): se digita la base de inicio y
+  lo contado en efectivo, datáfono y transferencias (incluye Nequi); el botón
+  de billete junto al campo de efectivo abre el **conteo por denominaciones**
+  (billetes $2.000–$100.000 y monedas $50–$1.000): se pone la cantidad de cada
+  una, muestra subtotales y el total, y "Usar total" llena el campo; el conteo
+  se guarda junto con el cierre; compara en
+  vivo contra lo registrado por el POS (con propinas), marca por rubro si
+  "cuadra", falta (rojo) o sobra (naranja), calcula el total final del día sin
+  la base, y **Guardar cierre** deja el registro del día en la base de datos
+  (uno por fecha; volver a guardar lo actualiza).
+- **Corregir una cuenta ya cobrada**: el botón de lápiz en Ventas de hoy la
+  reabre como pestaña (sale del total del día mientras tanto), se edita lo que
+  sea (ítems, descuento, propina, método) y se vuelve a cobrar con el mismo
+  número de cuenta.
+
+> **¿Correrlo en el computador de la pizzería (Windows)?** Guía completa en
+> **[SETUP-PIZZERIA.md](SETUP-PIZZERIA.md)** — instalación de Python, `run-windows.bat`,
+> arranque automático, firewall, respaldos. Regla: el servidor corre en UN solo
+> equipo a la vez (la base de ventas es `data/pos.db`).
+
+## Arranque (en este Mac)
+
+```bash
+cd "projects/lapizzicleta/pos"
+uv run --with flask app.py
+```
+
+Queda sirviendo en `http://0.0.0.0:8085`. En este Mac: <http://localhost:8085>.
+
+## Acceso desde el PC de caja
+
+1. Averiguar la IP del Mac en la red del local:
+
+   ```bash
+   ipconfig getifaddr en0   # WiFi; si el cable va por adaptador probar en1..en5
+   ```
+
+2. En el PC de caja abrir Chrome → `http://<IP-del-Mac>:8085`.
+3. Si no carga: en el Mac, **Configuración del Sistema → Red → Firewall** —
+   permitir conexiones entrantes a Python (o desactivar el firewall en la red local).
+4. Recomendado: fijar la IP del Mac (reservación DHCP en el router o IP manual)
+   para que el marcador del PC de caja no se dañe cuando cambie la IP.
+
+## Impresora SAT POS80 (en el PC de caja)
+
+La impresión sale del navegador del PC de caja, donde está la SAT por USB:
+
+1. Instalar/verificar el **driver SAT** y que imprima una página de prueba de Windows.
+2. En el driver, dejar el tamaño de papel en **POS80 / 80(72.1) × 297mm / Receipt**.
+3. En Chrome, al imprimir el ticket:
+   - Destino: la SAT · Tamaño de papel: POS80 · **Márgenes: Ninguno** ·
+     Escala: 100% · Sin encabezados ni pies de página.
+   - Chrome recuerda estas opciones para las próximas impresiones.
+4. El botón **Cobrar e imprimir** abre el ticket (`/ticket/<id>?print=1`) y lanza
+   el diálogo de impresión solo; con Enter sale el ticket.
+5. **Impresión silenciosa (opcional):** crear un acceso directo de Chrome con
+   `--kiosk-printing` y usar ese Chrome solo para la caja — imprime directo en la
+   predeterminada sin diálogo. Poner la SAT como impresora predeterminada de Windows.
+
+## Estructura
+
+```
+pos/
+├── app.py              # Flask: API + frontend + ticket (puerto 8085)
+├── pos.html            # interfaz de caja (un solo archivo)
+├── static/
+│   ├── logo.png        # sticker a color (512px)
+│   ├── logo-ticket.png # sticker B/N para la térmica
+│   └── fonts/          # Pirata One, Archivo, IBM Plex Mono (funciona sin internet)
+└── data/pos.db         # base SQLite (respaldar este archivo = respaldar las ventas)
+```
+
+## API (por si hace falta integrar algo después)
+
+| Método | Ruta | Qué hace |
+|---|---|---|
+| GET | `/api/menu` | catálogo de la carta (`data/menu.json`) para el autocompletado |
+| GET | `/api/facturas?estado=abierta` | cuentas abiertas con sus ítems |
+| POST | `/api/facturas` | nueva cuenta (numeración F-001 reinicia cada día) |
+| PUT | `/api/facturas/<id>` | guardar ítems + descuento + nota |
+| POST | `/api/facturas/<id>/cerrar` · `/anular` · `/reabrir` | cerrar, anular, o reabrir una cerrada/anulada para editarla |
+| GET | `/api/ventas?fecha=YYYY-MM-DD` | cerradas del día + total |
+| GET | `/api/export?desde=&hasta=` | CSV del rango (una fila por ítem) |
+| GET/POST | `/api/cierre?fecha=` | cierre de caja del día: esperados por método y guardar/actualizar el cuadre |
+| GET | `/api/backup` | descarga una copia consistente de `pos.db` (respaldo o migración de equipo) |
+| GET | `/ticket/<id>?print=1` | ticket 80mm; `print=1` lanza la impresión |
+
+Los totales los calcula el servidor al guardar (fuente de verdad); el navegador
+solo los muestra en vivo.
+
+## Respaldo
+
+Todo vive en `data/pos.db`. Abrir `/api/backup` en el navegador descarga una
+copia consistente ya fechada (también sirve copiar el archivo directamente); el
+export CSV sirve para contabilidad pero no reemplaza el respaldo.
+
+## Repositorio
+
+Código sincronizado en <https://github.com/angelosalazarb/POSLaPizzicleta>.
+La base `data/pos.db` está excluida del repo a propósito (datos del negocio):
+se mueve entre equipos con `/api/backup`. En Windows, `actualizar-windows.bat`
+hace el `git pull`.

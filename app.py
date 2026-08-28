@@ -1,0 +1,568 @@
+#!/usr/bin/env python3
+"""POS ligero La Pizzicleta — servidor local con tickets 80mm.
+
+Arranque:  uv run --with flask app.py
+Acceso desde caja:  http://<IP-del-Mac>:8085
+"""
+
+import csv
+import html
+import io
+import json
+import sqlite3
+from datetime import date, datetime
+from pathlib import Path
+
+from flask import Flask, g, jsonify, request, send_file, send_from_directory
+
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / "data" / "pos.db"
+POS_HTML = BASE_DIR / "pos.html"
+MENU_JSON = BASE_DIR / "data" / "menu.json"
+
+app = Flask(__name__)
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS facturas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero_dia INTEGER NOT NULL,
+    fecha_apertura TEXT NOT NULL,
+    fecha_cierre TEXT,
+    estado TEXT NOT NULL DEFAULT 'abierta' CHECK (estado IN ('abierta','cerrada','anulada')),
+    descuento_tipo TEXT NOT NULL DEFAULT 'monto' CHECK (descuento_tipo IN ('monto','porcentaje')),
+    descuento_valor REAL NOT NULL DEFAULT 0,
+    subtotal INTEGER NOT NULL DEFAULT 0,
+    total INTEGER NOT NULL DEFAULT 0,
+    nota TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    factura_id INTEGER NOT NULL REFERENCES facturas(id) ON DELETE CASCADE,
+    cantidad REAL NOT NULL DEFAULT 1,
+    descripcion TEXT NOT NULL DEFAULT '',
+    precio_unitario INTEGER NOT NULL DEFAULT 0,
+    subtotal INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_items_factura ON items(factura_id);
+CREATE INDEX IF NOT EXISTS idx_facturas_fecha ON facturas(fecha_apertura);
+CREATE TABLE IF NOT EXISTS cierres (
+    fecha TEXT PRIMARY KEY,
+    base INTEGER NOT NULL DEFAULT 0,
+    efectivo_contado INTEGER NOT NULL DEFAULT 0,
+    datafono_contado INTEGER NOT NULL DEFAULT 0,
+    transferencias_contado INTEGER NOT NULL DEFAULT 0,
+    esperado_efectivo INTEGER NOT NULL DEFAULT 0,
+    esperado_datafono INTEGER NOT NULL DEFAULT 0,
+    esperado_transferencias INTEGER NOT NULL DEFAULT 0,
+    total_final INTEGER NOT NULL DEFAULT 0,
+    diferencia INTEGER NOT NULL DEFAULT 0,
+    guardado_en TEXT NOT NULL,
+    conteo_efectivo TEXT NOT NULL DEFAULT ''
+);
+"""
+
+
+def get_db():
+    if "db" not in g:
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        g.db = sqlite3.connect(DB_PATH)
+        g.db.row_factory = sqlite3.Row
+        g.db.execute("PRAGMA foreign_keys = ON")
+    return g.db
+
+
+@app.teardown_appcontext
+def close_db(_exc):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+
+MIGRACIONES = [
+    "ALTER TABLE facturas ADD COLUMN propina_tipo TEXT NOT NULL DEFAULT 'porcentaje'",
+    "ALTER TABLE facturas ADD COLUMN propina_valor REAL NOT NULL DEFAULT 0",
+    "ALTER TABLE facturas ADD COLUMN propina INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE facturas ADD COLUMN metodo_pago TEXT NOT NULL DEFAULT 'Efectivo'",
+    "ALTER TABLE facturas ADD COLUMN reabierta INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE cierres ADD COLUMN conteo_efectivo TEXT NOT NULL DEFAULT ''",
+]
+
+METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
+
+
+def init_db():
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(DB_PATH) as db:
+        db.executescript(SCHEMA)
+        for sql in MIGRACIONES:
+            try:
+                db.execute(sql)
+            except sqlite3.OperationalError:
+                pass  # la columna ya existe
+
+
+def calcular_totales(items, descuento_tipo, descuento_valor,
+                     propina_tipo="porcentaje", propina_valor=0):
+    subtotal = sum(int(round(i["cantidad"] * i["precio_unitario"])) for i in items)
+    if descuento_tipo == "porcentaje":
+        descuento = int(round(subtotal * min(max(descuento_valor, 0), 100) / 100))
+    else:
+        descuento = int(min(max(descuento_valor, 0), subtotal))
+    total = max(subtotal - descuento, 0)
+    if propina_tipo == "porcentaje":
+        propina = int(round(total * min(max(propina_valor, 0), 100) / 100))
+    else:
+        propina = int(max(propina_valor, 0))
+    return subtotal, total, descuento, propina
+
+
+def factura_dict(db, row):
+    items = db.execute(
+        "SELECT id, cantidad, descripcion, precio_unitario, subtotal"
+        " FROM items WHERE factura_id = ? ORDER BY id", (row["id"],)
+    ).fetchall()
+    d = dict(row)
+    d["items"] = [dict(i) for i in items]
+    d["numero"] = f"F-{row['numero_dia']:03d}"
+    d["total_pagar"] = d["total"] + d.get("propina", 0)
+    return d
+
+
+# ---------- frontend ----------
+
+@app.get("/")
+def index():
+    return send_file(POS_HTML)
+
+
+@app.get("/static/<path:name>")
+def static_files(name):
+    return send_from_directory(BASE_DIR / "static", name)
+
+
+@app.get("/api/menu")
+def menu():
+    if not MENU_JSON.exists():
+        return jsonify([])
+    return send_file(MENU_JSON, mimetype="application/json")
+
+
+# ---------- API facturas ----------
+
+@app.get("/api/facturas")
+def listar_facturas():
+    db = get_db()
+    estado = request.args.get("estado", "abierta")
+    rows = db.execute(
+        "SELECT * FROM facturas WHERE estado = ? ORDER BY id", (estado,)
+    ).fetchall()
+    return jsonify([factura_dict(db, r) for r in rows])
+
+
+@app.post("/api/facturas")
+def crear_factura():
+    db = get_db()
+    hoy = date.today().isoformat()
+    n = db.execute(
+        "SELECT COALESCE(MAX(numero_dia), 0) + 1 AS n FROM facturas"
+        " WHERE date(fecha_apertura) = ?", (hoy,)
+    ).fetchone()["n"]
+    cur = db.execute(
+        "INSERT INTO facturas (numero_dia, fecha_apertura) VALUES (?, ?)",
+        (n, datetime.now().isoformat(timespec="seconds")),
+    )
+    db.commit()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return jsonify(factura_dict(db, row)), 201
+
+
+@app.put("/api/facturas/<int:fid>")
+def guardar_factura(fid):
+    db = get_db()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    if row is None:
+        return jsonify({"error": "factura no existe"}), 404
+    if row["estado"] != "abierta":
+        return jsonify({"error": "la factura ya no está abierta"}), 409
+
+    data = request.get_json(force=True)
+    items_in = []
+    for i in data.get("items", []):
+        try:
+            cantidad = max(float(i.get("cantidad") or 0), 0)
+            precio = max(int(i.get("precio_unitario") or 0), 0)
+        except (TypeError, ValueError):
+            continue
+        desc = str(i.get("descripcion") or "").strip()
+        if not desc and cantidad == 0 and precio == 0:
+            continue
+        items_in.append({
+            "cantidad": cantidad, "descripcion": desc, "precio_unitario": precio,
+        })
+
+    descuento_tipo = data.get("descuento_tipo", "monto")
+    if descuento_tipo not in ("monto", "porcentaje"):
+        descuento_tipo = "monto"
+    try:
+        descuento_valor = max(float(data.get("descuento_valor") or 0), 0)
+    except (TypeError, ValueError):
+        descuento_valor = 0
+    nota = str(data.get("nota") or "").strip()[:120]
+
+    propina_tipo = data.get("propina_tipo", "porcentaje")
+    if propina_tipo not in ("monto", "porcentaje"):
+        propina_tipo = "porcentaje"
+    try:
+        propina_valor = max(float(data.get("propina_valor") or 0), 0)
+    except (TypeError, ValueError):
+        propina_valor = 0
+
+    metodo_pago = data.get("metodo_pago", "Efectivo")
+    if metodo_pago not in METODOS_PAGO:
+        metodo_pago = "Efectivo"
+
+    subtotal, total, _, propina = calcular_totales(
+        items_in, descuento_tipo, descuento_valor, propina_tipo, propina_valor)
+
+    db.execute("DELETE FROM items WHERE factura_id = ?", (fid,))
+    for i in items_in:
+        db.execute(
+            "INSERT INTO items (factura_id, cantidad, descripcion, precio_unitario, subtotal)"
+            " VALUES (?, ?, ?, ?, ?)",
+            (fid, i["cantidad"], i["descripcion"], i["precio_unitario"],
+             int(round(i["cantidad"] * i["precio_unitario"]))),
+        )
+    db.execute(
+        "UPDATE facturas SET descuento_tipo=?, descuento_valor=?, subtotal=?, total=?, nota=?,"
+        " propina_tipo=?, propina_valor=?, propina=?, metodo_pago=? WHERE id=?",
+        (descuento_tipo, descuento_valor, subtotal, total, nota,
+         propina_tipo, propina_valor, propina, metodo_pago, fid),
+    )
+    db.commit()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    return jsonify(factura_dict(db, row))
+
+
+def _cambiar_estado(fid, nuevo):
+    db = get_db()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    if row is None:
+        return jsonify({"error": "factura no existe"}), 404
+    if row["estado"] != "abierta":
+        return jsonify({"error": "la factura ya no está abierta"}), 409
+    db.execute(
+        "UPDATE facturas SET estado=?, fecha_cierre=?, reabierta=0 WHERE id=?",
+        (nuevo, datetime.now().isoformat(timespec="seconds"), fid),
+    )
+    db.commit()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    return jsonify(factura_dict(db, row))
+
+
+@app.post("/api/facturas/<int:fid>/cerrar")
+def cerrar_factura(fid):
+    return _cambiar_estado(fid, "cerrada")
+
+
+@app.post("/api/facturas/<int:fid>/anular")
+def anular_factura(fid):
+    return _cambiar_estado(fid, "anulada")
+
+
+@app.post("/api/facturas/<int:fid>/reabrir")
+def reabrir_factura(fid):
+    db = get_db()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    if row is None:
+        return jsonify({"error": "factura no existe"}), 404
+    if row["estado"] == "abierta":
+        return jsonify(factura_dict(db, row))
+    db.execute(
+        "UPDATE facturas SET estado='abierta', fecha_cierre=NULL, reabierta=1 WHERE id=?", (fid,))
+    db.commit()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    return jsonify(factura_dict(db, row))
+
+
+@app.get("/api/ventas")
+def ventas_dia():
+    db = get_db()
+    fecha = request.args.get("fecha") or date.today().isoformat()
+    rows = db.execute(
+        "SELECT * FROM facturas WHERE estado='cerrada' AND date(fecha_apertura)=?"
+        " ORDER BY numero_dia", (fecha,)
+    ).fetchall()
+    facturas = [factura_dict(db, r) for r in rows]
+    por_metodo = {}
+    for f in facturas:
+        m = f.get("metodo_pago") or "Efectivo"
+        acc = por_metodo.setdefault(m, {"total": 0, "propinas": 0, "num": 0})
+        acc["total"] += f["total"]
+        acc["propinas"] += f.get("propina", 0)
+        acc["num"] += 1
+    return jsonify({
+        "fecha": fecha,
+        "facturas": facturas,
+        "total_dia": sum(f["total"] for f in facturas),
+        "propinas_dia": sum(f.get("propina", 0) for f in facturas),
+        "por_metodo": por_metodo,
+        "num_facturas": len(facturas),
+    })
+
+
+@app.get("/api/export")
+def export_csv():
+    db = get_db()
+    desde = request.args.get("desde") or date.today().isoformat()
+    hasta = request.args.get("hasta") or desde
+    rows = db.execute(
+        "SELECT * FROM facturas WHERE estado='cerrada'"
+        " AND date(fecha_apertura) BETWEEN ? AND ? ORDER BY fecha_apertura, numero_dia",
+        (desde, hasta),
+    ).fetchall()
+
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["Fecha", "Hora", "Factura", "Cantidad", "Item", "Precio Unitario",
+                "Subtotal Item", "Subtotal Factura", "Descuento", "Total Factura",
+                "Propina", "Total a Pagar", "Metodo Pago", "Nota"])
+    total_rango = propinas_rango = 0
+    for r in rows:
+        f = factura_dict(db, r)
+        dt = datetime.fromisoformat(f["fecha_apertura"])
+        descuento = f["subtotal"] - f["total"]
+        propina = f.get("propina", 0)
+        total_rango += f["total"]
+        propinas_rango += propina
+        for idx, i in enumerate(f["items"]):
+            w.writerow([
+                dt.date().isoformat(), dt.strftime("%H:%M"), f["numero"],
+                i["cantidad"], i["descripcion"], i["precio_unitario"], i["subtotal"],
+                f["subtotal"] if idx == 0 else "", descuento if idx == 0 else "",
+                f["total"] if idx == 0 else "", propina if idx == 0 else "",
+                f["total_pagar"] if idx == 0 else "",
+                (f.get("metodo_pago") or "Efectivo") if idx == 0 else "",
+                f["nota"] if idx == 0 else "",
+            ])
+    w.writerow([])
+    w.writerow(["TOTAL", desde if desde == hasta else f"{desde} a {hasta}",
+                f"{len(rows)} facturas", "", "", "", "", "", "", total_rango,
+                propinas_rango, total_rango + propinas_rango, "", ""])
+
+    out = io.BytesIO(buf.getvalue().encode("utf-8-sig"))
+    nombre = f"ventas_pizzicleta_{desde}" + ("" if desde == hasta else f"_{hasta}") + ".csv"
+    return send_file(out, mimetype="text/csv", as_attachment=True, download_name=nombre)
+
+
+@app.get("/api/backup")
+def backup_db():
+    """Descarga una copia consistente de la base (sirve para respaldo o para
+    mover el POS a otro equipo)."""
+    import tempfile
+    db = get_db()
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as t:
+        ruta = Path(t.name)
+    destino = sqlite3.connect(ruta)
+    db.backup(destino)
+    destino.close()
+    datos = ruta.read_bytes()
+    ruta.unlink(missing_ok=True)
+    nombre = f"pos-{date.today().isoformat()}.db"
+    return send_file(io.BytesIO(datos), mimetype="application/octet-stream",
+                     as_attachment=True, download_name=nombre)
+
+
+# ---------- cierre de caja ----------
+
+def _cierre_dict(row):
+    if row is None:
+        return None
+    c = dict(row)
+    try:
+        c["conteo_efectivo"] = json.loads(c.get("conteo_efectivo") or "{}")
+    except ValueError:
+        c["conteo_efectivo"] = {}
+    return c
+
+
+def _esperados_dia(db, fecha):
+    """Dinero recibido por método (venta + propina) de las cerradas del día."""
+    rows = db.execute(
+        "SELECT metodo_pago, SUM(total + propina) AS t FROM facturas"
+        " WHERE estado='cerrada' AND date(fecha_apertura)=? GROUP BY metodo_pago",
+        (fecha,),
+    ).fetchall()
+    por = {r["metodo_pago"] or "Efectivo": r["t"] or 0 for r in rows}
+    return {
+        "efectivo": por.get("Efectivo", 0),
+        "datafono": por.get("Datáfono", 0),
+        "transferencias": por.get("Nequi", 0) + por.get("Transferencia", 0),
+    }
+
+
+@app.get("/api/cierre")
+def get_cierre():
+    db = get_db()
+    fecha = request.args.get("fecha") or date.today().isoformat()
+    esperados = _esperados_dia(db, fecha)
+    row = db.execute("SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()
+    return jsonify({"fecha": fecha, "esperados": esperados,
+                    "cierre": _cierre_dict(row)})
+
+
+@app.post("/api/cierre")
+def guardar_cierre():
+    db = get_db()
+    data = request.get_json(force=True)
+    fecha = data.get("fecha") or date.today().isoformat()
+
+    def entero(campo):
+        try:
+            return max(int(data.get(campo) or 0), 0)
+        except (TypeError, ValueError):
+            return 0
+
+    base = entero("base")
+    efectivo = entero("efectivo_contado")
+    datafono = entero("datafono_contado")
+    transf = entero("transferencias_contado")
+
+    conteo = data.get("conteo_efectivo")
+    if not isinstance(conteo, dict):
+        conteo = {}
+    conteo = {str(k): int(v) for k, v in conteo.items()
+              if str(k).isdigit() and isinstance(v, (int, float)) and v > 0}
+
+    esp = _esperados_dia(db, fecha)
+    total_final = (efectivo - base) + datafono + transf
+    esperado_total = esp["efectivo"] + esp["datafono"] + esp["transferencias"]
+    diferencia = total_final - esperado_total
+
+    db.execute(
+        "INSERT INTO cierres (fecha, base, efectivo_contado, datafono_contado,"
+        " transferencias_contado, esperado_efectivo, esperado_datafono,"
+        " esperado_transferencias, total_final, diferencia, guardado_en, conteo_efectivo)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+        " ON CONFLICT(fecha) DO UPDATE SET base=excluded.base,"
+        " efectivo_contado=excluded.efectivo_contado,"
+        " datafono_contado=excluded.datafono_contado,"
+        " transferencias_contado=excluded.transferencias_contado,"
+        " esperado_efectivo=excluded.esperado_efectivo,"
+        " esperado_datafono=excluded.esperado_datafono,"
+        " esperado_transferencias=excluded.esperado_transferencias,"
+        " total_final=excluded.total_final, diferencia=excluded.diferencia,"
+        " guardado_en=excluded.guardado_en, conteo_efectivo=excluded.conteo_efectivo",
+        (fecha, base, efectivo, datafono, transf,
+         esp["efectivo"], esp["datafono"], esp["transferencias"],
+         total_final, diferencia,
+         datetime.now().isoformat(timespec="seconds"), json.dumps(conteo)),
+    )
+    db.commit()
+    row = db.execute("SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()
+    return jsonify({"fecha": fecha, "esperados": esp, "cierre": _cierre_dict(row)})
+
+
+# ---------- ticket 80mm ----------
+
+def _fmt(n):
+    return f"${n:,.0f}".replace(",", ".")
+
+
+@app.get("/ticket/<int:fid>")
+def ticket(fid):
+    db = get_db()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    if row is None:
+        return "Factura no encontrada", 404
+    f = factura_dict(db, row)
+    dt = datetime.fromisoformat(f["fecha_cierre"] or f["fecha_apertura"])
+    descuento = f["subtotal"] - f["total"]
+    auto_print = request.args.get("print") == "1"
+
+    lineas = "".join(
+        f'<tr><td class="c">{i["cantidad"]:g}</td>'
+        f'<td class="d">{html.escape(i["descripcion"])}</td>'
+        f'<td class="v">{_fmt(i["subtotal"])}</td></tr>'
+        for i in f["items"]
+    )
+    bloque_desc = ""
+    if descuento > 0:
+        etiqueta = ("Descuento"
+                    if f["descuento_tipo"] == "monto"
+                    else f"Descuento ({f['descuento_valor']:g}%)")
+        bloque_desc = (
+            f'<div class="tot-row"><span>Subtotal</span><span>{_fmt(f["subtotal"])}</span></div>'
+            f'<div class="tot-row"><span>{etiqueta}</span><span>-{_fmt(descuento)}</span></div>'
+        )
+    propina = f.get("propina", 0)
+    bloque_propina = ""
+    if propina > 0:
+        etiqueta_p = ("Propina"
+                      if f["propina_tipo"] == "monto"
+                      else f"Propina ({f['propina_valor']:g}%)")
+        bloque_propina = (
+            f'<div class="tot-row"><span>{etiqueta_p}</span><span>{_fmt(propina)}</span></div>'
+            f'<div class="total"><span>A PAGAR</span><span>{_fmt(f["total_pagar"])}</span></div>'
+        )
+    nota = f'<p class="nota">{html.escape(f["nota"])}</p>' if f["nota"] else ""
+    borrador = "" if f["estado"] == "cerrada" else '<p class="borrador">— BORRADOR —</p>'
+    script = "<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150))</script>" if auto_print else ""
+
+    return f"""<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket {f["numero"]}</title>
+<style>
+@font-face {{ font-family:'IBM Plex Mono'; src:url('/static/fonts/ibmplexmono-400.woff2') format('woff2'); font-weight:400; }}
+@font-face {{ font-family:'IBM Plex Mono'; src:url('/static/fonts/ibmplexmono-600.woff2') format('woff2'); font-weight:600; }}
+@page {{ size: 80mm auto; margin: 0; }}
+* {{ margin:0; padding:0; box-sizing:border-box; }}
+html, body {{ background:#fff; }}
+body {{
+  width:72mm; margin:0 auto; padding:4mm 0 8mm;
+  font-family:'IBM Plex Mono', 'Courier New', monospace;
+  font-size:12px; line-height:1.45; color:#000;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+}}
+img.logo {{ display:block; width:28mm; margin:0 auto 2mm; }}
+h1 {{ font-size:15px; font-weight:600; text-align:center; letter-spacing:.08em; }}
+.sub {{ text-align:center; font-size:10px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:2mm; }}
+.meta {{ text-align:center; font-size:11px; margin-bottom:2mm; }}
+.sep {{ border:none; border-top:1px dashed #000; margin:2mm 0; }}
+table {{ width:100%; border-collapse:collapse; }}
+td {{ vertical-align:top; padding:1px 0; }}
+td.c {{ width:9mm; }}
+td.d {{ padding-right:2mm; word-break:break-word; }}
+td.v {{ text-align:right; white-space:nowrap; }}
+.tot-row {{ display:flex; justify-content:space-between; font-size:12px; }}
+.total {{ display:flex; justify-content:space-between; font-size:17px; font-weight:600; margin-top:1mm; }}
+.nota {{ text-align:center; font-size:11px; margin-top:2mm; }}
+.borrador {{ text-align:center; font-weight:600; letter-spacing:.2em; margin-bottom:2mm; }}
+.pie {{ text-align:center; font-size:10px; margin-top:3mm; }}
+@media screen {{
+  body {{ box-shadow:0 2px 24px rgba(0,0,0,.18); margin:24px auto; padding:6mm 4mm 10mm; }}
+  html {{ background:#e8e4dd; }}
+}}
+</style></head><body>
+<img class="logo" src="/static/logo-ticket.png" alt="La Pizzicleta">
+<h1>LA PIZZICLETA</h1>
+<p class="sub">Pizzicleta Social Club</p>
+{borrador}
+<p class="meta">{dt.strftime("%d/%m/%Y %H:%M")}<br>Cuenta {f["numero"]}<br>Pago: {html.escape(f.get("metodo_pago") or "Efectivo")}</p>
+{nota}
+<hr class="sep">
+<table>{lineas}</table>
+<hr class="sep">
+{bloque_desc}
+<div class="total"><span>TOTAL</span><span>{_fmt(f["total"])}</span></div>
+{bloque_propina}
+<hr class="sep">
+<p class="pie">Una pizza para sanar el alma<br>@lapizzicleta &middot; Cali, CO</p>
+{script}
+</body></html>"""
+
+
+if __name__ == "__main__":
+    init_db()
+    app.run(host="0.0.0.0", port=8085)

@@ -1,0 +1,457 @@
+[
+ {
+  "nombre": "Porcion De Pizza + Gaseosa En Botella",
+  "precio": 16000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Combo De La Casa + Gaseosa 1.5 Lts",
+  "precio": 58000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Combo Deluxe Pizza + Gaseosa 1.5 Lts",
+  "precio": 66000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Slice + Cerveza",
+  "precio": 17000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia",
+  "precio": 28000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pasta Larga Lunch",
+  "precio": 23000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Rustica Di Pollo A Pancetta",
+  "precio": 34600,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata Bonita",
+  "precio": 44500,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata & Tomates Confitados",
+  "precio": 44500,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata Y Jamon Serrano",
+  "precio": 44500,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pollo Salame E Rucula",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Serrana Di Buffala",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Quattro Formaggi",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pollo E Panceta Al Pomodoro",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Mi Diavolla",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Suprema",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Napolitana",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Sandwich de Tomates y jamon serrano",
+  "precio": 31900,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Americano",
+  "precio": 5500,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Espresso",
+  "precio": 5000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Sandwich Diavolla",
+  "precio": 31900,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Capuccino",
+  "precio": 8600,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Torta",
+  "precio": 9900,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Cuadrito de focaccia",
+  "precio": 13000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Sandwich Fungi & melanzane",
+  "precio": 31900,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Porcion Focaccia",
+  "precio": 6000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Ensalada De Burrata & Tomates",
+  "precio": 28000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Pancitos Bicicleta Con Salsa Napolitana",
+  "precio": 11000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Pan Baguette Con Jamon Serrano Y Burrata.",
+  "precio": 28000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Pizza Pantalon Con Salsa Chan Chan",
+  "precio": 32600,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon",
+  "precio": 36500,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Bicicleta Pegaso",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Hawaiana",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Margarita",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Samba",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Carnes",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bici Bbq",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Peperoni",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Sprint Monticoro",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "La Rueda Gorgona",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Andina",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pancho Villa En Bicicleta",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bicicleta Monareta",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Doña Guayaba",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bulevar",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "La Vuelta Argentina",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Porción De Pizza",
+  "precio": 12000,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pollo Con Champiñones",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Margarita Latina",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pizza Solo Jamon",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pizza Mitad Y Mitad 2 Sabores",
+  "precio": 48000,
+  "categoria": "Pizza Combinada"
+ },
+ {
+  "nombre": "Pizza Mitad Y Mitad De Luxe 2 Sabores",
+  "precio": 57000,
+  "categoria": "Pizza Combinada"
+ },
+ {
+  "nombre": "Gorgona Vegana",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Andina Vegana",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Margarita Vegana",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Pinchada Vegana",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Pegaso",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Lasaña & Pan Baguette",
+  "precio": 29300,
+  "categoria": "Lasaña"
+ },
+ {
+  "nombre": "Soda schweppes",
+  "precio": 5800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosa Cocacola 1.5 Lts",
+  "precio": 12000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "GASEOSAS 500 ml",
+  "precio": 5800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada Sandia",
+  "precio": 11000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada Natural",
+  "precio": 9000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Agua Brisa",
+  "precio": 4000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Schweppes ginger ale",
+  "precio": 6000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada Cerezada",
+  "precio": 11000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Vaso Michelado",
+  "precio": 2000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Vaso de hielo",
+  "precio": 1000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Jugo Natural En Agua",
+  "precio": 9800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Hatsu Soda",
+  "precio": 8000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada de vino Tinto",
+  "precio": 16000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Soda Italiana",
+  "precio": 14800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada De Menta",
+  "precio": 10000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada Mango Biche",
+  "precio": 12000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Jugos En Leche",
+  "precio": 11500,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Club Colombia",
+  "precio": 6500,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cannabis Seena Ewa",
+  "precio": 12000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Aguila light",
+  "precio": 6500,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Stella artois",
+  "precio": 12000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cerveza Amanecera Y Veremos",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Tres Cordilleras Rosada",
+  "precio": 9000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cerveza Rubisima",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cerveza Mangozadera",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cerveza Piper Ipa",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Casilda",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Corona 330 Ml",
+  "precio": 12000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Club Roja lata 330 ml",
+  "precio": 7000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Club Trigo",
+  "precio": 6500,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Corona Cero Alcohol",
+  "precio": 10000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Bbc Rose Lata 269 Ml",
+  "precio": 10000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Poker",
+  "precio": 5500,
+  "categoria": "Cervezas"
+ }
+]

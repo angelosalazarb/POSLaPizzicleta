@@ -1,0 +1,12 @@
+# Base de datos de ventas: NUNCA al repo (datos del negocio; se mueve con /api/backup)
+data/pos.db
+data/*.db
+respaldos/
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs y temporales
+*.log
+.DS_Store
