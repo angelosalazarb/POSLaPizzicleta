@@ -45,6 +45,15 @@ CREATE TABLE IF NOT EXISTS items (
 );
 CREATE INDEX IF NOT EXISTS idx_items_factura ON items(factura_id);
 CREATE INDEX IF NOT EXISTS idx_facturas_fecha ON facturas(fecha_apertura);
+CREATE TABLE IF NOT EXISTS movimientos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL,
+    tipo TEXT NOT NULL DEFAULT 'Retiro',
+    concepto TEXT NOT NULL DEFAULT '',
+    monto INTEGER NOT NULL DEFAULT 0,
+    creado_en TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_movimientos_fecha ON movimientos(fecha);
 CREATE TABLE IF NOT EXISTS cierres (
     fecha TEXT PRIMARY KEY,
     base INTEGER NOT NULL DEFAULT 0,
@@ -85,9 +94,11 @@ MIGRACIONES = [
     "ALTER TABLE facturas ADD COLUMN metodo_pago TEXT NOT NULL DEFAULT 'Efectivo'",
     "ALTER TABLE facturas ADD COLUMN reabierta INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE cierres ADD COLUMN conteo_efectivo TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE cierres ADD COLUMN salidas INTEGER NOT NULL DEFAULT 0",
 ]
 
 METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
+TIPOS_MOVIMIENTO = ("Retiro", "Pago proveedor", "Gasto")
 
 
 def init_db():
@@ -162,10 +173,9 @@ def listar_facturas():
 @app.post("/api/facturas")
 def crear_factura():
     db = get_db()
-    hoy = date.today().isoformat()
+    # consecutivo continuo: nunca reinicia (numero_dia guarda el consecutivo global)
     n = db.execute(
         "SELECT COALESCE(MAX(numero_dia), 0) + 1 AS n FROM facturas"
-        " WHERE date(fecha_apertura) = ?", (hoy,)
     ).fetchone()["n"]
     cur = db.execute(
         "INSERT INTO facturas (numero_dia, fecha_apertura) VALUES (?, ?)",
@@ -372,6 +382,56 @@ def backup_db():
                      as_attachment=True, download_name=nombre)
 
 
+# ---------- retiros y pagos (salidas de efectivo) ----------
+
+@app.get("/api/movimientos")
+def listar_movimientos():
+    db = get_db()
+    fecha = request.args.get("fecha") or date.today().isoformat()
+    rows = db.execute(
+        "SELECT * FROM movimientos WHERE fecha = ? ORDER BY id", (fecha,)
+    ).fetchall()
+    movs = [dict(r) for r in rows]
+    return jsonify({"fecha": fecha, "movimientos": movs,
+                    "total": sum(m["monto"] for m in movs)})
+
+
+@app.post("/api/movimientos")
+def crear_movimiento():
+    db = get_db()
+    data = request.get_json(force=True)
+    tipo = data.get("tipo", "Retiro")
+    if tipo not in TIPOS_MOVIMIENTO:
+        tipo = "Retiro"
+    concepto = str(data.get("concepto") or "").strip()[:120]
+    try:
+        monto = max(int(data.get("monto") or 0), 0)
+    except (TypeError, ValueError):
+        monto = 0
+    if monto <= 0:
+        return jsonify({"error": "el monto debe ser mayor a 0"}), 400
+    ahora = datetime.now().isoformat(timespec="seconds")
+    cur = db.execute(
+        "INSERT INTO movimientos (fecha, tipo, concepto, monto, creado_en)"
+        " VALUES (?,?,?,?,?)",
+        (date.today().isoformat(), tipo, concepto, monto, ahora),
+    )
+    db.commit()
+    row = db.execute("SELECT * FROM movimientos WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return jsonify(dict(row)), 201
+
+
+@app.delete("/api/movimientos/<int:mid>")
+def eliminar_movimiento(mid):
+    db = get_db()
+    row = db.execute("SELECT * FROM movimientos WHERE id = ?", (mid,)).fetchone()
+    if row is None:
+        return jsonify({"error": "movimiento no existe"}), 404
+    db.execute("DELETE FROM movimientos WHERE id = ?", (mid,))
+    db.commit()
+    return jsonify({"ok": True})
+
+
 # ---------- cierre de caja ----------
 
 def _cierre_dict(row):
@@ -393,10 +453,15 @@ def _esperados_dia(db, fecha):
         (fecha,),
     ).fetchall()
     por = {r["metodo_pago"] or "Efectivo": r["t"] or 0 for r in rows}
+    salidas = db.execute(
+        "SELECT COALESCE(SUM(monto), 0) AS t FROM movimientos WHERE fecha = ?",
+        (fecha,),
+    ).fetchone()["t"]
     return {
         "efectivo": por.get("Efectivo", 0),
         "datafono": por.get("Datáfono", 0),
         "transferencias": por.get("Nequi", 0) + por.get("Transferencia", 0),
+        "salidas": salidas,
     }
 
 
@@ -406,8 +471,14 @@ def get_cierre():
     fecha = request.args.get("fecha") or date.today().isoformat()
     esperados = _esperados_dia(db, fecha)
     row = db.execute("SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()
+    # base fija: sugerir la del último cierre anterior (la caja queda con base para el día siguiente)
+    anterior = db.execute(
+        "SELECT base FROM cierres WHERE fecha < ? ORDER BY fecha DESC LIMIT 1",
+        (fecha,),
+    ).fetchone()
     return jsonify({"fecha": fecha, "esperados": esperados,
-                    "cierre": _cierre_dict(row)})
+                    "cierre": _cierre_dict(row),
+                    "base_sugerida": anterior["base"] if anterior else 0})
 
 
 @app.post("/api/cierre")
@@ -435,14 +506,17 @@ def guardar_cierre():
 
     esp = _esperados_dia(db, fecha)
     total_final = (efectivo - base) + datafono + transf
-    esperado_total = esp["efectivo"] + esp["datafono"] + esp["transferencias"]
+    # las salidas (retiros/pagos) reducen lo que debe quedar del día
+    esperado_total = (esp["efectivo"] + esp["datafono"] + esp["transferencias"]
+                      - esp["salidas"])
     diferencia = total_final - esperado_total
 
     db.execute(
         "INSERT INTO cierres (fecha, base, efectivo_contado, datafono_contado,"
         " transferencias_contado, esperado_efectivo, esperado_datafono,"
-        " esperado_transferencias, total_final, diferencia, guardado_en, conteo_efectivo)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
+        " esperado_transferencias, total_final, diferencia, guardado_en, conteo_efectivo,"
+        " salidas)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
         " ON CONFLICT(fecha) DO UPDATE SET base=excluded.base,"
         " efectivo_contado=excluded.efectivo_contado,"
         " datafono_contado=excluded.datafono_contado,"
@@ -451,11 +525,13 @@ def guardar_cierre():
         " esperado_datafono=excluded.esperado_datafono,"
         " esperado_transferencias=excluded.esperado_transferencias,"
         " total_final=excluded.total_final, diferencia=excluded.diferencia,"
-        " guardado_en=excluded.guardado_en, conteo_efectivo=excluded.conteo_efectivo",
+        " guardado_en=excluded.guardado_en, conteo_efectivo=excluded.conteo_efectivo,"
+        " salidas=excluded.salidas",
         (fecha, base, efectivo, datafono, transf,
          esp["efectivo"], esp["datafono"], esp["transferencias"],
          total_final, diferencia,
-         datetime.now().isoformat(timespec="seconds"), json.dumps(conteo)),
+         datetime.now().isoformat(timespec="seconds"), json.dumps(conteo),
+         esp["salidas"]),
     )
     db.commit()
     row = db.execute("SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()
