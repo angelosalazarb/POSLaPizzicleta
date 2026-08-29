@@ -490,6 +490,21 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1080px; }
 }
 .modal-total .lbl { font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
 .modal-total .val { font-family:var(--font-mono); font-weight:600; font-size:24px; }
+/* resumen del cierre */
+.res-fecha { font-size:13px; color:var(--muted); padding-top:10px; }
+.res-fila {
+  display:flex; justify-content:space-between; gap:20px; align-items:center;
+  padding:7px 0; border-bottom:1px dashed var(--linea);
+}
+.res-fila .lbl { font-size:13.5px; color:var(--muted); }
+.res-fila .val { font-family:var(--font-mono); font-weight:600; white-space:nowrap; }
+.res-fila.res-destacada { border-bottom:none; margin:2px -10px 0; padding:9px 10px; border-radius:10px; background:var(--naranja-dim); }
+.res-fila.res-destacada .lbl { color:var(--naranja-tx); font-weight:700; }
+.res-fila.res-destacada .val { color:var(--naranja-tx); font-size:16px; }
+.res-fila.res-propinas { background:var(--azul-dim); border-bottom:none; margin:2px -10px 0; padding:9px 10px; border-radius:10px; }
+.res-fila.res-propinas .lbl { color:var(--azul-tx); font-weight:700; }
+.res-fila.res-propinas .val { color:var(--azul-tx); }
+
 .modal-acciones { display:flex; gap:10px; padding:0 22px 20px; flex-wrap:wrap; }
 .modal-acciones .btn-limpiar { margin-left:auto; color:var(--muted); font-weight:600; min-height:44px; padding:0 14px; border-radius:100px; }
 .modal-acciones .btn-limpiar:hover { background:var(--error-dim); color:var(--error); }
@@ -1487,7 +1502,76 @@ async function guardarCierre() {
     }});
     toast(`Cierre de caja guardado (${state.fechaVentas})`);
     renderVentas();
+    mostrarResumenCierre();
   } catch (e) { toast(e.message, true); }
+}
+
+/* modal de resumen al guardar el cierre: qué se contó, qué se recibió y
+   cómo se reparte la plata entre caja local, gerencia y la cuenta */
+function mostrarResumenCierre() {
+  const c = calcularCierre();
+  const f = c.f, esp = c.esp;
+  const propinas = state.ventasVista?.propinas_dia || 0;
+  const aGerencia = Math.max((f.efectivo || 0) - (f.base || 0), 0);
+  const esHoy = state.fechaVentas === hoyISO();
+  const fechaLegible = new Date(state.fechaVentas + 'T12:00:00')
+    .toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'});
+
+  const fila = (lbl, val, cls = '') =>
+    `<div class="res-fila${cls ? ' ' + cls : ''}"><span class="lbl">${lbl}</span><span class="val">${val}</span></div>`;
+  const difTxt = c.difTotal === 0
+    ? '<span class="dif ok">cuadra</span>'
+    : c.difTotal < 0
+      ? `<span class="dif falta">falta &minus;${fmt(-c.difTotal)}</span>`
+      : `<span class="dif sobra">sobra +${fmt(c.difTotal)}</span>`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Resumen del cierre">
+      <div class="modal-head">
+        <h3>Cierre guardado</h3>
+        <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
+      </div>
+      <div class="modal-cuerpo">
+        <p class="res-fecha">${esHoy ? 'Hoy, ' : ''}${fechaLegible}</p>
+
+        <div class="den-grupo">Lo que se cont&oacute;</div>
+        ${fila('Efectivo en caja (incluye la base)', fmt(f.efectivo || 0))}
+        ${fila('Dat&aacute;fono', fmt(f.datafono || 0))}
+        ${fila('Transferencias + Nequi', fmt(f.transferencias || 0))}
+
+        <div class="den-grupo">Lo que se recibi&oacute; seg&uacute;n el POS</div>
+        ${fila('Efectivo (venta + propina)', fmt(esp.efectivo || 0))}
+        ${fila('Dat&aacute;fono (venta + propina)', fmt(esp.datafono || 0))}
+        ${fila('Transferencias + Nequi (venta + propina)', fmt(esp.transferencias || 0))}
+        ${esp.salidas ? fila('Salidas del d&iacute;a (retiros y pagos)', '&minus;' + fmt(esp.salidas)) : ''}
+
+        <div class="den-grupo">Total de dineros del d&iacute;a</div>
+        ${fila('Total contado (sin la base)', fmt(c.totalFinal))}
+        ${fila('Seg&uacute;n POS (ya descontadas las salidas)', fmt(c.esperadoTotal))}
+        <div class="res-fila"><span class="lbl">Diferencia</span>${difTxt}</div>
+        ${fila('Propinas del d&iacute;a &mdash; por entregar al equipo', fmt(propinas), 'res-propinas')}
+
+        <div class="den-grupo">Reparto de la plata</div>
+        ${fila('Queda en Caja local (base para el d&iacute;a siguiente)', fmt(f.base || 0))}
+        ${fila('Va a Caja gerencia (efectivo)', fmt(aGerencia), 'res-destacada')}
+        ${fila('Qued&oacute; en la cuenta (transferencias + Nequi)', fmt(f.transferencias || 0))}
+        ${fila('Dat&aacute;fono (llega a la cuenta del banco)', fmt(f.datafono || 0))}
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-primario" id="btnResumenListo">Listo</button>
+      </div>
+    </div>`;
+
+  const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
+  const alEscape = e => { if (e.key === 'Escape') cerrar(); };
+  document.addEventListener('keydown', alEscape);
+  overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(); });
+  overlay.querySelector('.cerrar-modal').addEventListener('click', cerrar);
+  overlay.querySelector('#btnResumenListo').addEventListener('click', cerrar);
+  document.body.appendChild(overlay);
+  overlay.querySelector('#btnResumenListo').focus();
 }
 
 function renderVentas() {
