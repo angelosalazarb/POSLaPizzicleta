@@ -320,9 +320,28 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1080px; }
 .btn-peligro.confirmando { background:var(--error); color:#fff; border-color:var(--error); }
 
 /* ---------- vista ventas ---------- */
-.ventas-head { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
+.ventas-head { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
 .ventas-head h2 { font-family:var(--font-display); font-weight:400; font-size:28px; }
 .ventas-head .resumen { color:var(--muted); font-size:14px; }
+.ventas-fecha { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.ventas-fecha input[type=date] {
+  min-height:44px; padding:0 12px;
+  border:1.5px solid var(--linea); border-radius:10px; background:var(--papel);
+  font-family:var(--font-mono); font-size:14px;
+}
+.ventas-fecha input[type=date]:focus { border-color:var(--azul); outline:none; }
+.btn-dia {
+  display:flex; align-items:center; justify-content:center;
+  min-width:44px; min-height:44px; padding:0 12px;
+  border:1.5px solid var(--linea); border-radius:10px; background:var(--card);
+  font-weight:700; font-size:18px; color:var(--muted);
+  transition:background var(--trans), color var(--trans), border-color var(--trans);
+}
+.btn-dia:hover:not(:disabled) { border-color:var(--tinta); color:var(--tinta); background:var(--azul-dim); }
+.btn-dia:disabled { opacity:.35; cursor:default; }
+.btn-dia.btn-hoy { font-size:14px; color:var(--naranja-tx); border-color:var(--naranja-tx); }
+.btn-dia.btn-hoy:hover { background:var(--naranja-dim); }
+@media (max-width: 760px) { .ventas-fecha { margin-left:0; width:100%; } }
 .venta-fila {
   display:grid; grid-template-columns:70px 90px 1fr 130px 52px 52px;
   gap:12px; align-items:center;
@@ -547,6 +566,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1080px; }
 /* ---------- utilidades ---------- */
 const $ = (sel, el=document) => el.querySelector(sel);
 const fmt = n => '$' + Math.round(n || 0).toLocaleString('es-CO');
+const hoyISO = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD en hora local
 const soloDigitos = s => (s || '').toString().replace(/[^\d]/g, '');
 const esc = s => (s || '').toString().replace(/[&<>"']/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -608,7 +628,8 @@ const state = {
   vistaVentas: false,
   guardados: new Map(), // id -> timeout de debounce
   pendientes: new Set(), // ids con cambios sin guardar
-  config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]}
+  config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]},
+  fechaVentas: hoyISO() // día mostrado en la vista Ventas (filtrable)
 };
 
 const facturaActiva = () => state.facturas.find(f => f.id === state.activaId) || null;
@@ -709,11 +730,31 @@ async function cargarFacturas(preservarActiva=true) {
 
 async function cargarTotalDia() {
   try {
-    const v = await api('/api/ventas');
+    const v = await api('/api/ventas'); // la pill del header siempre es HOY
     $('#totalDia').textContent = fmt(v.total_dia);
-    state.ventasHoy = v;
+    if (state.fechaVentas === hoyISO()) {
+      state.ventasVista = v;
+      if (state.vistaVentas) renderVentas();
+    }
+  } catch {}
+}
+
+async function cargarVentasVista() {
+  try {
+    const fecha = state.fechaVentas;
+    const v = await api('/api/ventas?fecha=' + fecha);
+    if (fecha !== state.fechaVentas) return; // el usuario ya cambió de día
+    state.ventasVista = v;
     if (state.vistaVentas) renderVentas();
   } catch {}
+}
+
+function cambiarFechaVentas(fecha) {
+  if (!fecha || fecha === state.fechaVentas) return;
+  state.fechaVentas = fecha;
+  // cargarCierre recarga el formulario del cierre porque la fecha cambió (cierreFormFecha)
+  Promise.all([cargarVentasVista(), cargarCierre(), cargarMovimientos()])
+    .then(renderVentas);
 }
 
 function actualizarPendiente() {
@@ -1246,13 +1287,16 @@ function alternarVentas(mostrar) {
   $('#btnVentas').classList.toggle('activo', mostrar);
   $('#btnVentas').setAttribute('aria-pressed', String(mostrar));
   renderTabs();
-  if (mostrar) { cargarTotalDia(); cargarCierre(); cargarMovimientos(); renderVentas(); }
+  if (mostrar) { cargarTotalDia(); cargarVentasVista(); cargarCierre(); cargarMovimientos(); renderVentas(); }
 }
 
 /* ---------- retiros y pagos ---------- */
 async function cargarMovimientos() {
   try {
-    state.movimientos = await api('/api/movimientos');
+    const fecha = state.fechaVentas;
+    const m = await api('/api/movimientos?fecha=' + fecha);
+    if (fecha !== state.fechaVentas) return; // el usuario ya cambió de día
+    state.movimientos = m;
     if (state.vistaVentas) renderVentas();
   } catch {}
 }
@@ -1281,22 +1325,28 @@ async function eliminarMovimiento(id) {
 /* ---------- cierre de caja ---------- */
 async function cargarCierre() {
   try {
-    state.cierre = await api('/api/cierre');
-    if (!state.cierreForm && state.cierre.cierre) {
-      const c = state.cierre.cierre;
-      state.cierreForm = {
-        base: c.base, efectivo: c.efectivo_contado,
-        datafono: c.datafono_contado, transferencias: c.transferencias_contado
-      };
-      if (!state.conteoEfectivo && c.conteo_efectivo && Object.keys(c.conteo_efectivo).length) {
-        state.conteoEfectivo = {};
-        for (const [d, n] of Object.entries(c.conteo_efectivo)) state.conteoEfectivo[d] = n;
+    const fecha = state.fechaVentas;
+    const cierre = await api('/api/cierre?fecha=' + fecha);
+    if (fecha !== state.fechaVentas) return; // el usuario ya cambió de día
+    state.cierre = cierre;
+    // el formulario pertenece a UNA fecha: al cambiar de día se recarga desde
+    // el cierre guardado de esa fecha (o base sugerida); dentro del mismo día
+    // se respeta lo que el usuario haya digitado
+    if (state.cierreFormFecha !== fecha) {
+      const c = cierre.cierre;
+      if (c) {
+        state.cierreForm = {
+          base: c.base, efectivo: c.efectivo_contado,
+          datafono: c.datafono_contado, transferencias: c.transferencias_contado
+        };
+        state.conteoEfectivo = (c.conteo_efectivo && Object.keys(c.conteo_efectivo).length)
+          ? {...c.conteo_efectivo} : null;
+      } else {
+        // base fija: arranca con la base que quedó del cierre anterior
+        state.cierreForm = {base: cierre.base_sugerida || 0, efectivo:0, datafono:0, transferencias:0};
+        state.conteoEfectivo = null;
       }
-    } else if (!state.cierre.cierre && state.cierre.base_sugerida
-               && !(state.cierreForm && state.cierreForm.base)) {
-      // base fija: arranca con la base que quedó del día anterior
-      if (!state.cierreForm) state.cierreForm = {base:0, efectivo:0, datafono:0, transferencias:0};
-      state.cierreForm.base = state.cierre.base_sugerida;
+      state.cierreFormFecha = fecha;
     }
     if (state.vistaVentas) renderVentas();
   } catch {}
@@ -1430,39 +1480,50 @@ async function guardarCierre() {
   const f = state.cierreForm || {};
   try {
     state.cierre = await api('/api/cierre', {method:'POST', body:{
+      fecha: state.fechaVentas,
       base: f.base||0, efectivo_contado: f.efectivo||0,
       datafono_contado: f.datafono||0, transferencias_contado: f.transferencias||0,
       conteo_efectivo: state.conteoEfectivo || {}
     }});
-    toast('Cierre de caja guardado');
+    toast(`Cierre de caja guardado (${state.fechaVentas})`);
     renderVentas();
   } catch (e) { toast(e.message, true); }
 }
 
 function renderVentas() {
   const cont = $('#vistaVentas');
-  const hoy = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD en hora local
-  const v = state.ventasHoy || {facturas:[], total_dia:0, fecha:hoy};
+  const hoy = hoyISO();
+  const esHoy = state.fechaVentas === hoy;
+  const v = state.ventasVista || {facturas:[], total_dia:0, fecha:state.fechaVentas};
   const filas = v.facturas.map(f => {
     const hora = new Date(f.fecha_cierre || f.fecha_apertura)
       .toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
     const detalle = f.items.map(i => `${i.cantidad}× ${esc(i.descripcion)}`).join(' &middot; ');
-    return `<div class="venta-fila">
+    return `<div class="venta-fila${esHoy ? '' : ' historica'}">
       <span class="num">${f.numero}</span>
       <span class="hora">${hora}</span>
       <span class="detalle"><span class="chip">${esc(f.metodo_pago || 'Efectivo')}</span>${f.mesa ? `<span class="chip">${esc(f.mesa)}</span>` : ''}${detalle}</span>
       <span class="tot">${fmt(f.total)}</span>
       <a class="btn-reimprimir" href="/ticket/${f.id}?print=1" target="_blank" aria-label="Reimprimir ticket ${f.numero}">${ICONOS.imprimir}</a>
-      <button type="button" class="btn-reimprimir btn-editar" data-id="${f.id}" aria-label="Reabrir y editar ${f.numero}">${ICONOS.editar}</button>
+      ${esHoy ? `<button type="button" class="btn-reimprimir btn-editar" data-id="${f.id}" aria-label="Reabrir y editar ${f.numero}">${ICONOS.editar}</button>` : '<span></span>'}
     </div>`;
   }).join('');
 
+  const tituloDia = esHoy ? 'Ventas de hoy'
+    : 'Ventas del ' + new Date(state.fechaVentas + 'T12:00:00')
+        .toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'});
   cont.innerHTML = `
     <div class="ventas-head">
-      <h2>Ventas de hoy</h2>
+      <h2>${tituloDia}</h2>
       <span class="resumen">${v.num_facturas || 0} cuenta${v.num_facturas === 1 ? '' : 's'} cobrada${v.num_facturas === 1 ? '' : 's'}</span>
+      <span class="ventas-fecha">
+        <button type="button" class="btn-dia" id="diaAntes" aria-label="D&iacute;a anterior">&lsaquo;</button>
+        <input type="date" id="fechaVentasSel" value="${state.fechaVentas}" max="${hoy}" aria-label="Ver otro d&iacute;a">
+        <button type="button" class="btn-dia" id="diaDespues" aria-label="D&iacute;a siguiente" ${esHoy ? 'disabled' : ''}>&rsaquo;</button>
+        ${esHoy ? '' : `<button type="button" class="btn-dia btn-hoy" id="btnVolverHoy">Hoy</button>`}
+      </span>
     </div>
-    ${filas || '<p class="sin-ventas">Todavía no hay ventas cerradas hoy.</p>'}
+    ${filas || `<p class="sin-ventas">${esHoy ? 'Todavía no hay ventas cerradas hoy.' : 'Sin ventas cerradas ese día.'}</p>`}
     <div class="ventas-total">
       <span class="lbl">Total del d&iacute;a</span>
       <span class="val">${fmt(v.total_dia)}</span>
@@ -1482,14 +1543,15 @@ function renderVentas() {
       <h3>Retiros y pagos</h3>
       <p class="sub-cierre">Salidas de efectivo del d&iacute;a (retiros, pagos a proveedores, gastos). Se descuentan del efectivo esperado en el cierre.</p>
       <div id="movLista"></div>
+      ${esHoy ? `
       <div class="mov-form">
         <span class="metodos" id="movTipos" role="group" aria-label="Tipo de salida"></span>
         <input type="text" id="movConcepto" maxlength="120" placeholder="concepto (ej. retiro, pago gas)" aria-label="Concepto de la salida">
         <input class="monto-mov" id="movMonto" inputmode="numeric" placeholder="$ monto" aria-label="Monto de la salida">
         <button type="button" class="btn btn-secundario" id="btnRegistrarMov">${ICONOS.mas} Registrar</button>
-      </div>
+      </div>` : '<p class="sin-movs">Las salidas solo se registran el d&iacute;a en curso.</p>'}
       <div class="total-salidas">
-        <span class="lbl">Total salidas hoy</span>
+        <span class="lbl">Total salidas${esHoy ? ' hoy' : ''}</span>
         <span class="val">&minus;${fmt(state.movimientos?.total || 0)}</span>
       </div>
     </div>
@@ -1539,11 +1601,11 @@ function renderVentas() {
     <div class="export-zona">
       <div class="campo">
         <label for="expDesde">Desde</label>
-        <input type="date" id="expDesde" value="${hoy}">
+        <input type="date" id="expDesde" value="${state.fechaVentas}">
       </div>
       <div class="campo">
         <label for="expHasta">Hasta</label>
-        <input type="date" id="expHasta" value="${hoy}">
+        <input type="date" id="expHasta" value="${state.fechaVentas}">
       </div>
       <button type="button" class="btn btn-secundario" id="btnExport">${ICONOS.descargar} Exportar CSV</button>
     </div>`;
@@ -1552,6 +1614,19 @@ function renderVentas() {
     const d = $('#expDesde').value, h = $('#expHasta').value;
     window.open(`/api/export?desde=${d}&hasta=${h}`, '_blank');
   });
+
+  // filtro de fecha
+  $('#fechaVentasSel').addEventListener('change', e => cambiarFechaVentas(e.target.value));
+  const sumarDia = delta => {
+    const d = new Date(state.fechaVentas + 'T12:00:00');
+    d.setDate(d.getDate() + delta);
+    const nueva = d.toLocaleDateString('en-CA');
+    if (nueva <= hoy) cambiarFechaVentas(nueva);
+  };
+  $('#diaAntes').addEventListener('click', () => sumarDia(-1));
+  $('#diaDespues').addEventListener('click', () => sumarDia(1));
+  const btnHoy = $('#btnVolverHoy');
+  if (btnHoy) btnHoy.addEventListener('click', () => cambiarFechaVentas(hoy));
 
   cont.querySelectorAll('.btn-editar').forEach(b => {
     b.addEventListener('click', () => reabrir(Number(b.dataset.id)));
@@ -1572,7 +1647,7 @@ function renderVentas() {
   $('#btnGuardarCierre').addEventListener('click', guardarCierre);
   $('#btnConteo').addEventListener('click', abrirConteo);
 
-  // retiros y pagos: lista, selector de tipo y registro
+  // retiros y pagos: lista, selector de tipo y registro (registro solo el día en curso)
   const movs = state.movimientos?.movimientos || [];
   $('#movLista').innerHTML = movs.length ? movs.map(m => {
     const hora = new Date(m.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
@@ -1581,34 +1656,36 @@ function renderVentas() {
       <span class="chip">${esc(m.tipo)}</span>
       <span class="concepto">${esc(m.concepto) || '<span style="color:var(--muted)">sin concepto</span>'}</span>
       <span class="monto">&minus;${fmt(m.monto)}</span>
-      <button type="button" class="btn-borrar" data-mov="${m.id}" aria-label="Eliminar salida de ${fmt(m.monto)}">${ICONOS.borrar}</button>
+      ${esHoy ? `<button type="button" class="btn-borrar" data-mov="${m.id}" aria-label="Eliminar salida de ${fmt(m.monto)}">${ICONOS.borrar}</button>` : '<span></span>'}
     </div>`;
-  }).join('') : '<p class="sin-movs">Sin salidas registradas hoy.</p>';
+  }).join('') : `<p class="sin-movs">Sin salidas registradas ${esHoy ? 'hoy' : 'ese día'}.</p>`;
   cont.querySelectorAll('[data-mov]').forEach(b => {
     b.addEventListener('click', () => eliminarMovimiento(Number(b.dataset.mov)));
   });
-  if (!state.movTipo) state.movTipo = 'Retiro';
-  const tiposCont = $('#movTipos');
-  for (const t of ['Retiro', 'Pago proveedor', 'Gasto']) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'metodo' + (state.movTipo === t ? ' on' : '');
-    b.textContent = t;
-    b.setAttribute('aria-pressed', String(state.movTipo === t));
-    b.addEventListener('click', () => {
-      state.movTipo = t;
-      tiposCont.querySelectorAll('.metodo').forEach(x => {
-        const on = x.textContent === t;
-        x.classList.toggle('on', on);
-        x.setAttribute('aria-pressed', String(on));
+  if (esHoy) {
+    if (!state.movTipo) state.movTipo = 'Retiro';
+    const tiposCont = $('#movTipos');
+    for (const t of ['Retiro', 'Pago proveedor', 'Gasto']) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'metodo' + (state.movTipo === t ? ' on' : '');
+      b.textContent = t;
+      b.setAttribute('aria-pressed', String(state.movTipo === t));
+      b.addEventListener('click', () => {
+        state.movTipo = t;
+        tiposCont.querySelectorAll('.metodo').forEach(x => {
+          const on = x.textContent === t;
+          x.classList.toggle('on', on);
+          x.setAttribute('aria-pressed', String(on));
+        });
       });
-    });
-    tiposCont.appendChild(b);
+      tiposCont.appendChild(b);
+    }
+    const movMonto = $('#movMonto');
+    movMonto.addEventListener('input', () => { movMonto.value = fmtInputPrecio(movMonto.value); });
+    movMonto.addEventListener('keydown', e => { if (e.key === 'Enter') registrarMovimiento(); });
+    $('#btnRegistrarMov').addEventListener('click', registrarMovimiento);
   }
-  const movMonto = $('#movMonto');
-  movMonto.addEventListener('input', () => { movMonto.value = fmtInputPrecio(movMonto.value); });
-  movMonto.addEventListener('keydown', e => { if (e.key === 'Enter') registrarMovimiento(); });
-  $('#btnRegistrarMov').addEventListener('click', registrarMovimiento);
   const g = state.cierre?.cierre;
   $('#cierreGuardado').textContent = g
     ? `Guardado a las ${new Date(g.guardado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'})}`
