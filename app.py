@@ -203,13 +203,18 @@ def listar_facturas():
             "SELECT * FROM facturas WHERE estado = ? ORDER BY id", (estado,)
         ).fetchall()
     else:
-        # vista de caja: abiertas + pagadas recientes (pestaña "Pagado" en retención)
+        # vista de caja: abiertas + pagadas del día sin entregar (mostrador: pagan
+        # primero) + pagadas-y-entregadas recientes (retención de unos minutos)
         limite = (datetime.now() - timedelta(minutes=RETENCION_PAGADA_MIN)
                   ).isoformat(timespec="seconds")
+        hoy = date.today().isoformat()
         rows = db.execute(
             "SELECT * FROM facturas WHERE estado='abierta'"
-            " OR (estado='cerrada' AND fecha_cierre >= ?) ORDER BY id",
-            (limite,),
+            " OR (estado='cerrada' AND ("
+            "   (etapa NOT IN ('entregada','pagada') AND date(fecha_cierre) >= ?)"
+            "   OR COALESCE(MAX(fecha_entregada, fecha_cierre), fecha_cierre) >= ?"
+            " )) ORDER BY id",
+            (hoy, limite),
         ).fetchall()
     return jsonify([factura_dict(db, r) for r in rows])
 
@@ -307,18 +312,12 @@ def _cambiar_estado(fid, nuevo):
         return jsonify({"error": "factura no existe"}), 404
     if row["estado"] != "abierta":
         return jsonify({"error": "la factura ya no está abierta"}), 409
-    if nuevo == "cerrada":
-        # cobrar = pagada; anular no toca la etapa
-        db.execute(
-            "UPDATE facturas SET estado=?, fecha_cierre=?, reabierta=0, etapa='pagada'"
-            " WHERE id=?",
-            (nuevo, datetime.now().isoformat(timespec="seconds"), fid),
-        )
-    else:
-        db.execute(
-            "UPDATE facturas SET estado=?, fecha_cierre=?, reabierta=0 WHERE id=?",
-            (nuevo, datetime.now().isoformat(timespec="seconds"), fid),
-        )
+    # cobrar NO toca la etapa: en mostrador pagan primero y la cuenta sigue su
+    # ciclo (enviar a cocina / entregar) ya pagada; anular tampoco la toca
+    db.execute(
+        "UPDATE facturas SET estado=?, fecha_cierre=?, reabierta=0 WHERE id=?",
+        (nuevo, datetime.now().isoformat(timespec="seconds"), fid),
+    )
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))
@@ -330,8 +329,10 @@ def cambiar_etapa(fid):
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     if row is None:
         return jsonify({"error": "factura no existe"}), 404
-    if row["estado"] != "abierta":
-        return jsonify({"error": "la factura ya no está abierta"}), 409
+    # la etapa avanza también sobre cuentas ya pagadas (pagan en el mostrador
+    # y la comida se envía/entrega después); solo las anuladas quedan quietas
+    if row["estado"] == "anulada":
+        return jsonify({"error": "la factura está anulada"}), 409
     nueva = (request.get_json(force=True) or {}).get("etapa")
     if nueva not in ("enviada", "entregada"):
         return jsonify({"error": "etapa inválida"}), 400
@@ -365,10 +366,12 @@ def reabrir_factura(fid):
         return jsonify({"error": "factura no existe"}), 404
     if row["estado"] == "abierta":
         return jsonify(factura_dict(db, row))
-    # vuelve a 'entregada': el flujo natural tras corregir es re-cobrar
+    # la etapa se conserva; solo el legado etapa='pagada' se normaliza a
+    # 'entregada' para que el re-cobro fluya normal
     db.execute(
         "UPDATE facturas SET estado='abierta', fecha_cierre=NULL, reabierta=1,"
-        " etapa='entregada' WHERE id=?", (fid,))
+        " etapa=CASE WHEN etapa='pagada' THEN 'entregada' ELSE etapa END"
+        " WHERE id=?", (fid,))
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))

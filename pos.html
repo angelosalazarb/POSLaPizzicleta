@@ -493,6 +493,34 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1080px; }
 .modal-total .lbl { font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
 .modal-total .val { font-family:var(--font-mono); font-weight:600; font-size:24px; }
 .modal-sub { padding:0 22px 4px; font-size:13px; color:var(--muted); }
+
+/* calculadora de vuelto */
+.pagar-con-vuelto { display:flex; align-items:center; gap:10px; }
+.vuelto-pagar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 0 10px; border-bottom:2px solid var(--tinta);
+}
+.vuelto-pagar .lbl { font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.vuelto-pagar .val { font-family:var(--font-mono); font-weight:600; font-size:24px; }
+.vuelto-pills { padding:14px 0 4px; justify-content:flex-start; }
+.vuelto-campo { display:flex; flex-direction:column; gap:6px; padding:10px 0; }
+.vuelto-campo label { font-size:11.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+.vuelto-campo input {
+  min-height:52px; padding:0 14px; text-align:right;
+  font-family:var(--font-mono); font-size:22px; font-weight:600;
+  border:1.5px solid var(--linea); border-radius:12px; background:var(--papel);
+}
+.vuelto-campo input:focus { border-color:var(--azul); outline:none; }
+.vuelto-res {
+  display:flex; justify-content:space-between; align-items:center;
+  margin:6px -10px 12px; padding:12px 14px; border-radius:12px; background:var(--papel);
+}
+.vuelto-res .lbl { font-size:13px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.vuelto-res .val { font-family:var(--font-mono); font-weight:600; font-size:clamp(26px, 5vw, 34px); }
+.vuelto-res.ok { background:rgba(46,125,79,.12); }
+.vuelto-res.ok .lbl, .vuelto-res.ok .val { color:var(--ok); }
+.vuelto-res.falta { background:var(--error-dim); }
+.vuelto-res.falta .lbl, .vuelto-res.falta .val { color:var(--error); }
 .btn-link {
   color:var(--azul-tx); font-weight:600; text-decoration:underline;
   padding:2px 4px; border-radius:6px;
@@ -601,7 +629,9 @@ const fmtInputPrecio = s => {
 
 const METODOS_PAGO = ['Efectivo', 'Datáfono', 'Nequi', 'Transferencia'];
 
-const ETAPA_LABEL = {en_progreso:'', enviada:'En cocina', entregada:'Entregada', pagada:'Pagado'};
+// la etapa es el ciclo de la comida; el pago es aparte (badge "Pagado" por estado).
+// 'pagada' es etapa legada de cuentas viejas: sin etiqueta propia.
+const ETAPA_LABEL = {en_progreso:'', enviada:'En cocina', entregada:'Entregada', pagada:''};
 
 const ICONOS = {
   mas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
@@ -795,9 +825,10 @@ function renderTabs() {
   for (const f of state.facturas) {
     const b = document.createElement('button');
     b.type = 'button';
+    const pagada = f.estado !== 'abierta';
     b.className = 'tab' + (f.id === state.activaId && !state.vistaVentas ? ' activa' : '')
       + (f.reabierta ? ' reabierta' : '')
-      + (f.etapa === 'pagada' ? ' pagada' : '');
+      + (pagada ? ' pagada' : '');
     b.dataset.id = f.id;
     const etiqueta = ETAPA_LABEL[f.etapa] || '';
     b.innerHTML =
@@ -805,6 +836,7 @@ function renderTabs() {
       `<span class="timer" data-timer="${f.id}"></span></span>` +
       `<span class="fila1">` +
       (f.mesa ? `<span class="mesa-tab">${esc(f.mesa)}</span>` : '') +
+      (pagada ? `<span class="badge-etapa pagada">Pagado</span>` : '') +
       (etiqueta ? `<span class="badge-etapa ${f.etapa}">${etiqueta}</span>` : '') +
       `<span class="tot" data-tabtot>${fmt(f.total + (f.propina || 0))}</span></span>`;
     b.addEventListener('click', () => {
@@ -826,7 +858,7 @@ function renderTabs() {
 
 /* ---------- contador con semáforo ---------- */
 function minutosCuenta(f) {
-  const fin = (f.etapa === 'pagada' && f.fecha_cierre) ? new Date(f.fecha_cierre) : new Date();
+  const fin = (f.estado !== 'abierta' && f.fecha_cierre) ? new Date(f.fecha_cierre) : new Date();
   return Math.max(0, Math.floor((fin - new Date(f.fecha_apertura)) / 60000));
 }
 
@@ -834,15 +866,21 @@ function actualizarTimers() {
   const [verde, ambar] = state.config.semaforo_min;
   const retencionMs = state.config.retencion_pagada_min * 60000;
   const ahora = Date.now();
-  const expirada = f => f.etapa === 'pagada' && f.fecha_cierre &&
-    ahora - new Date(f.fecha_cierre) > retencionMs;
+  // se archiva solo cuando está pagada Y entregada (o legado 'pagada')
+  const finCiclo = f => Math.max(
+    f.fecha_cierre ? new Date(f.fecha_cierre).getTime() : 0,
+    f.fecha_entregada ? new Date(f.fecha_entregada).getTime() : 0);
+  const expirada = f => f.estado === 'cerrada' &&
+    (f.etapa === 'entregada' || f.etapa === 'pagada') &&
+    ahora - finCiclo(f) > retencionMs;
 
   for (const f of state.facturas) {
     if (expirada(f)) continue;
     const m = minutosCuenta(f);
+    const pagada = f.estado !== 'abierta';
     document.querySelectorAll(`[data-timer="${f.id}"]`).forEach(el => {
       el.textContent = m + ' min';
-      el.className = 'timer ' + (f.etapa === 'pagada' ? 't-pagada'
+      el.className = 'timer ' + (pagada ? 't-pagada'
         : m < verde ? 't-ok' : m <= ambar ? 't-medio' : 't-alto');
     });
   }
@@ -903,10 +941,13 @@ function renderFactura() {
         <span class="val">${fmt(i.subtotal)}</span>
       </div>`).join('');
     const t = calcularLocal(f);
+    const etiquetaRO = ETAPA_LABEL[f.etapa] || '';
+    const entregadaYa = f.etapa === 'entregada' || f.etapa === 'pagada';
     cont.innerHTML = `
       <div class="cuenta-head">
         <h2>Cuenta ${f.numero}</h2>
         <span class="badge-etapa pagada">Pagado ${horaPago}</span>
+        ${etiquetaRO ? `<span class="badge-etapa ${f.etapa}">${etiquetaRO}</span>` : ''}
         <span class="timer" data-timer="${f.id}"></span>
         ${f.mesa ? `<span class="mesa-tab">${esc(f.mesa)}</span>` : ''}
       </div>
@@ -921,11 +962,19 @@ function renderFactura() {
         <div class="tot-linea"><span class="lbl">Pago</span><span class="chip">${esc(f.metodo_pago || 'Efectivo')}</span></div>
       </div>
       <div class="acciones">
+        ${entregadaYa ? '' : `<button type="button" class="btn btn-primario" id="btnCocinaRO">${ICONOS.comanda} ${f.etapa === 'en_progreso' ? 'Enviar a cocina' : 'Reimprimir comanda'}</button>`}
+        ${f.etapa === 'enviada' ? `<button type="button" class="btn btn-primario" id="btnEntregadoRO">${ICONOS.entregado} Entregado</button>` : ''}
         <a class="btn btn-secundario" href="/ticket/${f.id}?print=1" target="_blank">${ICONOS.imprimir} Reimprimir ticket</a>
         <button type="button" class="btn btn-secundario" id="btnReabrirPagada">${ICONOS.editar} Reabrir para editar</button>
       </div>
-      <p class="nota-retencion">Esta pesta&ntilde;a desaparece sola a los ${state.config.retencion_pagada_min} min del pago. La cuenta queda en Ventas de hoy.</p>`;
+      <p class="nota-retencion">${entregadaYa
+        ? `Pagada y entregada: la pesta&ntilde;a desaparece sola a los ${state.config.retencion_pagada_min} min. La cuenta queda en Ventas de hoy.`
+        : 'Pagada. La pesta&ntilde;a sigue aqu&iacute; hasta marcarla <strong>Entregado</strong>.'}</p>`;
     $('#btnReabrirPagada').addEventListener('click', () => reabrir(f.id));
+    const cocinaRO = $('#btnCocinaRO');
+    if (cocinaRO) cocinaRO.addEventListener('click', () => enviarCocina(f));
+    const entRO = $('#btnEntregadoRO');
+    if (entRO) entRO.addEventListener('click', () => marcarEntregada(f));
     actualizarTimers();
     return;
   }
@@ -997,7 +1046,10 @@ function renderFactura() {
       </div>
       <div class="tot-linea gran-total">
         <span class="lbl">A pagar</span>
-        <span class="val" id="vPagar">$0</span>
+        <span class="pagar-con-vuelto">
+          <span class="val" id="vPagar">$0</span>
+          <button type="button" class="btn-conteo" id="btnVuelto" aria-label="Calcular el vuelto" title="Calcular vuelto">${ICONOS.billetes}</button>
+        </span>
       </div>
       <div class="metodos" id="metodos" role="group" aria-label="M&eacute;todo de pago">
         <span class="lbl-met">Pago</span>
@@ -1106,6 +1158,7 @@ function renderFactura() {
   }
 
   // acciones
+  $('#btnVuelto').addEventListener('click', () => abrirVuelto(f));
   $('#btnCobrar').addEventListener('click', () => cobrar(f));
   $('#btnCocina').addEventListener('click', () => enviarCocina(f));
   const btnEnt = $('#btnEntregado');
@@ -1250,7 +1303,7 @@ async function enviarCocina(f) {
     toast('La cuenta está vacía', true); return;
   }
   try {
-    await guardar(f);
+    if (f.estado === 'abierta') await guardar(f); // una pagada ya no se edita
     const primera = f.etapa === 'en_progreso';
     if (primera) {
       Object.assign(f, await api(`/api/facturas/${f.id}/etapa`, {method:'POST', body:{etapa:'enviada'}}));
@@ -1524,6 +1577,76 @@ function abrirConteo() {
       toast(`Efectivo contado: ${fmt(total)}`);
     }
   });
+}
+
+/* calculadora de vuelto: cuánto entrega el cliente y cuánto se le devuelve */
+function abrirVuelto(f) {
+  const pagar = calcularLocal(f).pagar;
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  const RAPIDOS = [10000, 20000, 50000, 100000].filter(b => b >= pagar);
+
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Calcular vuelto">
+      <div class="modal-head">
+        <h3>Vuelto</h3>
+        <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
+      </div>
+      <div class="modal-cuerpo">
+        <div class="vuelto-pagar"><span class="lbl">A pagar (con propina)</span><span class="val">${fmt(pagar)}</span></div>
+        <div class="metodos vuelto-pills">
+          <button type="button" class="metodo" data-monto="${pagar}">Exacto</button>
+          ${RAPIDOS.map(b => `<button type="button" class="metodo" data-monto="${b}">${fmt(b)}</button>`).join('')}
+        </div>
+        <div class="vuelto-campo">
+          <label for="vueltoRecibido">El cliente entrega</label>
+          <input id="vueltoRecibido" inputmode="numeric" placeholder="0">
+        </div>
+        <div class="vuelto-res" id="vueltoRes"><span class="lbl">Devuelta</span><span class="val">&mdash;</span></div>
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-primario" id="btnVueltoListo">Listo</button>
+      </div>
+    </div>`;
+
+  const inp = overlay.querySelector('#vueltoRecibido');
+  const res = overlay.querySelector('#vueltoRes');
+
+  const calcular = () => {
+    const recibido = Number(soloDigitos(inp.value)) || 0;
+    if (!recibido) {
+      res.className = 'vuelto-res';
+      res.innerHTML = '<span class="lbl">Devuelta</span><span class="val">&mdash;</span>';
+      return;
+    }
+    const dif = recibido - pagar;
+    if (dif >= 0) {
+      res.className = 'vuelto-res ok';
+      res.innerHTML = `<span class="lbl">Devuelta</span><span class="val">${fmt(dif)}</span>`;
+    } else {
+      res.className = 'vuelto-res falta';
+      res.innerHTML = `<span class="lbl">Faltan</span><span class="val">${fmt(-dif)}</span>`;
+    }
+  };
+
+  inp.addEventListener('input', () => { inp.value = fmtInputPrecio(inp.value); calcular(); });
+  overlay.querySelectorAll('.vuelto-pills .metodo').forEach(b => {
+    b.addEventListener('click', () => {
+      inp.value = fmtInputPrecio(b.dataset.monto);
+      overlay.querySelectorAll('.vuelto-pills .metodo').forEach(x =>
+        x.classList.toggle('on', x === b));
+      calcular();
+    });
+  });
+
+  const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
+  const alEscape = e => { if (e.key === 'Escape') cerrar(); };
+  document.addEventListener('keydown', alEscape);
+  overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(); });
+  overlay.querySelector('.cerrar-modal').addEventListener('click', cerrar);
+  overlay.querySelector('#btnVueltoListo').addEventListener('click', cerrar);
+  document.body.appendChild(overlay);
+  inp.focus();
 }
 
 /* conteo de la base que se deja para el día siguiente */
