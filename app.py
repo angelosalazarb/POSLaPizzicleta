@@ -107,10 +107,12 @@ MIGRACIONES = [
     "ALTER TABLE facturas ADD COLUMN fecha_enviada TEXT",
     "ALTER TABLE facturas ADD COLUMN fecha_entregada TEXT",
     "ALTER TABLE facturas ADD COLUMN mesa TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE movimientos ADD COLUMN origen TEXT NOT NULL DEFAULT 'Efectivo'",
 ]
 
 METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
 TIPOS_MOVIMIENTO = ("Retiro", "Pago proveedor", "Gasto")
+ORIGENES_MOVIMIENTO = ("Efectivo", "Transferencia")  # de dónde sale la plata
 
 NUM_MESAS = 8              # número de mesas del local: editar aquí
 RETENCION_PAGADA_MIN = 10  # minutos que una cuenta pagada sigue visible en caja
@@ -487,6 +489,9 @@ def crear_movimiento():
     tipo = data.get("tipo", "Retiro")
     if tipo not in TIPOS_MOVIMIENTO:
         tipo = "Retiro"
+    origen = data.get("origen", "Efectivo")
+    if origen not in ORIGENES_MOVIMIENTO:
+        origen = "Efectivo"
     concepto = str(data.get("concepto") or "").strip()[:120]
     try:
         monto = max(int(data.get("monto") or 0), 0)
@@ -496,9 +501,9 @@ def crear_movimiento():
         return jsonify({"error": "el monto debe ser mayor a 0"}), 400
     ahora = datetime.now().isoformat(timespec="seconds")
     cur = db.execute(
-        "INSERT INTO movimientos (fecha, tipo, concepto, monto, creado_en)"
-        " VALUES (?,?,?,?,?)",
-        (date.today().isoformat(), tipo, concepto, monto, ahora),
+        "INSERT INTO movimientos (fecha, tipo, concepto, monto, creado_en, origen)"
+        " VALUES (?,?,?,?,?,?)",
+        (date.today().isoformat(), tipo, concepto, monto, ahora, origen),
     )
     db.commit()
     row = db.execute("SELECT * FROM movimientos WHERE id = ?", (cur.lastrowid,)).fetchone()
@@ -581,15 +586,20 @@ def _esperados_dia(db, fecha):
         (fecha,),
     ).fetchall()
     por = {r["metodo_pago"] or "Efectivo": r["t"] or 0 for r in rows}
-    salidas = db.execute(
-        "SELECT COALESCE(SUM(monto), 0) AS t FROM movimientos WHERE fecha = ?",
-        (fecha,),
-    ).fetchone()["t"]
+    sal_rows = db.execute(
+        "SELECT origen, COALESCE(SUM(monto), 0) AS t FROM movimientos"
+        " WHERE fecha = ? GROUP BY origen", (fecha,),
+    ).fetchall()
+    sal = {r["origen"] or "Efectivo": r["t"] or 0 for r in sal_rows}
+    sal_efectivo = sal.get("Efectivo", 0)
+    sal_transf = sal.get("Transferencia", 0)
     return {
         "efectivo": por.get("Efectivo", 0),
         "datafono": por.get("Datáfono", 0),
         "transferencias": por.get("Nequi", 0) + por.get("Transferencia", 0),
-        "salidas": salidas,
+        "salidas": sal_efectivo + sal_transf,
+        "salidas_efectivo": sal_efectivo,
+        "salidas_transferencias": sal_transf,
     }
 
 

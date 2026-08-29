@@ -396,6 +396,8 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1080px; }
   border:1.5px solid var(--linea); border-radius:10px; background:var(--papel);
 }
 .mov-form input:focus { border-color:var(--azul); outline:none; }
+.mov-form .lbl-origen { font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.chip-origen { color:var(--azul-tx); border-color:var(--azul-tx); }
 .sin-movs { color:var(--muted); font-size:14px; padding:14px 0; }
 .total-salidas { display:flex; justify-content:flex-end; gap:30px; margin-top:12px; }
 .total-salidas .lbl { font-size:13px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
@@ -1329,7 +1331,8 @@ async function registrarMovimiento() {
   if (!monto) { toast('Pon el monto de la salida', true); return; }
   try {
     await api('/api/movimientos', {method:'POST', body:{
-      tipo: state.movTipo || 'Retiro', concepto, monto
+      tipo: state.movTipo || 'Retiro', origen: state.movOrigen || 'Efectivo',
+      concepto, monto
     }});
     toast('Salida registrada');
     await Promise.all([cargarMovimientos(), cargarCierre()]);
@@ -1377,16 +1380,19 @@ async function cargarCierre() {
 function calcularCierre() {
   const f = state.cierreForm || {base:0, efectivo:0, datafono:0, transferencias:0};
   const esp = state.cierre?.esperados || {efectivo:0, datafono:0, transferencias:0, salidas:0};
-  const salidas = esp.salidas || 0;
-  // lo que debería haber en la caja: base + ventas en efectivo − retiros/pagos
-  const espEfCaja = (f.base||0) + esp.efectivo - salidas;
+  // cada salida se descuenta de donde salió la plata (efectivo o transferencia)
+  const salEf = esp.salidas_efectivo ?? esp.salidas ?? 0;
+  const salTr = esp.salidas_transferencias || 0;
+  // lo que debería haber en la caja: base + ventas en efectivo − salidas en efectivo
+  const espEfCaja = (f.base||0) + esp.efectivo - salEf;
+  const espTr = esp.transferencias - salTr;
   const totalFinal = ((f.efectivo||0) - (f.base||0)) + (f.datafono||0) + (f.transferencias||0);
-  const esperadoTotal = esp.efectivo + esp.datafono + esp.transferencias - salidas;
+  const esperadoTotal = esp.efectivo + esp.datafono + esp.transferencias - salEf - salTr;
   return {
-    f, esp, espEfCaja,
+    f, esp, espEfCaja, espTr, salEf, salTr,
     difEf: (f.efectivo||0) - espEfCaja,
     difDat: (f.datafono||0) - esp.datafono,
-    difTr: (f.transferencias||0) - esp.transferencias,
+    difTr: (f.transferencias||0) - espTr,
     totalFinal, esperadoTotal,
     difTotal: totalFinal - esperadoTotal
   };
@@ -1402,6 +1408,8 @@ function pintarDif(el, dif) {
 function actualizarCierreCalculos() {
   const c = calcularCierre();
   $('#cEspEf').textContent = fmt(c.espEfCaja);
+  const espTr = $('#cEspTr');
+  if (espTr) espTr.textContent = fmt(c.espTr);
   pintarDif($('#cDifEf'), c.difEf);
   pintarDif($('#cDifDat'), c.difDat);
   pintarDif($('#cDifTr'), c.difTr);
@@ -1604,7 +1612,8 @@ function mostrarResumenCierre() {
         ${fila('Efectivo (venta + propina)', fmt(esp.efectivo || 0))}
         ${fila('Dat&aacute;fono (venta + propina)', fmt(esp.datafono || 0))}
         ${fila('Transferencias + Nequi (venta + propina)', fmt(esp.transferencias || 0))}
-        ${esp.salidas ? fila('Salidas del d&iacute;a (retiros y pagos)', '&minus;' + fmt(esp.salidas)) : ''}
+        ${c.salEf ? fila('Salidas en efectivo (retiros y pagos)', '&minus;' + fmt(c.salEf)) : ''}
+        ${c.salTr ? fila('Salidas por transferencia', '&minus;' + fmt(c.salTr)) : ''}
 
         <div class="den-grupo">Total de dineros del d&iacute;a</div>
         ${fila('Total contado (sin la base)', fmt(c.totalFinal))}
@@ -1684,11 +1693,15 @@ function renderVentas() {
     </div>
     <div class="cierre">
       <h3>Retiros y pagos</h3>
-      <p class="sub-cierre">Salidas de efectivo del d&iacute;a (retiros, pagos a proveedores, gastos). Se descuentan del efectivo esperado en el cierre.</p>
+      <p class="sub-cierre">Salidas del d&iacute;a (retiros, pagos a proveedores, gastos). Cada una se descuenta en el cierre de donde sali&oacute; la plata: efectivo de la caja o transferencia de la cuenta.</p>
       <div id="movLista"></div>
       ${esHoy ? `
       <div class="mov-form">
         <span class="metodos" id="movTipos" role="group" aria-label="Tipo de salida"></span>
+      </div>
+      <div class="mov-form">
+        <span class="lbl-origen">&iquest;De d&oacute;nde sale?</span>
+        <span class="metodos" id="movOrigenes" role="group" aria-label="Origen de la plata"></span>
         <input type="text" id="movConcepto" maxlength="120" placeholder="concepto (ej. retiro, pago gas)" aria-label="Concepto de la salida">
         <input class="monto-mov" id="movMonto" inputmode="numeric" placeholder="$ monto" aria-label="Monto de la salida">
         <button type="button" class="btn btn-secundario" id="btnRegistrarMov">${ICONOS.mas} Registrar</button>
@@ -1730,7 +1743,7 @@ function renderVentas() {
       <div class="cierre-fila">
         <label for="cTr">Transferencias<small>incluye Nequi</small></label>
         <input id="cTr" inputmode="numeric" placeholder="0" data-campo="transferencias">
-        <span class="esp">${fmt(state.cierre?.esperados?.transferencias || 0)}</span>
+        <span class="esp" id="cEspTr">$0</span>
         <span class="dif" id="cDifTr"></span>
       </div>
       <div class="cierre-fila total-cierre">
@@ -1800,7 +1813,7 @@ function renderVentas() {
     const hora = new Date(m.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
     return `<div class="mov-fila">
       <span class="hora">${hora}</span>
-      <span class="chip">${esc(m.tipo)}</span>
+      <span><span class="chip">${esc(m.tipo)}</span><span class="chip chip-origen">${esc(m.origen || 'Efectivo')}</span></span>
       <span class="concepto">${esc(m.concepto) || '<span style="color:var(--muted)">sin concepto</span>'}</span>
       <span class="monto">&minus;${fmt(m.monto)}</span>
       ${esHoy ? `<button type="button" class="btn-borrar" data-mov="${m.id}" aria-label="Eliminar salida de ${fmt(m.monto)}">${ICONOS.borrar}</button>` : '<span></span>'}
@@ -1827,6 +1840,24 @@ function renderVentas() {
         });
       });
       tiposCont.appendChild(b);
+    }
+    if (!state.movOrigen) state.movOrigen = 'Efectivo';
+    const origCont = $('#movOrigenes');
+    for (const o of ['Efectivo', 'Transferencia']) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'metodo' + (state.movOrigen === o ? ' on' : '');
+      b.textContent = o;
+      b.setAttribute('aria-pressed', String(state.movOrigen === o));
+      b.addEventListener('click', () => {
+        state.movOrigen = o;
+        origCont.querySelectorAll('.metodo').forEach(x => {
+          const on = x.textContent === o;
+          x.classList.toggle('on', on);
+          x.setAttribute('aria-pressed', String(on));
+        });
+      });
+      origCont.appendChild(b);
     }
     const movMonto = $('#movMonto');
     movMonto.addEventListener('input', () => { movMonto.value = fmtInputPrecio(movMonto.value); });
