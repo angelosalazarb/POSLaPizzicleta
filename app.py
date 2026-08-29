@@ -108,6 +108,8 @@ MIGRACIONES = [
     "ALTER TABLE facturas ADD COLUMN fecha_entregada TEXT",
     "ALTER TABLE facturas ADD COLUMN mesa TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE movimientos ADD COLUMN origen TEXT NOT NULL DEFAULT 'Efectivo'",
+    "ALTER TABLE cierres ADD COLUMN base_siguiente INTEGER",
+    "ALTER TABLE cierres ADD COLUMN conteo_base_siguiente TEXT NOT NULL DEFAULT ''",
 ]
 
 METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
@@ -527,10 +529,11 @@ def _cierre_dict(row):
     if row is None:
         return None
     c = dict(row)
-    try:
-        c["conteo_efectivo"] = json.loads(c.get("conteo_efectivo") or "{}")
-    except ValueError:
-        c["conteo_efectivo"] = {}
+    for campo in ("conteo_efectivo", "conteo_base_siguiente"):
+        try:
+            c[campo] = json.loads(c.get(campo) or "{}")
+        except ValueError:
+            c[campo] = {}
     return c
 
 
@@ -547,12 +550,14 @@ def get_apertura():
     db = get_db()
     fecha = request.args.get("fecha") or date.today().isoformat()
     row = db.execute("SELECT * FROM aperturas WHERE fecha = ?", (fecha,)).fetchone()
+    # la base sugerida es la que el cierre anterior declaró dejar en caja
     anterior = db.execute(
-        "SELECT base FROM cierres WHERE fecha < ? ORDER BY fecha DESC LIMIT 1",
+        "SELECT COALESCE(base_siguiente, base) AS b FROM cierres"
+        " WHERE fecha < ? ORDER BY fecha DESC LIMIT 1",
         (fecha,),
     ).fetchone()
     return jsonify({"fecha": fecha, "apertura": _cierre_dict(row),
-                    "base_sugerida": anterior["base"] if anterior else 0})
+                    "base_sugerida": anterior["b"] if anterior else 0})
 
 
 @app.post("/api/apertura")
@@ -614,11 +619,12 @@ def get_cierre():
     apertura = db.execute(
         "SELECT base FROM aperturas WHERE fecha = ?", (fecha,)).fetchone()
     anterior = db.execute(
-        "SELECT base FROM cierres WHERE fecha < ? ORDER BY fecha DESC LIMIT 1",
+        "SELECT COALESCE(base_siguiente, base) AS b FROM cierres"
+        " WHERE fecha < ? ORDER BY fecha DESC LIMIT 1",
         (fecha,),
     ).fetchone()
     base_sugerida = (apertura["base"] if apertura
-                     else anterior["base"] if anterior else 0)
+                     else anterior["b"] if anterior else 0)
     return jsonify({"fecha": fecha, "esperados": esperados,
                     "cierre": _cierre_dict(row),
                     "base_sugerida": base_sugerida})
@@ -641,7 +647,15 @@ def guardar_cierre():
     datafono = entero("datafono_contado")
     transf = entero("transferencias_contado")
 
+    # base que se deja en la caja para abrir el día siguiente (NULL = no declarada)
+    bs = data.get("base_siguiente")
+    try:
+        base_siguiente = max(int(bs), 0) if bs not in (None, "") else None
+    except (TypeError, ValueError):
+        base_siguiente = None
+
     conteo = _limpiar_conteo(data.get("conteo_efectivo"))
+    conteo_bs = _limpiar_conteo(data.get("conteo_base_siguiente"))
 
     esp = _esperados_dia(db, fecha)
     total_final = (efectivo - base) + datafono + transf
@@ -654,8 +668,8 @@ def guardar_cierre():
         "INSERT INTO cierres (fecha, base, efectivo_contado, datafono_contado,"
         " transferencias_contado, esperado_efectivo, esperado_datafono,"
         " esperado_transferencias, total_final, diferencia, guardado_en, conteo_efectivo,"
-        " salidas)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        " salidas, base_siguiente, conteo_base_siguiente)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
         " ON CONFLICT(fecha) DO UPDATE SET base=excluded.base,"
         " efectivo_contado=excluded.efectivo_contado,"
         " datafono_contado=excluded.datafono_contado,"
@@ -665,12 +679,13 @@ def guardar_cierre():
         " esperado_transferencias=excluded.esperado_transferencias,"
         " total_final=excluded.total_final, diferencia=excluded.diferencia,"
         " guardado_en=excluded.guardado_en, conteo_efectivo=excluded.conteo_efectivo,"
-        " salidas=excluded.salidas",
+        " salidas=excluded.salidas, base_siguiente=excluded.base_siguiente,"
+        " conteo_base_siguiente=excluded.conteo_base_siguiente",
         (fecha, base, efectivo, datafono, transf,
          esp["efectivo"], esp["datafono"], esp["transferencias"],
          total_final, diferencia,
          datetime.now().isoformat(timespec="seconds"), json.dumps(conteo),
-         esp["salidas"]),
+         esp["salidas"], base_siguiente, json.dumps(conteo_bs)),
     )
     db.commit()
     row = db.execute("SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()

@@ -1362,14 +1362,19 @@ async function cargarCierre() {
       if (c) {
         state.cierreForm = {
           base: c.base, efectivo: c.efectivo_contado,
-          datafono: c.datafono_contado, transferencias: c.transferencias_contado
+          datafono: c.datafono_contado, transferencias: c.transferencias_contado,
+          baseSiguiente: c.base_siguiente ?? c.base
         };
         state.conteoEfectivo = (c.conteo_efectivo && Object.keys(c.conteo_efectivo).length)
           ? {...c.conteo_efectivo} : null;
+        state.conteoBaseSiguiente = (c.conteo_base_siguiente && Object.keys(c.conteo_base_siguiente).length)
+          ? {...c.conteo_base_siguiente} : null;
       } else {
         // base fija: arranca con la base que quedó del cierre anterior
-        state.cierreForm = {base: cierre.base_sugerida || 0, efectivo:0, datafono:0, transferencias:0};
+        const sug = cierre.base_sugerida || 0;
+        state.cierreForm = {base: sug, efectivo:0, datafono:0, transferencias:0, baseSiguiente: sug};
         state.conteoEfectivo = null;
+        state.conteoBaseSiguiente = null;
       }
       state.cierreFormFecha = fecha;
     }
@@ -1410,6 +1415,8 @@ function actualizarCierreCalculos() {
   $('#cEspEf').textContent = fmt(c.espEfCaja);
   const espTr = $('#cEspTr');
   if (espTr) espTr.textContent = fmt(c.espTr);
+  const ger = $('#cAGerencia');
+  if (ger) ger.textContent = '→ gerencia ' + fmt(Math.max((c.f.efectivo || 0) - (c.f.baseSiguiente || 0), 0));
   pintarDif($('#cDifEf'), c.difEf);
   pintarDif($('#cDifDat'), c.difDat);
   pintarDif($('#cDifTr'), c.difTr);
@@ -1519,6 +1526,25 @@ function abrirConteo() {
   });
 }
 
+/* conteo de la base que se deja para el día siguiente */
+function abrirConteoBaseSiguiente() {
+  if (!state.conteoBaseSiguiente) state.conteoBaseSiguiente = {};
+  modalConteo({
+    titulo: 'Base que queda en caja',
+    subtitulo: 'Cont&aacute; los billetes y monedas que dej&aacute;s de base para abrir el d&iacute;a siguiente. El resto del efectivo va a gerencia.',
+    conteo: state.conteoBaseSiguiente,
+    boton: 'Usar total',
+    onAceptar: total => {
+      if (!state.cierreForm) state.cierreForm = {base:0, efectivo:0, datafono:0, transferencias:0};
+      state.cierreForm.baseSiguiente = total;
+      const inp = $('#cBaseSig');
+      if (inp) inp.value = total ? fmtInputPrecio(String(total)) : '';
+      actualizarCierreCalculos();
+      toast(`Base para el día siguiente: ${fmt(total)}`);
+    }
+  });
+}
+
 /* ---------- apertura de caja ---------- */
 async function cargarApertura() {
   try {
@@ -1565,7 +1591,9 @@ async function guardarCierre() {
       fecha: state.fechaVentas,
       base: f.base||0, efectivo_contado: f.efectivo||0,
       datafono_contado: f.datafono||0, transferencias_contado: f.transferencias||0,
-      conteo_efectivo: state.conteoEfectivo || {}
+      base_siguiente: f.baseSiguiente ?? f.base ?? 0,
+      conteo_efectivo: state.conteoEfectivo || {},
+      conteo_base_siguiente: state.conteoBaseSiguiente || {}
     }});
     toast(`Cierre de caja guardado (${state.fechaVentas})`);
     renderVentas();
@@ -1582,7 +1610,8 @@ function mostrarResumenCierre() {
   const propPagadas = (state.movimientos?.movimientos || [])
     .filter(m => m.tipo === 'Propinas').reduce((s, m) => s + (m.monto || 0), 0);
   const propPendiente = propinas - propPagadas;
-  const aGerencia = Math.max((f.efectivo || 0) - (f.base || 0), 0);
+  const baseQueda = f.baseSiguiente ?? f.base ?? 0;
+  const aGerencia = Math.max((f.efectivo || 0) - baseQueda, 0);
   const esHoy = state.fechaVentas === hoyISO();
   const fechaLegible = new Date(state.fechaVentas + 'T12:00:00')
     .toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'});
@@ -1627,7 +1656,7 @@ function mostrarResumenCierre() {
         ${fila('Propinas por entregar al equipo', fmt(propPendiente), 'res-propinas')}
 
         <div class="den-grupo">Reparto de la plata</div>
-        ${fila('Queda en Caja local (base para el d&iacute;a siguiente)', fmt(f.base || 0))}
+        ${fila('Queda en Caja local (base para el d&iacute;a siguiente)', fmt(baseQueda))}
         ${fila('Va a Caja gerencia (efectivo)', fmt(aGerencia), 'res-destacada')}
         ${fila('Qued&oacute; en la cuenta (transferencias + Nequi)', fmt(f.transferencias || 0))}
         ${fila('Dat&aacute;fono (llega a la cuenta del banco)', fmt(f.datafono || 0))}
@@ -1756,6 +1785,15 @@ function renderVentas() {
         <span class="dif" id="cDifEf"></span>
       </div>
       <div class="cierre-fila">
+        <label for="cBaseSig">Base que queda<small>se deja en la caja para abrir el d&iacute;a siguiente</small></label>
+        <span class="campo-conteo">
+          <input id="cBaseSig" inputmode="numeric" placeholder="0" data-campo="baseSiguiente">
+          <button type="button" class="btn-conteo" id="btnConteoBaseSig" aria-label="Contar la base que queda">${ICONOS.billetes}</button>
+        </span>
+        <span class="esp" id="cAGerencia"></span>
+        <span class="dif"></span>
+      </div>
+      <div class="cierre-fila">
         <label for="cDat">Dat&aacute;fono<small>cierre del voucher</small></label>
         <input id="cDat" inputmode="numeric" placeholder="0" data-campo="datafono">
         <span class="esp">${fmt(state.cierre?.esperados?.datafono || 0)}</span>
@@ -1826,6 +1864,7 @@ function renderVentas() {
   });
   $('#btnGuardarCierre').addEventListener('click', guardarCierre);
   $('#btnConteo').addEventListener('click', abrirConteo);
+  $('#btnConteoBaseSig').addEventListener('click', abrirConteoBaseSiguiente);
   $('#btnApertura').addEventListener('click', abrirModalApertura);
 
   // retiros y pagos: lista, selector de tipo y registro (registro solo el día en curso)
