@@ -144,6 +144,39 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1080px; }
 .tab.reabierta { border-style:dashed; border-color:var(--naranja-tx); }
 .tab.reabierta .num { color:var(--naranja-tx); }
 .tab.reabierta .num::after { content:" · edici\00F3n"; font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+.tab.pagada { opacity:.72; }
+.tab .fila1 { display:flex; align-items:center; gap:8px; }
+.tab .mesa-tab { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--naranja-tx); }
+
+/* contador con semáforo */
+.timer { font-family:var(--font-mono); font-size:11px; font-weight:600; padding:1px 8px; border-radius:100px; white-space:nowrap; }
+.timer:empty { display:none; }
+.timer.t-ok { background:rgba(46,125,79,.12); color:var(--ok); }
+.timer.t-medio { background:var(--naranja-dim); color:var(--naranja-tx); }
+.timer.t-alto { background:var(--error-dim); color:var(--error); }
+.timer.t-pagada { background:transparent; border:1px solid var(--linea); color:var(--muted); }
+
+/* etapa de la cuenta */
+.badge-etapa { display:inline-flex; align-items:center; padding:2px 10px; border-radius:100px; font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+.badge-etapa.enviada { background:var(--azul-dim); color:var(--azul-tx); }
+.badge-etapa.entregada { background:rgba(46,125,79,.12); color:var(--ok); }
+.badge-etapa.pagada { background:var(--tinta); color:var(--papel); }
+
+/* selector de mesa */
+.campo-mesa select {
+  min-height:44px; padding:0 12px; font-weight:600;
+  border:1.5px solid var(--linea); border-radius:10px; background:var(--papel);
+}
+.campo-mesa select:focus { border-color:var(--azul); outline:none; }
+
+/* cuenta pagada (solo lectura) */
+.pagada-items .item-linea {
+  display:grid; grid-template-columns:56px 1fr 130px;
+  gap:10px; padding:8px 0; border-bottom:1px dashed var(--linea);
+}
+.pagada-items .item-linea .cant { font-family:var(--font-mono); text-align:center; }
+.pagada-items .item-linea .val { font-family:var(--font-mono); text-align:right; }
+.nota-retencion { color:var(--muted); font-size:13px; margin-top:14px; }
 
 /* cabecera de cuenta */
 .cuenta-head { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
@@ -467,6 +500,8 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1080px; }
   .venta-fila .detalle { display:none; }
   .campo-nota { margin-left:0; width:100%; }
   .campo-nota input { flex:1; }
+  .campo-mesa { margin-left:0; width:100%; }
+  .campo-mesa select { flex:1; }
   .btn-peligro { margin-left:0; }
   .ac-lista { left:0; right:0; }
 }
@@ -522,6 +557,8 @@ const fmtInputPrecio = s => {
 
 const METODOS_PAGO = ['Efectivo', 'Datáfono', 'Nequi', 'Transferencia'];
 
+const ETAPA_LABEL = {en_progreso:'', enviada:'En cocina', entregada:'Entregada', pagada:'Pagado'};
+
 const ICONOS = {
   mas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   borrar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>',
@@ -531,7 +568,9 @@ const ICONOS = {
   anular: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M4.9 4.9l14.2 14.2"/></svg>',
   editar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
   billetes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="11" rx="2"/><circle cx="12" cy="12.5" r="2.6"/><path d="M6.5 10.5v.01M17.5 14.5v.01"/></svg>',
-  cerrarX: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+  cerrarX: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  comanda: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  entregado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-4-4"/></svg>'
 };
 
 const DENOMINACIONES = {
@@ -564,14 +603,26 @@ async function api(url, opts={}) {
 
 /* ---------- estado ---------- */
 const state = {
-  facturas: [],        // abiertas, del servidor
+  facturas: [],        // abiertas + pagadas recientes, del servidor
   activaId: null,
   vistaVentas: false,
   guardados: new Map(), // id -> timeout de debounce
-  pendientes: new Set() // ids con cambios sin guardar
+  pendientes: new Set(), // ids con cambios sin guardar
+  config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]}
 };
 
 const facturaActiva = () => state.facturas.find(f => f.id === state.activaId) || null;
+
+const OPCIONES_MESA = () => {
+  const o = [];
+  for (let i = 1; i <= state.config.num_mesas; i++) o.push('Mesa ' + i);
+  o.push('Para llevar', 'Domicilio');
+  return o;
+};
+
+async function cargarConfig() {
+  try { state.config = {...state.config, ...(await api('/api/config'))}; } catch {}
+}
 
 /* ---------- menú (carta niceeat) ---------- */
 const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
@@ -648,7 +699,7 @@ function armarAutocompletado(fila, desc, precio, it, f) {
 /* ---------- carga inicial ---------- */
 async function cargarFacturas(preservarActiva=true) {
   const previa = state.activaId;
-  state.facturas = await api('/api/facturas?estado=abierta');
+  state.facturas = await api('/api/facturas'); // abiertas + pagadas en retención
   if (!preservarActiva || !state.facturas.some(f => f.id === previa)) {
     state.activaId = state.facturas.length ? state.facturas[state.facturas.length-1].id : null;
   }
@@ -666,7 +717,8 @@ async function cargarTotalDia() {
 }
 
 function actualizarPendiente() {
-  const total = state.facturas.reduce((s, f) => s + calcularLocal(f).pagar, 0);
+  const total = state.facturas.filter(f => f.estado === 'abierta')
+    .reduce((s, f) => s + calcularLocal(f).pagar, 0);
   $('#totalPendiente').textContent = fmt(total);
 }
 
@@ -679,9 +731,17 @@ function renderTabs() {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'tab' + (f.id === state.activaId && !state.vistaVentas ? ' activa' : '')
-      + (f.reabierta ? ' reabierta' : '');
+      + (f.reabierta ? ' reabierta' : '')
+      + (f.etapa === 'pagada' ? ' pagada' : '');
     b.dataset.id = f.id;
-    b.innerHTML = `<span class="num">${f.numero}</span><span class="tot" data-tabtot>${fmt(f.total)}</span>`;
+    const etiqueta = ETAPA_LABEL[f.etapa] || '';
+    b.innerHTML =
+      `<span class="fila1"><span class="num">${f.numero}</span>` +
+      `<span class="timer" data-timer="${f.id}"></span></span>` +
+      `<span class="fila1">` +
+      (f.mesa ? `<span class="mesa-tab">${esc(f.mesa)}</span>` : '') +
+      (etiqueta ? `<span class="badge-etapa ${f.etapa}">${etiqueta}</span>` : '') +
+      `<span class="tot" data-tabtot>${fmt(f.total + (f.propina || 0))}</span></span>`;
     b.addEventListener('click', () => {
       state.activaId = f.id;
       if (state.vistaVentas) alternarVentas(false);
@@ -696,7 +756,41 @@ function renderTabs() {
   nueva.innerHTML = ICONOS.mas + 'Nueva cuenta';
   nueva.addEventListener('click', nuevaFactura);
   nav.appendChild(nueva);
+  actualizarTimers(); // el innerHTML='' de arriba destruyó los spans anteriores
 }
+
+/* ---------- contador con semáforo ---------- */
+function minutosCuenta(f) {
+  const fin = (f.etapa === 'pagada' && f.fecha_cierre) ? new Date(f.fecha_cierre) : new Date();
+  return Math.max(0, Math.floor((fin - new Date(f.fecha_apertura)) / 60000));
+}
+
+function actualizarTimers() {
+  const [verde, ambar] = state.config.semaforo_min;
+  const retencionMs = state.config.retencion_pagada_min * 60000;
+  const ahora = Date.now();
+  const expirada = f => f.etapa === 'pagada' && f.fecha_cierre &&
+    ahora - new Date(f.fecha_cierre) > retencionMs;
+
+  for (const f of state.facturas) {
+    if (expirada(f)) continue;
+    const m = minutosCuenta(f);
+    document.querySelectorAll(`[data-timer="${f.id}"]`).forEach(el => {
+      el.textContent = m + ' min';
+      el.className = 'timer ' + (f.etapa === 'pagada' ? 't-pagada'
+        : m < verde ? 't-ok' : m <= ambar ? 't-medio' : 't-alto');
+    });
+  }
+
+  if (state.facturas.some(expirada)) {
+    state.facturas = state.facturas.filter(f => !expirada(f));
+    if (!state.facturas.some(f => f.id === state.activaId)) {
+      state.activaId = state.facturas.length ? state.facturas[state.facturas.length-1].id : null;
+    }
+    renderTabs(); renderFactura();
+  }
+}
+setInterval(actualizarTimers, 15000);
 
 async function nuevaFactura() {
   try {
@@ -732,13 +826,65 @@ function renderFactura() {
 
   cont.className = 'hoja';
   const hora = new Date(f.fecha_apertura).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+
+  // cuenta pagada en retención: solo lectura hasta que la pestaña expire
+  if (f.estado !== 'abierta') {
+    const horaPago = f.fecha_cierre
+      ? new Date(f.fecha_cierre).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'}) : '';
+    const itemsHtml = f.items.map(i => `
+      <div class="item-linea">
+        <span class="cant">${i.cantidad}&times;</span>
+        <span>${esc(i.descripcion)}</span>
+        <span class="val">${fmt(i.subtotal)}</span>
+      </div>`).join('');
+    const t = calcularLocal(f);
+    cont.innerHTML = `
+      <div class="cuenta-head">
+        <h2>Cuenta ${f.numero}</h2>
+        <span class="badge-etapa pagada">Pagado ${horaPago}</span>
+        <span class="timer" data-timer="${f.id}"></span>
+        ${f.mesa ? `<span class="mesa-tab">${esc(f.mesa)}</span>` : ''}
+      </div>
+      <div class="pagada-items">${itemsHtml}</div>
+      <div class="totales">
+        ${t.descuento > 0 ? `
+        <div class="tot-linea"><span class="lbl">Subtotal</span><span class="val">${fmt(t.subtotal)}</span></div>
+        <div class="tot-linea"><span class="lbl">Descuento</span><span class="val desc-monto">&minus;${fmt(t.descuento)}</span></div>` : ''}
+        <div class="tot-linea total-medio"><span class="lbl">Total</span><span class="val">${fmt(t.total)}</span></div>
+        ${t.propina > 0 ? `<div class="tot-linea"><span class="lbl">Propina</span><span class="val prop-monto">+${fmt(t.propina)}</span></div>` : ''}
+        <div class="tot-linea gran-total"><span class="lbl">Pagado</span><span class="val">${fmt(t.pagar)}</span></div>
+        <div class="tot-linea"><span class="lbl">Pago</span><span class="chip">${esc(f.metodo_pago || 'Efectivo')}</span></div>
+      </div>
+      <div class="acciones">
+        <a class="btn btn-secundario" href="/ticket/${f.id}?print=1" target="_blank">${ICONOS.imprimir} Reimprimir ticket</a>
+        <button type="button" class="btn btn-secundario" id="btnReabrirPagada">${ICONOS.editar} Reabrir para editar</button>
+      </div>
+      <p class="nota-retencion">Esta pesta&ntilde;a desaparece sola a los ${state.config.retencion_pagada_min} min del pago. La cuenta queda en Ventas de hoy.</p>`;
+    $('#btnReabrirPagada').addEventListener('click', () => reabrir(f.id));
+    actualizarTimers();
+    return;
+  }
+
+  const opcionesMesa = OPCIONES_MESA();
+  if (f.mesa && !opcionesMesa.includes(f.mesa)) opcionesMesa.push(f.mesa);
+  const etiquetaEtapa = f.etapa && f.etapa !== 'en_progreso' && f.etapa !== 'pagada'
+    ? `<span class="badge-etapa ${f.etapa}">${ETAPA_LABEL[f.etapa]}</span>` : '';
   cont.innerHTML = `
     <div class="cuenta-head">
       <h2>Cuenta ${f.numero}</h2>
       ${f.reabierta ? `<span class="badge-edicion">${ICONOS.editar} Modo edici&oacute;n &mdash; ya estaba cobrada</span>` : `<span class="hora">abierta ${hora}</span>`}
+      <span class="timer" data-timer="${f.id}"></span>
+      ${etiquetaEtapa}
+      <div class="campo-nota campo-mesa">
+        <label for="mesaSel">Mesa</label>
+        <select id="mesaSel">
+          <option value="">&mdash;</option>
+          ${opcionesMesa.map(m => `<option value="${esc(m)}"${f.mesa === m ? ' selected' : ''}>${esc(m)}</option>`).join('')}
+        </select>
+      </div>
       <div class="campo-nota">
         <label for="nota">Nota</label>
-        <input id="nota" type="text" maxlength="120" placeholder="cliente, mesa..." value="">
+        <input id="nota" type="text" maxlength="120" placeholder="cliente, aclaraciones..." value="">
       </div>
     </div>
     <div class="items-head" aria-hidden="true">
@@ -794,9 +940,19 @@ function renderFactura() {
     </div>
     <div class="acciones">
       <button type="button" class="btn btn-primario" id="btnCobrar">${ICONOS.cobrar} ${f.reabierta ? 'Guardar cambios e imprimir' : 'Cobrar e imprimir'}</button>
+      <button type="button" class="btn btn-secundario" id="btnCocina">${ICONOS.comanda} ${f.etapa === 'en_progreso' ? 'Enviar a cocina' : 'Reimprimir comanda'}</button>
+      ${f.etapa === 'enviada' ? `<button type="button" class="btn btn-secundario" id="btnEntregado">${ICONOS.entregado} Entregado</button>` : ''}
       <button type="button" class="btn btn-secundario" id="btnBorrador">${ICONOS.imprimir} Imprimir borrador</button>
       <button type="button" class="btn btn-peligro" id="btnAnular">${ICONOS.anular} Anular</button>
     </div>`;
+
+  // mesa
+  const mesaSel = $('#mesaSel');
+  mesaSel.addEventListener('change', () => {
+    f.mesa = mesaSel.value;
+    programarGuardado(f);
+    renderTabs(); // refresca el rótulo de mesa en la pestaña
+  });
 
   // nota
   const nota = $('#nota');
@@ -886,10 +1042,14 @@ function renderFactura() {
 
   // acciones
   $('#btnCobrar').addEventListener('click', () => cobrar(f));
+  $('#btnCocina').addEventListener('click', () => enviarCocina(f));
+  const btnEnt = $('#btnEntregado');
+  if (btnEnt) btnEnt.addEventListener('click', () => marcarEntregada(f));
   $('#btnBorrador').addEventListener('click', () => imprimirBorrador(f));
   armarAnular(f);
 
   recalcular(f);
+  actualizarTimers();
 }
 
 function crearFila(f, it) {
@@ -977,6 +1137,7 @@ function recalcular(f) {
 
 /* ---------- guardado ---------- */
 function programarGuardado(f) {
+  if (f.estado !== 'abierta') return; // pagada en retención: nada que autoguardar
   state.pendientes.add(f.id);
   clearTimeout(state.guardados.get(f.id));
   state.guardados.set(f.id, setTimeout(() => guardar(f), 800));
@@ -991,6 +1152,7 @@ async function guardar(f) {
     await api(`/api/facturas/${f.id}`, {method:'PUT', body:{
       items: f.items, descuento_tipo: f.descuento_tipo,
       descuento_valor: f.descuento_valor, nota: f.nota || '',
+      mesa: f.mesa || '',
       propina_tipo: f.propina_tipo || 'porcentaje',
       propina_valor: f.propina_valor || 0,
       metodo_pago: f.metodo_pago || 'Efectivo'
@@ -1008,13 +1170,37 @@ async function cobrar(f) {
   }
   try {
     await guardar(f);
-    await api(`/api/facturas/${f.id}/cerrar`, {method:'POST'});
+    const r = await api(`/api/facturas/${f.id}/cerrar`, {method:'POST'});
     window.open(`/ticket/${f.id}?print=1`, '_blank');
-    state.facturas = state.facturas.filter(x => x.id !== f.id);
-    state.activaId = state.facturas.length ? state.facturas[state.facturas.length-1].id : null;
+    // la pestaña se queda con badge "Pagado" hasta que expire la retención
+    Object.assign(f, r);
     renderTabs(); renderFactura();
     cargarTotalDia();
     toast(`Cuenta ${f.numero} cobrada`);
+  } catch (e) { toast(e.message, true); }
+}
+
+async function enviarCocina(f) {
+  if (!f.items.some(i => (i.descripcion||'').trim() || i.precio_unitario > 0)) {
+    toast('La cuenta está vacía', true); return;
+  }
+  try {
+    await guardar(f);
+    const primera = f.etapa === 'en_progreso';
+    if (primera) {
+      Object.assign(f, await api(`/api/facturas/${f.id}/etapa`, {method:'POST', body:{etapa:'enviada'}}));
+    }
+    window.open(`/comanda/${f.id}?print=1${primera ? '' : '&re=1'}`, '_blank');
+    renderTabs(); renderFactura();
+    if (primera) toast(`Cuenta ${f.numero} enviada a cocina`);
+  } catch (e) { toast(e.message, true); }
+}
+
+async function marcarEntregada(f) {
+  try {
+    Object.assign(f, await api(`/api/facturas/${f.id}/etapa`, {method:'POST', body:{etapa:'entregada'}}));
+    renderTabs(); renderFactura();
+    toast(`Cuenta ${f.numero} entregada`);
   } catch (e) { toast(e.message, true); }
 }
 
@@ -1264,7 +1450,7 @@ function renderVentas() {
     return `<div class="venta-fila">
       <span class="num">${f.numero}</span>
       <span class="hora">${hora}</span>
-      <span class="detalle"><span class="chip">${esc(f.metodo_pago || 'Efectivo')}</span>${detalle}</span>
+      <span class="detalle"><span class="chip">${esc(f.metodo_pago || 'Efectivo')}</span>${f.mesa ? `<span class="chip">${esc(f.mesa)}</span>` : ''}${detalle}</span>
       <span class="tot">${fmt(f.total)}</span>
       <a class="btn-reimprimir" href="/ticket/${f.id}?print=1" target="_blank" aria-label="Reimprimir ticket ${f.numero}">${ICONOS.imprimir}</a>
       <button type="button" class="btn-reimprimir btn-editar" data-id="${f.id}" aria-label="Reabrir y editar ${f.numero}">${ICONOS.editar}</button>
@@ -1448,22 +1634,27 @@ $('#btnVentas').addEventListener('click', () => alternarVentas(!state.vistaVenta
 $('#fechaHoy').textContent = new Date().toLocaleDateString('es-CO',
   {weekday:'long', day:'numeric', month:'long'});
 
+async function refrescarSiInactivo() {
+  // recargar solo si no se está editando nada
+  const editando = document.activeElement && document.activeElement.matches('input, select');
+  if (state.pendientes.size === 0 && !state.vistaVentas && !editando) {
+    try { await cargarFacturas(); } catch {}
+  }
+  cargarTotalDia();
+}
+
 let recargaTimer = null;
 window.addEventListener('focus', () => {
-  // recargar tras un respiro, y solo si no se está editando nada
+  // tras un respiro, para no pisar el click que trajo el foco
   clearTimeout(recargaTimer);
-  recargaTimer = setTimeout(async () => {
-    const editando = document.activeElement && document.activeElement.matches('input');
-    if (state.pendientes.size === 0 && !state.vistaVentas && !editando) {
-      try { await cargarFacturas(); } catch {}
-    }
-    cargarTotalDia();
-  }, 350);
+  recargaTimer = setTimeout(refrescarSiInactivo, 350);
 });
+// dos cajas en la LAN ven los cambios de etapa de la otra sin cambiar de ventana
+setInterval(refrescarSiInactivo, 60000);
 
 (async () => {
   try {
-    await Promise.all([cargarFacturas(), cargarMenu()]);
+    await Promise.all([cargarFacturas(), cargarMenu(), cargarConfig()]);
     await cargarTotalDia();
   } catch (e) {
     toast('No se pudo conectar con el servidor', true);

@@ -9,14 +9,16 @@ import csv
 import html
 import io
 import json
+import os
 import sqlite3
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from flask import Flask, g, jsonify, request, send_file, send_from_directory
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "data" / "pos.db"
+# POS_DB / POS_PORT: solo para entornos de prueba; producción no define nada
+DB_PATH = Path(os.environ.get("POS_DB", BASE_DIR / "data" / "pos.db"))
 POS_HTML = BASE_DIR / "pos.html"
 MENU_JSON = BASE_DIR / "data" / "menu.json"
 
@@ -95,10 +97,20 @@ MIGRACIONES = [
     "ALTER TABLE facturas ADD COLUMN reabierta INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE cierres ADD COLUMN conteo_efectivo TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE cierres ADD COLUMN salidas INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE facturas ADD COLUMN etapa TEXT NOT NULL DEFAULT 'en_progreso'",
+    "ALTER TABLE facturas ADD COLUMN fecha_enviada TEXT",
+    "ALTER TABLE facturas ADD COLUMN fecha_entregada TEXT",
+    "ALTER TABLE facturas ADD COLUMN mesa TEXT NOT NULL DEFAULT ''",
 ]
 
 METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
 TIPOS_MOVIMIENTO = ("Retiro", "Pago proveedor", "Gasto")
+
+NUM_MESAS = 8              # número de mesas del local: editar aquí
+RETENCION_PAGADA_MIN = 10  # minutos que una cuenta pagada sigue visible en caja
+SEMAFORO_MIN = [10, 18]    # verde < 10 min, amarillo 10–18, rojo > 18
+# ciclo operativo de la cuenta; solo avanza, nunca retrocede
+ETAPAS = ("en_progreso", "enviada", "entregada", "pagada")
 
 
 def init_db():
@@ -110,6 +122,9 @@ def init_db():
                 db.execute(sql)
             except sqlite3.OperationalError:
                 pass  # la columna ya existe
+        # una cerrada es por definición pagada (facturas de antes de la columna etapa)
+        db.execute("UPDATE facturas SET etapa='pagada'"
+                   " WHERE estado='cerrada' AND etapa='en_progreso'")
 
 
 def calcular_totales(items, descuento_tipo, descuento_valor,
@@ -158,15 +173,34 @@ def menu():
     return send_file(MENU_JSON, mimetype="application/json")
 
 
+@app.get("/api/config")
+def get_config():
+    return jsonify({
+        "num_mesas": NUM_MESAS,
+        "retencion_pagada_min": RETENCION_PAGADA_MIN,
+        "semaforo_min": SEMAFORO_MIN,
+    })
+
+
 # ---------- API facturas ----------
 
 @app.get("/api/facturas")
 def listar_facturas():
     db = get_db()
-    estado = request.args.get("estado", "abierta")
-    rows = db.execute(
-        "SELECT * FROM facturas WHERE estado = ? ORDER BY id", (estado,)
-    ).fetchall()
+    estado = request.args.get("estado")
+    if estado:
+        rows = db.execute(
+            "SELECT * FROM facturas WHERE estado = ? ORDER BY id", (estado,)
+        ).fetchall()
+    else:
+        # vista de caja: abiertas + pagadas recientes (pestaña "Pagado" en retención)
+        limite = (datetime.now() - timedelta(minutes=RETENCION_PAGADA_MIN)
+                  ).isoformat(timespec="seconds")
+        rows = db.execute(
+            "SELECT * FROM facturas WHERE estado='abierta'"
+            " OR (estado='cerrada' AND fecha_cierre >= ?) ORDER BY id",
+            (limite,),
+        ).fetchall()
     return jsonify([factura_dict(db, r) for r in rows])
 
 
@@ -218,6 +252,9 @@ def guardar_factura(fid):
     except (TypeError, ValueError):
         descuento_valor = 0
     nota = str(data.get("nota") or "").strip()[:120]
+    # texto final de display ("Mesa 3", "Para llevar", ...); laxa a propósito:
+    # si NUM_MESAS baja, las cuentas viejas conservan su rótulo
+    mesa = str(data.get("mesa") or "").strip()[:20]
 
     propina_tipo = data.get("propina_tipo", "porcentaje")
     if propina_tipo not in ("monto", "porcentaje"):
@@ -244,9 +281,9 @@ def guardar_factura(fid):
         )
     db.execute(
         "UPDATE facturas SET descuento_tipo=?, descuento_valor=?, subtotal=?, total=?, nota=?,"
-        " propina_tipo=?, propina_valor=?, propina=?, metodo_pago=? WHERE id=?",
+        " propina_tipo=?, propina_valor=?, propina=?, metodo_pago=?, mesa=? WHERE id=?",
         (descuento_tipo, descuento_valor, subtotal, total, nota,
-         propina_tipo, propina_valor, propina, metodo_pago, fid),
+         propina_tipo, propina_valor, propina, metodo_pago, mesa, fid),
     )
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
@@ -260,12 +297,43 @@ def _cambiar_estado(fid, nuevo):
         return jsonify({"error": "factura no existe"}), 404
     if row["estado"] != "abierta":
         return jsonify({"error": "la factura ya no está abierta"}), 409
-    db.execute(
-        "UPDATE facturas SET estado=?, fecha_cierre=?, reabierta=0 WHERE id=?",
-        (nuevo, datetime.now().isoformat(timespec="seconds"), fid),
-    )
+    if nuevo == "cerrada":
+        # cobrar = pagada; anular no toca la etapa
+        db.execute(
+            "UPDATE facturas SET estado=?, fecha_cierre=?, reabierta=0, etapa='pagada'"
+            " WHERE id=?",
+            (nuevo, datetime.now().isoformat(timespec="seconds"), fid),
+        )
+    else:
+        db.execute(
+            "UPDATE facturas SET estado=?, fecha_cierre=?, reabierta=0 WHERE id=?",
+            (nuevo, datetime.now().isoformat(timespec="seconds"), fid),
+        )
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    return jsonify(factura_dict(db, row))
+
+
+@app.post("/api/facturas/<int:fid>/etapa")
+def cambiar_etapa(fid):
+    db = get_db()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    if row is None:
+        return jsonify({"error": "factura no existe"}), 404
+    if row["estado"] != "abierta":
+        return jsonify({"error": "la factura ya no está abierta"}), 409
+    nueva = (request.get_json(force=True) or {}).get("etapa")
+    if nueva not in ("enviada", "entregada"):
+        return jsonify({"error": "etapa inválida"}), 400
+    # solo se avanza; reimprimir comanda o repetir el toque no retrocede nada
+    if ETAPAS.index(nueva) > ETAPAS.index(row["etapa"]):
+        campo = "fecha_enviada" if nueva == "enviada" else "fecha_entregada"
+        db.execute(
+            f"UPDATE facturas SET etapa=?, {campo}=COALESCE({campo}, ?) WHERE id=?",
+            (nueva, datetime.now().isoformat(timespec="seconds"), fid),
+        )
+        db.commit()
+        row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))
 
 
@@ -287,8 +355,10 @@ def reabrir_factura(fid):
         return jsonify({"error": "factura no existe"}), 404
     if row["estado"] == "abierta":
         return jsonify(factura_dict(db, row))
+    # vuelve a 'entregada': el flujo natural tras corregir es re-cobrar
     db.execute(
-        "UPDATE facturas SET estado='abierta', fecha_cierre=NULL, reabierta=1 WHERE id=?", (fid,))
+        "UPDATE facturas SET estado='abierta', fecha_cierre=NULL, reabierta=1,"
+        " etapa='entregada' WHERE id=?", (fid,))
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))
@@ -333,9 +403,14 @@ def export_csv():
 
     buf = io.StringIO()
     w = csv.writer(buf)
-    w.writerow(["Fecha", "Hora", "Factura", "Cantidad", "Item", "Precio Unitario",
+    w.writerow(["Fecha", "Hora", "Factura", "Mesa", "Cantidad", "Item", "Precio Unitario",
                 "Subtotal Item", "Subtotal Factura", "Descuento", "Total Factura",
-                "Propina", "Total a Pagar", "Metodo Pago", "Nota"])
+                "Propina", "Total a Pagar", "Metodo Pago", "Nota",
+                "Enviada a cocina", "Entregada"])
+
+    def hora_o_vacio(iso):
+        return datetime.fromisoformat(iso).strftime("%H:%M") if iso else ""
+
     total_rango = propinas_rango = 0
     for r in rows:
         f = factura_dict(db, r)
@@ -347,17 +422,20 @@ def export_csv():
         for idx, i in enumerate(f["items"]):
             w.writerow([
                 dt.date().isoformat(), dt.strftime("%H:%M"), f["numero"],
+                (f.get("mesa") or "") if idx == 0 else "",
                 i["cantidad"], i["descripcion"], i["precio_unitario"], i["subtotal"],
                 f["subtotal"] if idx == 0 else "", descuento if idx == 0 else "",
                 f["total"] if idx == 0 else "", propina if idx == 0 else "",
                 f["total_pagar"] if idx == 0 else "",
                 (f.get("metodo_pago") or "Efectivo") if idx == 0 else "",
                 f["nota"] if idx == 0 else "",
+                hora_o_vacio(f.get("fecha_enviada")) if idx == 0 else "",
+                hora_o_vacio(f.get("fecha_entregada")) if idx == 0 else "",
             ])
     w.writerow([])
     w.writerow(["TOTAL", desde if desde == hasta else f"{desde} a {hasta}",
-                f"{len(rows)} facturas", "", "", "", "", "", "", total_rango,
-                propinas_rango, total_rango + propinas_rango, "", ""])
+                f"{len(rows)} facturas", "", "", "", "", "", "", "", total_rango,
+                propinas_rango, total_rango + propinas_rango, "", "", "", ""])
 
     out = io.BytesIO(buf.getvalue().encode("utf-8-sig"))
     nombre = f"ventas_pizzicleta_{desde}" + ("" if desde == hasta else f"_{hasta}") + ".csv"
@@ -625,7 +703,7 @@ td.v {{ text-align:right; white-space:nowrap; }}
 <h1>LA PIZZICLETA</h1>
 <p class="sub">Pizzicleta Social Club</p>
 {borrador}
-<p class="meta">{dt.strftime("%d/%m/%Y %H:%M")}<br>Cuenta {f["numero"]}<br>Pago: {html.escape(f.get("metodo_pago") or "Efectivo")}</p>
+<p class="meta">{dt.strftime("%d/%m/%Y %H:%M")}<br>Cuenta {f["numero"]}{f'<br>{html.escape(f["mesa"])}' if f.get("mesa") else ""}<br>Pago: {html.escape(f.get("metodo_pago") or "Efectivo")}</p>
 {nota}
 <hr class="sep">
 <table>{lineas}</table>
@@ -639,6 +717,74 @@ td.v {{ text-align:right; white-space:nowrap; }}
 </body></html>"""
 
 
+# ---------- comanda de cocina 80mm (sin precios; no modifica la BD) ----------
+
+@app.get("/comanda/<int:fid>")
+def comanda(fid):
+    db = get_db()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    if row is None:
+        return "Factura no encontrada", 404
+    f = factura_dict(db, row)
+    ahora = datetime.now()
+    auto_print = request.args.get("print") == "1"
+
+    lineas = "".join(
+        f'<tr><td class="c">{i["cantidad"]:g}×</td>'
+        f'<td class="d">{html.escape(i["descripcion"])}</td></tr>'
+        for i in f["items"]
+        if (i["descripcion"] or "").strip()
+    )
+    mesa = f'<p class="mesa">{html.escape(f["mesa"])}</p>' if f.get("mesa") else ""
+    nota = f'<p class="nota">{html.escape(f["nota"])}</p>' if f["nota"] else ""
+    # el frontend marca 'enviada' antes de abrir la comanda, así que fecha_enviada
+    # no distingue la primera impresión: la reimpresión la declara la caja con ?re=1
+    reimpresion = '<p class="reimp">— REIMPRESIÓN —</p>' if request.args.get("re") == "1" else ""
+    script = "<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150))</script>" if auto_print else ""
+
+    return f"""<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comanda {f["numero"]}</title>
+<style>
+@font-face {{ font-family:'IBM Plex Mono'; src:url('/static/fonts/ibmplexmono-400.woff2') format('woff2'); font-weight:400; }}
+@font-face {{ font-family:'IBM Plex Mono'; src:url('/static/fonts/ibmplexmono-600.woff2') format('woff2'); font-weight:600; }}
+@page {{ size: 80mm auto; margin: 0; }}
+* {{ margin:0; padding:0; box-sizing:border-box; }}
+html, body {{ background:#fff; }}
+body {{
+  width:72mm; margin:0 auto; padding:4mm 0 8mm;
+  font-family:'IBM Plex Mono', 'Courier New', monospace;
+  font-size:14px; line-height:1.5; color:#000;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+}}
+h1 {{ font-size:15px; font-weight:600; text-align:center; letter-spacing:.14em; }}
+.meta {{ text-align:center; font-size:12px; margin-bottom:1mm; }}
+.mesa {{ text-align:center; font-size:19px; font-weight:600; margin:1mm 0; }}
+.reimp {{ text-align:center; font-weight:600; letter-spacing:.2em; margin:1mm 0; }}
+.sep {{ border:none; border-top:1px dashed #000; margin:2mm 0; }}
+table {{ width:100%; border-collapse:collapse; }}
+td {{ vertical-align:top; padding:2px 0; }}
+td.c {{ width:12mm; font-weight:600; font-size:16px; }}
+td.d {{ font-size:15px; word-break:break-word; }}
+.nota {{ text-align:center; font-size:13px; font-weight:600; margin-top:2mm; }}
+@media screen {{
+  body {{ box-shadow:0 2px 24px rgba(0,0,0,.18); margin:24px auto; padding:6mm 4mm 10mm; }}
+  html {{ background:#e8e4dd; }}
+}}
+</style></head><body>
+<h1>COMANDA · COCINA</h1>
+{reimpresion}
+<p class="meta">Cuenta {f["numero"]} &middot; {ahora.strftime("%d/%m/%Y %H:%M")}</p>
+{mesa}
+<hr class="sep">
+<table>{lineas}</table>
+{nota}
+{script}
+</body></html>"""
+
+
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port=8085)
+    app.run(host="0.0.0.0", port=int(os.environ.get("POS_PORT", 8085)))
