@@ -1579,13 +1579,16 @@ function abrirConteo() {
   });
 }
 
-/* calculadora de vuelto: cuánto entrega el cliente y cuánto se le devuelve */
+/* calculadora de vuelto: el cliente decide si paga con o sin propina,
+   se marca qué billete entrega y sale la devuelta */
 function abrirVuelto(f) {
-  const pagar = calcularLocal(f).pagar;
+  const t = calcularLocal(f);
+  const hayProp = t.propina > 0;
+  let conPropina = true; // objetivo del cobro; el cliente decide
+  const objetivo = () => (hayProp && !conPropina) ? t.total : t.pagar;
+
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
-  const RAPIDOS = [10000, 20000, 50000, 100000].filter(b => b >= pagar);
-
   overlay.innerHTML = `
     <div class="modal" role="dialog" aria-modal="true" aria-label="Calcular vuelto">
       <div class="modal-head">
@@ -1593,11 +1596,15 @@ function abrirVuelto(f) {
         <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
       </div>
       <div class="modal-cuerpo">
-        <div class="vuelto-pagar"><span class="lbl">A pagar (con propina)</span><span class="val">${fmt(pagar)}</span></div>
-        <div class="metodos vuelto-pills">
-          <button type="button" class="metodo" data-monto="${pagar}">Exacto</button>
-          ${RAPIDOS.map(b => `<button type="button" class="metodo" data-monto="${b}">${fmt(b)}</button>`).join('')}
+        <div class="vuelto-pagar">
+          <span class="lbl" id="vueltoLbl">A pagar${hayProp ? ' (con propina)' : ''}</span>
+          <span class="val" id="vueltoObjetivo">${fmt(objetivo())}</span>
         </div>
+        ${hayProp ? `<div class="metodos vuelto-pills" id="vueltoProp">
+          <button type="button" class="metodo on" data-prop="1">Con propina ${fmt(t.pagar)}</button>
+          <button type="button" class="metodo" data-prop="0">Sin propina ${fmt(t.total)}</button>
+        </div>` : ''}
+        <div class="metodos vuelto-pills" id="vueltoRapidos"></div>
         <div class="vuelto-campo">
           <label for="vueltoRecibido">El cliente entrega</label>
           <input id="vueltoRecibido" inputmode="numeric" placeholder="0">
@@ -1619,7 +1626,7 @@ function abrirVuelto(f) {
       res.innerHTML = '<span class="lbl">Devuelta</span><span class="val">&mdash;</span>';
       return;
     }
-    const dif = recibido - pagar;
+    const dif = recibido - objetivo();
     if (dif >= 0) {
       res.className = 'vuelto-res ok';
       res.innerHTML = `<span class="lbl">Devuelta</span><span class="val">${fmt(dif)}</span>`;
@@ -1629,23 +1636,56 @@ function abrirVuelto(f) {
     }
   };
 
-  inp.addEventListener('input', () => { inp.value = fmtInputPrecio(inp.value); calcular(); });
-  overlay.querySelectorAll('.vuelto-pills .metodo').forEach(b => {
+  const pintarRapidos = () => {
+    const obj = objetivo();
+    const rapidos = [10000, 20000, 50000, 100000].filter(b => b >= obj);
+    const cont = overlay.querySelector('#vueltoRapidos');
+    cont.innerHTML =
+      `<button type="button" class="metodo" data-monto="${obj}">Exacto</button>` +
+      rapidos.map(b => `<button type="button" class="metodo" data-monto="${b}">${fmt(b)}</button>`).join('');
+    cont.querySelectorAll('.metodo').forEach(b => {
+      b.addEventListener('click', () => {
+        inp.value = fmtInputPrecio(b.dataset.monto);
+        cont.querySelectorAll('.metodo').forEach(x => x.classList.toggle('on', x === b));
+        calcular();
+      });
+    });
+  };
+
+  const propCont = overlay.querySelector('#vueltoProp');
+  if (propCont) propCont.querySelectorAll('.metodo').forEach(b => {
     b.addEventListener('click', () => {
-      inp.value = fmtInputPrecio(b.dataset.monto);
-      overlay.querySelectorAll('.vuelto-pills .metodo').forEach(x =>
-        x.classList.toggle('on', x === b));
+      conPropina = b.dataset.prop === '1';
+      propCont.querySelectorAll('.metodo').forEach(x => x.classList.toggle('on', x === b));
+      overlay.querySelector('#vueltoLbl').textContent = 'A pagar' + (conPropina ? ' (con propina)' : ' (sin propina)');
+      overlay.querySelector('#vueltoObjetivo').textContent = fmt(objetivo());
+      pintarRapidos();
       calcular();
     });
   });
 
-  const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
+  inp.addEventListener('input', () => { inp.value = fmtInputPrecio(inp.value); calcular(); });
+
+  const cerrar = () => {
+    // si el cliente decidió no pagar propina, se quita de la cuenta para que
+    // el cierre no espere plata que no entró
+    if (hayProp && !conPropina && f.estado === 'abierta') {
+      f.propina_valor = 0;
+      recalcular(f);
+      programarGuardado(f);
+      renderFactura();
+      toast(`Propina quitada — a pagar ${fmt(calcularLocal(f).pagar)}`);
+    }
+    overlay.remove();
+    document.removeEventListener('keydown', alEscape);
+  };
   const alEscape = e => { if (e.key === 'Escape') cerrar(); };
   document.addEventListener('keydown', alEscape);
   overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(); });
   overlay.querySelector('.cerrar-modal').addEventListener('click', cerrar);
   overlay.querySelector('#btnVueltoListo').addEventListener('click', cerrar);
   document.body.appendChild(overlay);
+  pintarRapidos();
   inp.focus();
 }
 
