@@ -1579,6 +1579,9 @@ function mostrarResumenCierre() {
   const c = calcularCierre();
   const f = c.f, esp = c.esp;
   const propinas = state.ventasVista?.propinas_dia || 0;
+  const propPagadas = (state.movimientos?.movimientos || [])
+    .filter(m => m.tipo === 'Propinas').reduce((s, m) => s + (m.monto || 0), 0);
+  const propPendiente = propinas - propPagadas;
   const aGerencia = Math.max((f.efectivo || 0) - (f.base || 0), 0);
   const esHoy = state.fechaVentas === hoyISO();
   const fechaLegible = new Date(state.fechaVentas + 'T12:00:00')
@@ -1619,7 +1622,9 @@ function mostrarResumenCierre() {
         ${fila('Total contado (sin la base)', fmt(c.totalFinal))}
         ${fila('Seg&uacute;n POS (ya descontadas las salidas)', fmt(c.esperadoTotal))}
         <div class="res-fila"><span class="lbl">Diferencia</span>${difTxt}</div>
-        ${fila('Propinas del d&iacute;a &mdash; por entregar al equipo', fmt(propinas), 'res-propinas')}
+        ${fila('Propinas recibidas en el d&iacute;a', fmt(propinas))}
+        ${propPagadas ? fila('Propinas ya entregadas al equipo', '&minus;' + fmt(propPagadas)) : ''}
+        ${fila('Propinas por entregar al equipo', fmt(propPendiente), 'res-propinas')}
 
         <div class="den-grupo">Reparto de la plata</div>
         ${fila('Queda en Caja local (base para el d&iacute;a siguiente)', fmt(f.base || 0))}
@@ -1661,6 +1666,12 @@ function renderVentas() {
     </div>`;
   }).join('');
 
+  // propinas: recibidas en las ventas vs entregadas al equipo (salidas tipo Propinas)
+  const propRecibidas = v.propinas_dia || 0;
+  const propPagadas = (state.movimientos?.movimientos || [])
+    .filter(m => m.tipo === 'Propinas').reduce((s, m) => s + (m.monto || 0), 0);
+  const propPendiente = propRecibidas - propPagadas;
+
   const tituloDia = esHoy ? 'Ventas de hoy'
     : 'Ventas del ' + new Date(state.fechaVentas + 'T12:00:00')
         .toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'});
@@ -1681,9 +1692,19 @@ function renderVentas() {
       <span class="val">${fmt(v.total_dia)}</span>
     </div>
     <div class="tot-linea" style="margin-top:8px">
-      <span class="lbl">Propinas del d&iacute;a</span>
-      <span class="val prop-monto">+${fmt(v.propinas_dia || 0)}</span>
+      <span class="lbl">Propinas recibidas</span>
+      <span class="val prop-monto">+${fmt(propRecibidas)}</span>
     </div>
+    ${propPagadas ? `<div class="tot-linea">
+      <span class="lbl">Propinas entregadas al equipo</span>
+      <span class="val">&minus;${fmt(propPagadas)}</span>
+    </div>` : ''}
+    ${(propRecibidas || propPagadas) ? `<div class="tot-linea">
+      <span class="lbl">Propinas por entregar</span>
+      <span class="val prop-monto">${fmt(propPendiente)}
+        ${esHoy && propPendiente > 0 ? `<button type="button" class="btn-link" id="btnPagarPropinas">Pagar al equipo</button>` : ''}
+      </span>
+    </div>` : ''}
     <div class="desglose">
       ${Object.entries(v.por_metodo || {}).map(([m, d]) => `
         <div class="tot-linea">
@@ -1825,7 +1846,7 @@ function renderVentas() {
   if (esHoy) {
     if (!state.movTipo) state.movTipo = 'Retiro';
     const tiposCont = $('#movTipos');
-    for (const t of ['Retiro', 'Pago proveedor', 'Gasto']) {
+    for (const t of ['Retiro', 'Pago proveedor', 'Gasto', 'Propinas']) {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'metodo' + (state.movTipo === t ? ' on' : '');
@@ -1863,6 +1884,22 @@ function renderVentas() {
     movMonto.addEventListener('input', () => { movMonto.value = fmtInputPrecio(movMonto.value); });
     movMonto.addEventListener('keydown', e => { if (e.key === 'Enter') registrarMovimiento(); });
     $('#btnRegistrarMov').addEventListener('click', registrarMovimiento);
+
+    // pago de propinas al equipo: prellena la salida y deja elegir el origen
+    const btnProp = $('#btnPagarPropinas');
+    if (btnProp) btnProp.addEventListener('click', () => {
+      state.movTipo = 'Propinas';
+      tiposCont.querySelectorAll('.metodo').forEach(x => {
+        const on = x.textContent === 'Propinas';
+        x.classList.toggle('on', on);
+        x.setAttribute('aria-pressed', String(on));
+      });
+      $('#movConcepto').value = 'Propinas del equipo';
+      movMonto.value = fmtInputPrecio(String(propPendiente));
+      movMonto.scrollIntoView({behavior:'smooth', block:'center'});
+      movMonto.focus();
+      toast('Elegí de dónde sale la plata y tocá Registrar');
+    });
   }
   const g = state.cierre?.cierre;
   $('#cierreGuardado').textContent = g

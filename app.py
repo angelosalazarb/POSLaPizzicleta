@@ -111,7 +111,7 @@ MIGRACIONES = [
 ]
 
 METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
-TIPOS_MOVIMIENTO = ("Retiro", "Pago proveedor", "Gasto")
+TIPOS_MOVIMIENTO = ("Retiro", "Pago proveedor", "Gasto", "Propinas")
 ORIGENES_MOVIMIENTO = ("Efectivo", "Transferencia")  # de dónde sale la plata
 
 NUM_MESAS = 8              # número de mesas del local: editar aquí
