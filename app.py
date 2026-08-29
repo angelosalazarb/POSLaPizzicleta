@@ -56,6 +56,12 @@ CREATE TABLE IF NOT EXISTS movimientos (
     creado_en TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_movimientos_fecha ON movimientos(fecha);
+CREATE TABLE IF NOT EXISTS aperturas (
+    fecha TEXT PRIMARY KEY,
+    base INTEGER NOT NULL DEFAULT 0,
+    conteo_efectivo TEXT NOT NULL DEFAULT '',
+    guardado_en TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS cierres (
     fecha TEXT PRIMARY KEY,
     base INTEGER NOT NULL DEFAULT 0,
@@ -510,7 +516,7 @@ def eliminar_movimiento(mid):
     return jsonify({"ok": True})
 
 
-# ---------- cierre de caja ----------
+# ---------- apertura y cierre de caja ----------
 
 def _cierre_dict(row):
     if row is None:
@@ -521,6 +527,50 @@ def _cierre_dict(row):
     except ValueError:
         c["conteo_efectivo"] = {}
     return c
+
+
+def _limpiar_conteo(conteo):
+    """{denominación: cantidad} con solo enteros positivos."""
+    if not isinstance(conteo, dict):
+        return {}
+    return {str(k): int(v) for k, v in conteo.items()
+            if str(k).isdigit() and isinstance(v, (int, float)) and v > 0}
+
+
+@app.get("/api/apertura")
+def get_apertura():
+    db = get_db()
+    fecha = request.args.get("fecha") or date.today().isoformat()
+    row = db.execute("SELECT * FROM aperturas WHERE fecha = ?", (fecha,)).fetchone()
+    anterior = db.execute(
+        "SELECT base FROM cierres WHERE fecha < ? ORDER BY fecha DESC LIMIT 1",
+        (fecha,),
+    ).fetchone()
+    return jsonify({"fecha": fecha, "apertura": _cierre_dict(row),
+                    "base_sugerida": anterior["base"] if anterior else 0})
+
+
+@app.post("/api/apertura")
+def guardar_apertura():
+    db = get_db()
+    data = request.get_json(force=True)
+    fecha = data.get("fecha") or date.today().isoformat()
+    try:
+        base = max(int(data.get("base") or 0), 0)
+    except (TypeError, ValueError):
+        base = 0
+    conteo = _limpiar_conteo(data.get("conteo_efectivo"))
+    db.execute(
+        "INSERT INTO aperturas (fecha, base, conteo_efectivo, guardado_en)"
+        " VALUES (?,?,?,?)"
+        " ON CONFLICT(fecha) DO UPDATE SET base=excluded.base,"
+        " conteo_efectivo=excluded.conteo_efectivo, guardado_en=excluded.guardado_en",
+        (fecha, base, json.dumps(conteo),
+         datetime.now().isoformat(timespec="seconds")),
+    )
+    db.commit()
+    row = db.execute("SELECT * FROM aperturas WHERE fecha = ?", (fecha,)).fetchone()
+    return jsonify({"fecha": fecha, "apertura": _cierre_dict(row)})
 
 
 def _esperados_dia(db, fecha):
@@ -549,14 +599,19 @@ def get_cierre():
     fecha = request.args.get("fecha") or date.today().isoformat()
     esperados = _esperados_dia(db, fecha)
     row = db.execute("SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()
-    # base fija: sugerir la del último cierre anterior (la caja queda con base para el día siguiente)
+    # base sugerida: la apertura registrada ese día; si no hay, la base del
+    # último cierre anterior (base fija que quedó para el día siguiente)
+    apertura = db.execute(
+        "SELECT base FROM aperturas WHERE fecha = ?", (fecha,)).fetchone()
     anterior = db.execute(
         "SELECT base FROM cierres WHERE fecha < ? ORDER BY fecha DESC LIMIT 1",
         (fecha,),
     ).fetchone()
+    base_sugerida = (apertura["base"] if apertura
+                     else anterior["base"] if anterior else 0)
     return jsonify({"fecha": fecha, "esperados": esperados,
                     "cierre": _cierre_dict(row),
-                    "base_sugerida": anterior["base"] if anterior else 0})
+                    "base_sugerida": base_sugerida})
 
 
 @app.post("/api/cierre")
@@ -576,11 +631,7 @@ def guardar_cierre():
     datafono = entero("datafono_contado")
     transf = entero("transferencias_contado")
 
-    conteo = data.get("conteo_efectivo")
-    if not isinstance(conteo, dict):
-        conteo = {}
-    conteo = {str(k): int(v) for k, v in conteo.items()
-              if str(k).isdigit() and isinstance(v, (int, float)) and v > 0}
+    conteo = _limpiar_conteo(data.get("conteo_efectivo"))
 
     esp = _esperados_dia(db, fecha)
     total_final = (efectivo - base) + datafono + transf

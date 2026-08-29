@@ -490,6 +490,13 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1080px; }
 }
 .modal-total .lbl { font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
 .modal-total .val { font-family:var(--font-mono); font-weight:600; font-size:24px; }
+.modal-sub { padding:0 22px 4px; font-size:13px; color:var(--muted); }
+.btn-link {
+  color:var(--azul-tx); font-weight:600; text-decoration:underline;
+  padding:2px 4px; border-radius:6px;
+}
+.btn-link:hover { color:var(--tinta); background:var(--azul-dim); }
+
 /* resumen del cierre */
 .res-fecha { font-size:13px; color:var(--muted); padding-top:10px; }
 .res-fila {
@@ -768,7 +775,7 @@ function cambiarFechaVentas(fecha) {
   if (!fecha || fecha === state.fechaVentas) return;
   state.fechaVentas = fecha;
   // cargarCierre recarga el formulario del cierre porque la fecha cambió (cierreFormFecha)
-  Promise.all([cargarVentasVista(), cargarCierre(), cargarMovimientos()])
+  Promise.all([cargarVentasVista(), cargarCierre(), cargarMovimientos(), cargarApertura()])
     .then(renderVentas);
 }
 
@@ -1302,7 +1309,7 @@ function alternarVentas(mostrar) {
   $('#btnVentas').classList.toggle('activo', mostrar);
   $('#btnVentas').setAttribute('aria-pressed', String(mostrar));
   renderTabs();
-  if (mostrar) { cargarTotalDia(); cargarVentasVista(); cargarCierre(); cargarMovimientos(); renderVentas(); }
+  if (mostrar) { cargarTotalDia(); cargarVentasVista(); cargarCierre(); cargarMovimientos(); cargarApertura(); renderVentas(); }
 }
 
 /* ---------- retiros y pagos ---------- */
@@ -1403,11 +1410,8 @@ function actualizarCierreCalculos() {
   pintarDif($('#cDifTotal'), c.difTotal);
 }
 
-/* modal de conteo de efectivo por denominaciones */
-function abrirConteo() {
-  if (!state.conteoEfectivo) state.conteoEfectivo = {};
-  const conteo = state.conteoEfectivo;
-
+/* modal genérico de conteo por denominaciones (cierre y apertura) */
+function modalConteo({titulo, subtitulo = '', conteo, boton, onAceptar}) {
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   const filas = Object.entries(DENOMINACIONES).map(([grupo, dens]) =>
@@ -1423,18 +1427,19 @@ function abrirConteo() {
   ).join('');
 
   overlay.innerHTML = `
-    <div class="modal" role="dialog" aria-modal="true" aria-label="Conteo de efectivo">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="${titulo}">
       <div class="modal-head">
-        <h3>Conteo de efectivo</h3>
+        <h3>${titulo}</h3>
         <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
       </div>
+      ${subtitulo ? `<p class="modal-sub">${subtitulo}</p>` : ''}
       <div class="modal-cuerpo">${filas}</div>
       <div class="modal-total">
         <span class="lbl">Total contado</span>
         <span class="val" id="conteoTotal">$0</span>
       </div>
       <div class="modal-acciones">
-        <button type="button" class="btn btn-primario" id="btnUsarTotal">Usar total</button>
+        <button type="button" class="btn btn-primario" id="btnUsarTotal">${boton}</button>
         <button type="button" class="btn-limpiar" id="btnLimpiarConteo">Limpiar</button>
       </div>
     </div>`;
@@ -1475,20 +1480,74 @@ function abrirConteo() {
     actualizar();
   });
 
-  overlay.querySelector('#btnUsarTotal').addEventListener('click', () => {
-    const total = totalConteo();
-    if (!state.cierreForm) state.cierreForm = {base:0, efectivo:0, datafono:0, transferencias:0};
-    state.cierreForm.efectivo = total;
-    const inp = $('#cEf');
-    if (inp) inp.value = total ? fmtInputPrecio(String(total)) : '';
-    actualizarCierreCalculos();
-    cerrar();
-    toast(`Efectivo contado: ${fmt(total)}`);
+  overlay.querySelector('#btnUsarTotal').addEventListener('click', async () => {
+    try {
+      await onAceptar(totalConteo());
+      cerrar();
+    } catch (e) { toast(e.message, true); }
   });
 
   document.body.appendChild(overlay);
   actualizar();
   overlay.querySelector('input[data-den]').focus();
+}
+
+/* conteo del efectivo al cierre */
+function abrirConteo() {
+  if (!state.conteoEfectivo) state.conteoEfectivo = {};
+  modalConteo({
+    titulo: 'Conteo de efectivo',
+    subtitulo: 'Todo el efectivo de la caja al cierre, incluida la base.',
+    conteo: state.conteoEfectivo,
+    boton: 'Usar total',
+    onAceptar: total => {
+      if (!state.cierreForm) state.cierreForm = {base:0, efectivo:0, datafono:0, transferencias:0};
+      state.cierreForm.efectivo = total;
+      const inp = $('#cEf');
+      if (inp) inp.value = total ? fmtInputPrecio(String(total)) : '';
+      actualizarCierreCalculos();
+      toast(`Efectivo contado: ${fmt(total)}`);
+    }
+  });
+}
+
+/* ---------- apertura de caja ---------- */
+async function cargarApertura() {
+  try {
+    const fecha = state.fechaVentas;
+    const a = await api('/api/apertura?fecha=' + fecha);
+    if (fecha !== state.fechaVentas) return; // el usuario ya cambió de día
+    state.apertura = a;
+    if (state.vistaVentas) renderVentas();
+  } catch {}
+}
+
+function abrirModalApertura() {
+  const guardada = state.apertura?.apertura;
+  const conteo = guardada?.conteo_efectivo ? {...guardada.conteo_efectivo} : {};
+  const sugerida = state.apertura?.base_sugerida || 0;
+  const esHoy = state.fechaVentas === hoyISO();
+  modalConteo({
+    titulo: 'Apertura de caja',
+    subtitulo: 'Cont&aacute; la base con la que abre la caja'
+      + (esHoy ? '' : ` (${state.fechaVentas})`)
+      + (sugerida && !guardada ? `. Del &uacute;ltimo cierre quedaron ${fmt(sugerida)}.` : '.')
+      + ' Si no pod&eacute;s ahora, cerr&aacute; esta ventana y hacelo luego desde Ventas.',
+    conteo,
+    boton: 'Guardar apertura',
+    onAceptar: async total => {
+      const r = await api('/api/apertura', {method:'POST', body:{
+        fecha: state.fechaVentas, base: total, conteo_efectivo: conteo
+      }});
+      state.apertura = {...(state.apertura || {}), apertura: r.apertura};
+      // la base del cierre parte de la apertura del día
+      if (state.cierreFormFecha === state.fechaVentas && state.cierreForm) {
+        state.cierreForm.base = total;
+      }
+      if (state.vistaVentas) renderVentas();
+      toast(`Apertura guardada: base ${fmt(total)}`);
+    }
+  });
 }
 
 async function guardarCierre() {
@@ -1642,6 +1701,9 @@ function renderVentas() {
     <div class="cierre">
       <h3>Cierre de caja</h3>
       <p class="sub-cierre">Contá la plata y compar&aacute; contra lo registrado. El "seg&uacute;n POS" incluye propinas y ya descuenta las salidas de arriba.</p>
+      <p class="sub-cierre">${state.apertura?.apertura
+        ? `Caja abierta con base <strong>${fmt(state.apertura.apertura.base)}</strong> (conteo guardado a las ${new Date(state.apertura.apertura.guardado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'})}). <button type="button" class="btn-link" id="btnApertura">Editar apertura</button>`
+        : `Sin apertura registrada ${esHoy ? 'hoy' : 'ese d&iacute;a'}. <button type="button" class="btn-link" id="btnApertura">Registrar apertura de caja</button>`}</p>
       <div class="cierre-fila">
         <label for="cBase">Base de inicio<small>con lo que abri&oacute; la caja</small></label>
         <input id="cBase" inputmode="numeric" placeholder="0" data-campo="base">
@@ -1730,6 +1792,7 @@ function renderVentas() {
   });
   $('#btnGuardarCierre').addEventListener('click', guardarCierre);
   $('#btnConteo').addEventListener('click', abrirConteo);
+  $('#btnApertura').addEventListener('click', abrirModalApertura);
 
   // retiros y pagos: lista, selector de tipo y registro (registro solo el día en curso)
   const movs = state.movimientos?.movimientos || [];
@@ -1815,8 +1878,10 @@ setInterval(refrescarSiInactivo, 60000);
 
 (async () => {
   try {
-    await Promise.all([cargarFacturas(), cargarMenu(), cargarConfig()]);
+    await Promise.all([cargarFacturas(), cargarMenu(), cargarConfig(), cargarApertura()]);
     await cargarTotalDia();
+    // primera apertura del día: pedir la base contada por denominaciones
+    if (!state.apertura?.apertura) abrirModalApertura();
   } catch (e) {
     toast('No se pudo conectar con el servidor', true);
   }
