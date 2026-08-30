@@ -110,6 +110,7 @@ MIGRACIONES = [
     "ALTER TABLE movimientos ADD COLUMN origen TEXT NOT NULL DEFAULT 'Efectivo'",
     "ALTER TABLE cierres ADD COLUMN base_siguiente INTEGER",
     "ALTER TABLE cierres ADD COLUMN conteo_base_siguiente TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE facturas ADD COLUMN archivada INTEGER NOT NULL DEFAULT 0",
 ]
 
 METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
@@ -210,7 +211,7 @@ def listar_facturas():
         hoy = date.today().isoformat()
         rows = db.execute(
             "SELECT * FROM facturas WHERE estado='abierta'"
-            " OR (estado='cerrada' AND ("
+            " OR (estado='cerrada' AND archivada=0 AND ("
             "   (etapa NOT IN ('entregada','pagada') AND date(fecha_cierre) >= ?)"
             "   OR COALESCE(MAX(fecha_entregada, fecha_cierre), fecha_cierre) >= ?"
             " )) ORDER BY id",
@@ -358,6 +359,27 @@ def anular_factura(fid):
     return _cambiar_estado(fid, "anulada")
 
 
+@app.post("/api/facturas/<int:fid>/archivar")
+def archivar_factura(fid):
+    """Cerrar cuenta: saca la pestaña de la caja ya, sin esperar la retención.
+    Solo para cuentas pagadas; cerrar implica que también quedó entregada."""
+    db = get_db()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    if row is None:
+        return jsonify({"error": "factura no existe"}), 404
+    if row["estado"] != "cerrada":
+        return jsonify({"error": "solo se cierra una cuenta ya pagada"}), 409
+    db.execute(
+        "UPDATE facturas SET archivada=1,"
+        " etapa=CASE WHEN etapa IN ('entregada','pagada') THEN etapa ELSE 'entregada' END,"
+        " fecha_entregada=COALESCE(fecha_entregada, ?) WHERE id=?",
+        (datetime.now().isoformat(timespec="seconds"), fid),
+    )
+    db.commit()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    return jsonify(factura_dict(db, row))
+
+
 @app.post("/api/facturas/<int:fid>/reabrir")
 def reabrir_factura(fid):
     db = get_db()
@@ -367,9 +389,10 @@ def reabrir_factura(fid):
     if row["estado"] == "abierta":
         return jsonify(factura_dict(db, row))
     # la etapa se conserva; solo el legado etapa='pagada' se normaliza a
-    # 'entregada' para que el re-cobro fluya normal
+    # 'entregada' para que el re-cobro fluya normal; reabrir des-archiva
     db.execute(
         "UPDATE facturas SET estado='abierta', fecha_cierre=NULL, reabierta=1,"
+        " archivada=0,"
         " etapa=CASE WHEN etapa='pagada' THEN 'entregada' ELSE etapa END"
         " WHERE id=?", (fid,))
     db.commit()

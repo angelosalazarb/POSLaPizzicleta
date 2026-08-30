@@ -969,11 +969,13 @@ function renderFactura() {
         ${f.etapa === 'enviada' ? `<button type="button" class="btn btn-primario" id="btnEntregadoRO">${ICONOS.entregado} Entregado</button>` : ''}
         <a class="btn btn-secundario" href="/ticket/${f.id}?print=1" target="_blank">${ICONOS.imprimir} Reimprimir ticket</a>
         <button type="button" class="btn btn-secundario" id="btnReabrirPagada">${ICONOS.editar} Reabrir para editar</button>
+        <button type="button" class="btn btn-secundario" id="btnCerrarCuenta">${ICONOS.cerrarX} Cerrar cuenta</button>
       </div>
       <p class="nota-retencion">${entregadaYa
-        ? `Pagada y entregada: la pesta&ntilde;a desaparece sola a los ${state.config.retencion_pagada_min} min. La cuenta queda en Ventas de hoy.`
-        : 'Pagada. La pesta&ntilde;a sigue aqu&iacute; hasta marcarla <strong>Entregado</strong>.'}</p>`;
+        ? `Pagada y entregada: la pesta&ntilde;a desaparece sola a los ${state.config.retencion_pagada_min} min, o ci&eacute;rrala ya con <strong>Cerrar cuenta</strong>. Queda en Ventas de hoy.`
+        : 'Pagada. La pesta&ntilde;a sigue aqu&iacute; hasta marcarla <strong>Entregado</strong> (o cerrala con <strong>Cerrar cuenta</strong> si ya se entreg&oacute;).'}</p>`;
     $('#btnReabrirPagada').addEventListener('click', () => reabrir(f.id));
+    $('#btnCerrarCuenta').addEventListener('click', () => cerrarCuenta(f));
     const cocinaRO = $('#btnCocinaRO');
     if (cocinaRO) cocinaRO.addEventListener('click', () => enviarCocina(f));
     const entRO = $('#btnEntregadoRO');
@@ -1314,6 +1316,18 @@ async function enviarCocina(f) {
     window.open(`/comanda/${f.id}?print=1${primera ? '' : '&re=1'}`, '_blank');
     renderTabs(); renderFactura();
     if (primera) toast(`Cuenta ${f.numero} enviada a cocina`);
+  } catch (e) { toast(e.message, true); }
+}
+
+async function cerrarCuenta(f) {
+  try {
+    await api(`/api/facturas/${f.id}/archivar`, {method:'POST'});
+    state.facturas = state.facturas.filter(x => x.id !== f.id);
+    if (state.activaId === f.id) {
+      state.activaId = state.facturas.length ? state.facturas[state.facturas.length-1].id : null;
+    }
+    renderTabs(); renderFactura();
+    toast(`Cuenta ${f.numero} cerrada`);
   } catch (e) { toast(e.message, true); }
 }
 
