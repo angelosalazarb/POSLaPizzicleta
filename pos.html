@@ -243,12 +243,24 @@ input, select { font:inherit; color:inherit; }
   overflow-y:auto; padding:2px 4px 2px 2px;
 }
 .prod-card {
+  position:relative;
   display:flex; flex-direction:column; text-align:left;
   border:1.5px solid var(--linea); border-radius:12px;
   background:var(--card); overflow:hidden;
   transition:transform 90ms ease-out, border-color var(--trans), box-shadow var(--trans);
 }
 .prod-card:hover { border-color:var(--tinta); box-shadow:var(--sombra); }
+/* nombre completo al pasar el mouse (los nombres largos van recortados a 2 líneas) */
+.prod-card::after {
+  content:attr(data-tip);
+  position:absolute; inset:0; z-index:2;
+  padding:10px 11px;
+  background:rgba(26,26,26,.94); color:var(--papel);
+  font-size:12.5px; font-weight:600; line-height:1.4;
+  opacity:0; pointer-events:none; overflow:hidden;
+  transition:opacity 120ms ease-out 180ms;
+}
+.prod-card:hover::after, .prod-card:focus-visible::after { opacity:1; }
 .prod-card:active { transform:scale(.95); }
 .prod-card .foto {
   display:flex; align-items:center; justify-content:center;
@@ -1023,7 +1035,7 @@ function armarPanelMenu(f) {
   busca.value = state.buscaProd || '';
 
   const cardHTML = (p, i) => `
-    <button type="button" class="prod-card" data-i="${i}" aria-label="Agregar ${esc(p.nombre)}">
+    <button type="button" class="prod-card" data-i="${i}" data-tip="${esc(p.nombre)} &middot; ${fmt(p.precio)}" aria-label="Agregar ${esc(p.nombre)}">
       <span class="foto" style="background:${tinteCat(p.categoria)}">${p.imagen
         ? `<img src="${esc(p.imagen)}" alt="" loading="lazy">` : emojiCat(p.categoria)}</span>
       <span class="info">
