@@ -86,6 +86,28 @@ input, select { font:inherit; color:inherit; }
 .btn-ventas.activo { background:var(--tinta); color:var(--papel); }
 .btn-ventas svg { width:19px; height:19px; }
 
+/* selector de sección (Mesas / Pedidos) junto al logo */
+.secciones {
+  display:flex; margin-left:10px;
+  border:1.5px solid var(--tinta); border-radius:100px;
+  background:var(--card); overflow:hidden;
+}
+.seccion {
+  display:flex; align-items:center; gap:8px;
+  min-height:48px; padding:0 22px;
+  font-weight:600; font-size:15px; color:var(--muted);
+  transition:background var(--trans), color var(--trans);
+}
+.seccion + .seccion { border-left:1.5px solid var(--linea); }
+.seccion:hover { background:var(--azul-dim); color:var(--tinta); }
+.seccion.on { background:var(--tinta); color:var(--papel); }
+.seccion .cnt {
+  font-family:var(--font-mono); font-size:12px; font-weight:600;
+  min-width:22px; padding:1px 8px; border-radius:100px; text-align:center;
+  background:var(--naranja); color:var(--tinta);
+}
+.seccion .cnt:empty { display:none; }
+
 /* ---------- tablero (mesas + kanban) ---------- */
 .tablero { display:flex; flex-direction:column; gap:14px; padding-top:20px; }
 .tab-head { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
@@ -730,6 +752,10 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
     <h1>La Pizzicleta</h1>
     <div class="lema">Caja &middot; Sede Sur</div>
   </div>
+  <nav class="secciones" aria-label="Secciones">
+    <button type="button" class="seccion" id="secMesas">Mesas</button>
+    <button type="button" class="seccion" id="secPedidos">Pedidos <span class="cnt" id="secPedidosCnt"></span></button>
+  </nav>
   <div class="derecha">
     <span class="fecha-hoy" id="fechaHoy"></span>
     <div class="pill-dia">
@@ -824,6 +850,7 @@ const state = {
   facturas: [],        // abiertas + pagadas recientes, del servidor
   activaId: null,
   vista: 'tablero',    // 'tablero' | 'cuenta' | 'ventas'
+  seccion: 'mesas',    // sección activa del tablero: 'mesas' | 'pedidos'
   guardados: new Map(), // id -> timeout de debounce
   pendientes: new Set(), // ids con cambios sin guardar
   config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]},
@@ -1102,9 +1129,27 @@ function setVista(v) {
   $('#vistaVentas').hidden = v !== 'ventas';
   $('#btnVentas').classList.toggle('activo', v === 'ventas');
   $('#btnVentas').setAttribute('aria-pressed', String(v === 'ventas'));
+  pintarSecciones();
   if (v === 'tablero') renderTablero();
   else if (v === 'cuenta') renderFactura();
   else { cargarTotalDia(); cargarVentasVista(); cargarCierre(); cargarMovimientos(); cargarApertura(); renderVentas(); }
+}
+
+// marca la sección activa en la barra superior y el contador de pedidos
+function pintarSecciones() {
+  const enTablero = state.vista === 'tablero';
+  const bMesas = $('#secMesas'), bPedidos = $('#secPedidos');
+  bMesas.classList.toggle('on', enTablero && state.seccion === 'mesas');
+  bPedidos.classList.toggle('on', enTablero && state.seccion === 'pedidos');
+  bMesas.setAttribute('aria-pressed', String(enTablero && state.seccion === 'mesas'));
+  bPedidos.setAttribute('aria-pressed', String(enTablero && state.seccion === 'pedidos'));
+  const activos = state.facturas.filter(f => !cuentaCompleta(f)).length;
+  $('#secPedidosCnt').textContent = activos ? String(activos) : '';
+}
+
+function setSeccion(s) {
+  state.seccion = s;
+  setVista('tablero');
 }
 
 function abrirCuenta(id) {
@@ -1204,15 +1249,17 @@ function renderTablero() {
       ${c.fs.length ? c.fs.map(kcardHTML).join('') : '<p class="kvacia">—</p>'}
     </div>`).join('');
 
+  // una sola sección a la vez; se cambia desde la barra superior (Mesas / Pedidos)
+  const cuerpo = state.seccion === 'pedidos'
+    ? `<div class="kanban">${kanban}</div>`
+    : `<div class="mesas-grid">${tiles.join('')}</div>`;
   cont.innerHTML = `<div class="tablero">
     <div class="tab-head">
-      <h2 class="sec-titulo">Mesas</h2>
       <button type="button" class="btn btn-primario" id="btnNuevaTablero">${ICONOS.mas} Nueva cuenta</button>
     </div>
-    <div class="mesas-grid">${tiles.join('')}</div>
-    <h2 class="sec-titulo">Pedidos</h2>
-    <div class="kanban">${kanban}</div>
+    ${cuerpo}
   </div>`;
+  pintarSecciones();
 
   $('#btnNuevaTablero').addEventListener('click', () => nuevaFactura());
   cont.querySelectorAll('[data-mesa]').forEach(b => b.addEventListener('click', e => {
@@ -2551,6 +2598,8 @@ async function reabrir(id) {
 
 /* ---------- arranque ---------- */
 $('#btnVentas').addEventListener('click', () => alternarVentas(state.vista !== 'ventas'));
+$('#secMesas').addEventListener('click', () => setSeccion('mesas'));
+$('#secPedidos').addEventListener('click', () => setSeccion('pedidos'));
 
 $('#fechaHoy').textContent = new Date().toLocaleDateString('es-CO',
   {weekday:'long', day:'numeric', month:'long'});
