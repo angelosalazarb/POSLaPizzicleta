@@ -859,8 +859,16 @@ function renderTabs() {
 }
 
 /* ---------- contador con semáforo ---------- */
+// la cuenta "termina" solo cuando está pagada Y entregada (o legado 'pagada')
+const cuentaCompleta = f => f.estado === 'cerrada' &&
+  (f.etapa === 'entregada' || f.etapa === 'pagada');
+const finCiclo = f => Math.max(
+  f.fecha_cierre ? new Date(f.fecha_cierre).getTime() : 0,
+  f.fecha_entregada ? new Date(f.fecha_entregada).getTime() : 0);
+
 function minutosCuenta(f) {
-  const fin = (f.estado !== 'abierta' && f.fecha_cierre) ? new Date(f.fecha_cierre) : new Date();
+  // el contador corre hasta pagada+entregada; pagar solo no lo detiene
+  const fin = cuentaCompleta(f) ? finCiclo(f) : Date.now();
   return Math.max(0, Math.floor((fin - new Date(f.fecha_apertura)) / 60000));
 }
 
@@ -868,21 +876,14 @@ function actualizarTimers() {
   const [verde, ambar] = state.config.semaforo_min;
   const retencionMs = state.config.retencion_pagada_min * 60000;
   const ahora = Date.now();
-  // se archiva solo cuando está pagada Y entregada (o legado 'pagada')
-  const finCiclo = f => Math.max(
-    f.fecha_cierre ? new Date(f.fecha_cierre).getTime() : 0,
-    f.fecha_entregada ? new Date(f.fecha_entregada).getTime() : 0);
-  const expirada = f => f.estado === 'cerrada' &&
-    (f.etapa === 'entregada' || f.etapa === 'pagada') &&
-    ahora - finCiclo(f) > retencionMs;
+  const expirada = f => cuentaCompleta(f) && ahora - finCiclo(f) > retencionMs;
 
   for (const f of state.facturas) {
     if (expirada(f)) continue;
     const m = minutosCuenta(f);
-    const pagada = f.estado !== 'abierta';
     document.querySelectorAll(`[data-timer="${f.id}"]`).forEach(el => {
       el.textContent = m + ' min';
-      el.className = 'timer ' + (pagada ? 't-pagada'
+      el.className = 'timer ' + (cuentaCompleta(f) ? 't-pagada'
         : m < verde ? 't-ok' : m <= ambar ? 't-medio' : 't-alto');
     });
   }
