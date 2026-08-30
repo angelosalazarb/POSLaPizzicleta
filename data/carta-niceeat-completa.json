@@ -1,0 +1,3476 @@
+{
+ "extraido": "2026-08-29T23:53:57.348Z",
+ "fuente": "niceeat.co panel admin (solo lectura)",
+ "productos": [
+  {
+   "id": "90b2b737-b046-4191-02bd-ea35191639fe",
+   "nombre": "Soda schweppes",
+   "descripcion": "Refréscate sin culpas con una soda BRETAÑA, puedes michelarla, agregar notas de cereza o pedirla con limón.",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "botella 400 ml",
+     "precio": 5800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Personal Michelada",
+     "precio": 7800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "SODA BRETAÑA MICHELADA CON ZUMO DE CEREZA",
+     "precio": 9000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "SODA BRETAÑA MICHELADA CON FLOR DE JAMAICA",
+     "precio": 9000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "23172e43-c6fc-77c0-73b4-f71a0ed8596b",
+   "nombre": "GASEOSA COCACOLA 1.5 LTS",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "COCACOLA",
+     "precio": 12000,
+     "grupos_modificadores": [
+      "Notas de sabores"
+     ]
+    },
+    {
+     "nombre": "QUATRO",
+     "precio": 12000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "SPRITE",
+     "precio": 12000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "PREMIO",
+     "precio": 12000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "GINGER ALE",
+     "precio": 16000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "4bee9bea-e498-48df-640a-4be8a1379b20",
+   "nombre": "GASEOSAS 500 ml",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "COCACOLA 400 ML",
+     "precio": 5800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "COCACOLA  ZERO 400 ML",
+     "precio": 5800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "COCACOLA ZERO 400 ML",
+     "precio": 5800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "COCACOLA ZERO",
+     "precio": 5800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "QUATRO",
+     "precio": 5800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "SPRITE",
+     "precio": 5800,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "5d3fa33d-8274-e033-a068-5e8c7aab903d",
+   "nombre": "LIMONADA  SANDIA",
+   "descripcion": "Rica limonada granizada de sandia natural.",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal",
+     "precio": 11000,
+     "grupos_modificadores": [
+      "Licor"
+     ]
+    },
+    {
+     "nombre": "LIMONADA SANDIA MICHELADA",
+     "precio": 13500,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "623c2c13-4a3b-a51f-5dcc-980e27ea21ea",
+   "nombre": "LIMONADA NATURAL",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal",
+     "precio": 9000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "7a5be8d4-aaf3-3a6d-5a03-d57269e70a72",
+   "nombre": "AGUA BRISA",
+   "descripcion": "Nuestra marca en una botella de agua",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "botella",
+     "precio": 4000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Agua gas",
+     "precio": 4500,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "9a3ec154-7190-4165-9fce-cd93a0b15666",
+   "nombre": "Schweppes ginger ale",
+   "descripcion": "schweppes ginger ale 400 ml",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "botella 400 ml",
+     "precio": 6000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "MICHELADO VASO 16 OZ",
+     "precio": 7800,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "788d3a35-5ea8-6ceb-a8d8-afb3df549514",
+   "nombre": "LIMONADA CEREZADA",
+   "descripcion": "limonada granizada con notas de cereza",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Vaso 16 oz",
+     "precio": 11000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "b55fe8aa-9d88-42a4-83b0-ed144045a767",
+   "nombre": "Vaso Michelado",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Vaso 16 oz sal y limón",
+     "precio": 2000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "6174b527-07a5-43f4-9127-c95ceaf8ff81",
+   "nombre": "Vaso de hielo",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "vaso 16 oz",
+     "precio": 1000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "5f5499aa-93bc-6b8a-532e-821b66031755",
+   "nombre": "JUGO NATURAL EN AGUA",
+   "descripcion": "pregunta por los sabores dispobibles, jugos natutales en agua.",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "JUGO NATURAL MORA",
+     "precio": 9800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "JUGO NATURAL MANGO",
+     "precio": 9800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "JUGO NATURAL LULO",
+     "precio": 9800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "JUGO NATURAL MARACUYA",
+     "precio": 9800,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "fcd72af6-c56d-43da-933e-1e84a7b21f9f",
+   "nombre": "Hatsu Soda",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "BOTELLA 330 ML",
+     "precio": 8000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "c247a909-c7b4-41c7-9d30-8345ef5afdaf",
+   "nombre": "Limonada de vino Tinto",
+   "descripcion": "deliciosa bebida granizada de limon  & vino tinto.",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "vaso 16 oz",
+     "precio": 16000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "8281762a-16a8-420a-ac72-2e55a69f6161",
+   "nombre": "SODA ITALIANA",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "FRUTOS ROJOS COPA",
+     "precio": 14800,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "FRUTOS AMARILLOS COPA",
+     "precio": 14800,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "636bebc9-869a-4c8e-a203-88a89150301c",
+   "nombre": "LIMONADA DE MENTA",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "VASO 16 OZ",
+     "precio": 10000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "ed2e2c61-6551-4f8b-a4e4-3db0d9fdb4e4",
+   "nombre": "Limonada Mango Biche",
+   "descripcion": "rica limonada mango biche baja en azucar y michelada",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "VASO 16 OZ",
+     "precio": 12000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "2d4ad8e1-9a9e-4d6f-b0f7-e27ebd9a1035",
+   "nombre": "JUGOS EN LECHE",
+   "descripcion": "",
+   "categoria": "BEBIDAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Mango leche",
+     "precio": 11500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Mora leche",
+     "precio": 11500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Maracuya leche",
+     "precio": 11500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Lulo leche",
+     "precio": 11500,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "32ed19f0-57e7-416f-8211-86acd9abc905",
+   "nombre": "Sandwich de Tomates y jamon serrano",
+   "descripcion": "Con la FOCACCIA Pizzicleta vamos a servir el mejor sándwich al ponerle rugula fresca, jamón serrano, tomates al horno y queso de burrata.",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal",
+     "precio": 31900,
+     "grupos_modificadores": [
+      "CAJA PARA LLEVAR"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "29fc998a-f98c-44de-afce-3808c65b88ac",
+   "nombre": "AMERICANO",
+   "descripcion": "",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "TAZA",
+     "precio": 5500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "SUAVE",
+     "precio": 5500,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "f89cb7ea-3b13-4f49-979d-ea6d37e938af",
+   "nombre": "ESPRESSO",
+   "descripcion": "",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "TAZA",
+     "precio": 5000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "af47ec2b-8504-440f-b7cd-a3b742fe9106",
+   "nombre": "Sandwich Diavolla",
+   "descripcion": "Deliciosa focaccia hecha en casa con notas de romero, rugula fresca, combinación de peperoni y salami español, peperoncino picante, champiñones y miel.",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Sandwich de Foccacia",
+     "precio": 31900,
+     "grupos_modificadores": [
+      "CAJA PARA LLEVAR"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a9dca4ac-6fc9-464d-a9c1-78d82ad87fe9",
+   "nombre": "CAPUCCINO",
+   "descripcion": "",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "PERSONAL",
+     "precio": 8600,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "a9e2b378-0937-4fc8-a192-3c0d62ce1458",
+   "nombre": "TORTA",
+   "descripcion": "",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Chocolate cubiertas con granola",
+     "precio": 9900,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Vainilla rellanas con mermelada frutos rojos",
+     "precio": 9900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "3a1a4715-da3d-45f1-b7db-78861376a5fe",
+   "nombre": "Cuadrito de focaccia",
+   "descripcion": "Focaccia porción",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Peperoni",
+     "precio": 13000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Napolitano",
+     "precio": 9000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Champiñones con crema",
+     "precio": 10000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Serrano con rugula",
+     "precio": 15000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Peperoni con burrata & miel pícate",
+     "precio": 15000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "eed0064d-30ac-44ee-973a-1dc4b994c31f",
+   "nombre": "Sandwich Fungi & melanzane",
+   "descripcion": "Pan focaccia, rugula, pimenton, berenjenas horneadas, queso de bufala y mayonesa chipotle.",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "personal",
+     "precio": 31900,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "27c471d9-61ee-4ac5-8d8d-b7eff0cf279b",
+   "nombre": "PORCION FOCACCIA",
+   "descripcion": "",
+   "categoria": "BRUNCH",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "FOCACCIA ENTERA",
+     "precio": 6000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "FOCACCIA CON MUZZA",
+     "precio": 15000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "FOCACCIA MEDIO DIA",
+     "precio": 2000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "FOCACCIA MUZZA, TOMATES & RUGULA",
+     "precio": 19000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "793fdf9d-76f1-f9be-b863-a56a2d0f1eea",
+   "nombre": "Club Colombia",
+   "descripcion": "",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Lata",
+     "precio": 6500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "CERVEZA CLUB MICHELADA",
+     "precio": 8000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "263b53d5-9401-cc7d-1950-e4072960ce1e",
+   "nombre": "CANNABIS SEENA EWA",
+   "descripcion": "cerveza artesanal con terpenos de Canabis.",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "BOTELLA 330 ML",
+     "precio": 12000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "HEINEKEN  ZERO MICHELADA",
+     "precio": 7000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "6f9de82c-e822-c1ca-4802-6cd8dd0bfb42",
+   "nombre": "Aguila light",
+   "descripcion": "",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Lata",
+     "precio": 6500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "aguila michelada",
+     "precio": 8000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "757ea83f-3009-4b06-b05a-022647f84830",
+   "nombre": "Stella artois",
+   "descripcion": "Cerveza stella srtois 300 ml",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Stella artois 300 ml",
+     "precio": 12000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "d6339df4-1318-41e8-8224-0e0acd5d0cc8",
+   "nombre": "CERVEZA AMANECERA Y VEREMOS",
+   "descripcion": "DE LA CASA ANTAÑO CERVECERIA",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "BOTELLA 330 ML",
+     "precio": 16000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "b5951c9b-c9d5-4884-b498-3f140a7ed93a",
+   "nombre": "CERVEZA RUBISIMA",
+   "descripcion": "BY ANTAÑO CERVECERIA",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Botella 330 ml",
+     "precio": 16000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "9993d661-8bc4-4595-b719-e3c1a1303a45",
+   "nombre": "Tres Cordilleras Rosada",
+   "descripcion": "",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Botella 330 ml",
+     "precio": 9000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "98fa6eb5-5cd2-49ba-877d-a37bbf6476a4",
+   "nombre": "CERVEZA MANGOZADERA",
+   "descripcion": "DE LA CASA ANTAÑO CERVECERIA",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "BOTELLA 330 ML",
+     "precio": 16000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "83fe9d38-d23d-4d29-9b94-71d5ebeab378",
+   "nombre": "CERVEZA PIPER IPA",
+   "descripcion": "DE LA CASA ANTAÑO CERVECERIA",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "BOTELLA 330 ML",
+     "precio": 16000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "2ae19869-b73c-47cb-998c-3849c94dd8d1",
+   "nombre": "CORONA 330 ML",
+   "descripcion": "CORONA",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "CORONA BOTELLA 330 ML",
+     "precio": 12000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "5c6c8f3f-2244-4aad-af16-13cf8fa355cb",
+   "nombre": "CASILDA",
+   "descripcion": "Cerveza Negra con notas a chocolate",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Botella 330 ml",
+     "precio": 16000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "c9b9b290-62f3-4518-85ab-cdeca9e10b22",
+   "nombre": "Club Roja lata 330 ml",
+   "descripcion": "Cerveza club Roja",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Lata 330 ml",
+     "precio": 7000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "f0c1c675-aab3-48b5-861e-c26769764e31",
+   "nombre": "BBC ROSE LATA 269 ML",
+   "descripcion": "Cerveza rosada BBC LATA",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Lata 269 ml",
+     "precio": 10000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "d291e910-ba5d-461b-89a8-039ccdfb7110",
+   "nombre": "Club Trigo",
+   "descripcion": "",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Lata 330 ml",
+     "precio": 6500,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "57d2ea2f-2736-476e-bbfe-e292092628cc",
+   "nombre": "CORONA CERO ALCOHOL",
+   "descripcion": "CORONA CERO ALCOHOL.",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "BOTELLA 330 ML",
+     "precio": 10000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "2edd0c23-9418-42f4-b35a-200a263135a3",
+   "nombre": "POKER",
+   "descripcion": "",
+   "categoria": "CERVEZAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "LATA 330 ML",
+     "precio": 5500,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "44987a77-8eee-cbee-b28a-fbc455a5ee96",
+   "nombre": "PORCION DE PIZZA + GASEOSA EN BOTELLA",
+   "descripcion": "Una rebanada de pizza & una gaseosa 400 ml son ideales para pasar la brisa caleña del bulevar.",
+   "categoria": "COMBOS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "SLICE CARNES",
+     "precio": 16000,
+     "grupos_modificadores": [
+      "Adiciones",
+      "Elige un sabor",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "SLICE POLLO CHAMPIÑONES",
+     "precio": 16000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "SLICE SAMBA",
+     "precio": 16000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "SLICE PANCHO VILLA",
+     "precio": 16000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "SLICE MARGARITA",
+     "precio": 16000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "SLICE HAWAIANA",
+     "precio": 16000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "8ba18bac-1492-8cb1-8b56-291f1efdb41f",
+   "nombre": "PIZZA COMBO DE LA CASA + GASEOSA 1.5 LTS",
+   "descripcion": "Una pizza MEDIANA O GRANDE de dos sabores, una gaseosa 1.5 lts, el bulevard del rio y un buen parche.",
+   "categoria": "COMBOS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "PIZZA MEDIANA EN COMBO + GASEOSA 1.5 LTS",
+     "precio": 58000,
+     "grupos_modificadores": [
+      "Elige 2 sabores",
+      "Adiciones",
+      "GASEOSAS EN COMBO",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "PIZZA GRANDE EN COMBO + GASEOSA 1.5 LTS",
+     "precio": 73000,
+     "grupos_modificadores": [
+      "Elige 2 sabores",
+      "Adiciones",
+      "GASEOSAS EN COMBO",
+      "CAJA PARA LLEVAR"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "6def7459-647f-4a7e-beda-0e95d6106f3a",
+   "nombre": "PIZZA COMBO DELUXE PIZZA + GASEOSA 1.5 LTS",
+   "descripcion": "",
+   "categoria": "COMBOS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "DELUXE MEDIANA + GASEOSA 1.5 LTS",
+     "precio": 66000,
+     "grupos_modificadores": [
+      "Elige 2 sabores",
+      "Adiciones",
+      "GASEOSAS EN COMBO",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "GRANDE  + GASEOSA 1.5 LTS",
+     "precio": 80000,
+     "grupos_modificadores": [
+      "Elige 2 sabores",
+      "Adiciones",
+      "GASEOSAS EN COMBO",
+      "CAJA PARA LLEVAR"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "dd59848b-4c66-4b27-8d7a-e77885f01827",
+   "nombre": "PIZZA SLICE + CERVEZA",
+   "descripcion": "",
+   "categoria": "COMBOS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "PIZZA SLICE CARNES",
+     "precio": 17000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "PIZZA SLICE PÓLLO CHAMPIÑON",
+     "precio": 17000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "PIZZA SLICE SAMBA",
+     "precio": 17000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "PIZZA SLICE GORGONA",
+     "precio": 17000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "PIZZA SLICE MARGARITA",
+     "precio": 17000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    },
+    {
+     "nombre": "PIZZA SLICE HAWAIANA",
+     "precio": 17000,
+     "grupos_modificadores": [
+      "Elige un sabor"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "e6165ab2-e5ac-4348-98f2-c9c253f81936",
+   "nombre": "COMBO ALMUERZO MOLDE 16 ONZAS CON FOCACCIA",
+   "descripcion": "Lasaña en molde mixta ( boloñesa+ pollo + champiñones ) + pan baguette & Limonada // Únicamente de 12 a 2 pm o según disponibilidad  //",
+   "categoria": "COMBOS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "MIXTA + FOCACCIA",
+     "precio": 28000,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "POLLO CHAMPIÑON  + FOCACCIA",
+     "precio": 28000,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "BOLOÑESA + FOCACCIA",
+     "precio": 28000,
+     "grupos_modificadores": [
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "VEGETARIANA+ FOCACCIA",
+     "precio": 28000,
+     "grupos_modificadores": [
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "MEXICANA + FOCACCIA",
+     "precio": 29900,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "SOPA DE TOMATE + PROTEINA + ENSALADA + FOCACCIA",
+     "precio": 32000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "0e75acf5-58ad-4397-b11d-2d7aa3d5c6d0",
+   "nombre": "PASTA LARGA LUNCH",
+   "descripcion": "",
+   "categoria": "COMBOS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "POLLO CON CHAMPIÑONES",
+     "precio": 23000,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "BOLOÑESA",
+     "precio": 23000,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "NAPOLITANA",
+     "precio": 23000,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "TRES QUESOS",
+     "precio": 25000,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "CARBONARA",
+     "precio": 26000,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "FRUTOS DEL MAR",
+     "precio": 32000,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "e8e378d1-d20a-9627-333a-ab611a9d82fb",
+   "nombre": "ENSALADA DE BURRATA & TOMATES",
+   "descripcion": "Queso de especialidad burrata acompañada de 4 piezas de pan baguette, rugula inglesa y tomates en vinagre balsamico",
+   "categoria": "ENTRADAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Entrada",
+     "precio": 28000,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "con jamón serrano sobre el baguette",
+     "precio": 35000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "BURRATA PERSONAL",
+     "precio": 15000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "4842582b-ba7e-b159-98d7-70774b89ee91",
+   "nombre": "PANCITOS BICICLETA  CON SALSA NAPOLITANA",
+   "descripcion": "8 Piezas de pan baguette dorado con mantequilla de ajo y finas hierbas.",
+   "categoria": "ENTRADAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal",
+     "precio": 11000,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "PANCITOS BICICLETA  CON DE SALSA NAPOLITANA",
+     "precio": 9000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "d33ccae6-af82-3e8d-7c25-bf104f7d7c6b",
+   "nombre": "PAN BAGUETTE CON JAMON SERRANO Y BURRATA.",
+   "descripcion": "6 piezas de Pan baguette acompañado de Jamon serrano.",
+   "categoria": "ENTRADAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Unidad",
+     "precio": 28000,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "CON TOMATE CONFITADO & BURRATA",
+     "precio": 26000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "7d34fda1-2d0a-f35d-9068-3e1c69b98db1",
+   "nombre": "LASAÑA & PAN BAGUETTE",
+   "descripcion": "Lasaña horneada en cazuela a tu elección, esta vasija concentrara el fuego en su interior sacando el mayor gusto de este plato hecho al horno durante 20 minutos para que acompañes con pan baguette en este viaje de sabores.",
+   "categoria": "LASAÑA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Cazuela boloñesa",
+     "precio": 29300,
+     "grupos_modificadores": [
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "Cazuela pollo champiñones",
+     "precio": 29300,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Cazuela vegetariana vegetales y rugula",
+     "precio": 28000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Cazuela mixta",
+     "precio": 32000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "lasaña vegetariana setas champiñon & orellana",
+     "precio": 28000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "LASAÑA MEXICANA",
+     "precio": 32000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "a08751e5-824b-7c82-ba00-b5c23f98ca8b",
+   "nombre": "PIZZA MITAD Y MITAD 2 SABORES",
+   "descripcion": "En este modo TÚ eres el chef. Elige 2 sabores de nuestras pizzas de la casa (solo disponible en tamaño mediana y grande)",
+   "categoria": "PIZZA COMBINADA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 48000,
+     "grupos_modificadores": [
+      "Elige 2 sabores",
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 63000,
+     "grupos_modificadores": [
+      "Elige 2 sabores",
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "9c9111d2-71f0-46c2-be2a-5e7d3f20b9cb",
+   "nombre": "PIZZA MITAD Y MITAD DE LUXE 2 SABORES",
+   "descripcion": "La categoría de pizzas e ingredientes importados y de especialidad por mitades.",
+   "categoria": "PIZZA COMBINADA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 57000,
+     "grupos_modificadores": [
+      "Elige 2 sabores"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 71000,
+     "grupos_modificadores": [
+      "Elige 2 sabores"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "2b9cb8ff-5f15-5ede-c42d-451f3b02afa2",
+   "nombre": "BICICLETA PEGASO",
+   "descripcion": "Deliciosa receta vegetariana sobre salsa napolitana y mozzarella con maduritos y maíz dulce.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 27200,
+     "grupos_modificadores": [
+      "Adición de licor",
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 43700,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 61900,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fb16bb13-057c-3ed0-3f5d-f93b44f06c34",
+   "nombre": "HAWAIANA",
+   "descripcion": "El sabor más vendido desde el origen de nuestra marca un sabor que se mantiene en las más vendidas. Piña colada en casa  y jamón premium sobre una base de salsa napolitana y queso mozzarella.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adición de licor",
+      "Adiciones",
+      "CAJA PARA LLEVAR"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "203a4067-053a-124e-0ae5-4864c061c336",
+   "nombre": "MARGARITA",
+   "descripcion": "Una receta clásica, en una base de salsa napolitana de la casa usamos queso mozzarella fundido con rodajas de tomate y albahaca genovesa fresca. El aroma y los tonos de esta pizza le hacen justicia al origen de su nombre; la reina de Italia, Margarita de Saboya.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 27200,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6  porciones (30 cm)2",
+     "precio": 43700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 61900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ff60de84-70ce-bc66-51b2-33a134155ace",
+   "nombre": "SAMBA",
+   "descripcion": "Una deliciosa receta caleña que sé que mantiene como pizza local en la ciudad, Madurito frito con maíz y tocineta sobre mozzarella fundido hacen la receta ideal para los amantes del dulce orgánico con las notas de la parrilla.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6  porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "5915bfc0-463b-e1e3-8a41-6abec938a015",
+   "nombre": "CARNES",
+   "descripcion": "Sobre salsa napolitana y mozzarella usamos una selección de carnes premium, el pepperoni, salami y jamón crean una receta carnívora fantástica.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "87ef3230-b46a-7d63-8fd8-4e8c4a48d73b",
+   "nombre": "BICI BBQ",
+   "descripcion": "Deliciosa Pizza de la casa , sobre salsa napolitana y queso mozzarella con Maduritos, cábano y salsa barbacoa para el final",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "986da340-e193-33d1-8af9-ba8b231d61e6",
+   "nombre": "PEPERONI",
+   "descripcion": "Clásica pizza estilo Nueva York de rodajas de pepperoni, sobre salsa napolitana y mucha mozzarella vamos a cubrir con pepperoni picante 6/10 para una receta deliciosa que se mantiene en top del mundo.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "be38f9df-1fd1-a5d7-3bb6-369e78dae7be",
+   "nombre": "SPRINT MONTICORO",
+   "descripcion": "Una receta sobre salsa napolitana y queso mozzarella que combina el dulce de los maicitos con la tocineta a la parrilla y la frescura del tomate en brunoise. Recomendamos usar albahaca fresca para realzar sus aromas y sabor.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3b95ccec-e6e0-244d-b785-1811185774c8",
+   "nombre": "LA RUEDA GORGONA",
+   "descripcion": "Nuestra Pizza de la casa, una receta icono de toda nuestra pasión;  berenjena asada y champiñones con la mezcla de queso cheddar y mozzarella integran los sabores para recibir la armonía de la rúgula fresca, EN HONOR A NUESTRA MARCA.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 27200,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 43700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 61900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "5452244d-8e46-4e6f-22b2-46497fca9e09",
+   "nombre": "ANDINA",
+   "descripcion": "Deliciosa receta vegetariana de salsa napolitana, queso mozzarella, Pimientos, cebolla, champiñones salteados, agregamos rugula fresca y semillas de sésamo.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 27200,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 43700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 61900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bbd2fa8c-9111-c6bc-9d49-f648c8c9cc4b",
+   "nombre": "PANCHO VILLA EN BICICLETA",
+   "descripcion": "sobre salsa napolitana y mozzarella fundido tenemos carne boloñesa, maíz, cebolla, pimentón, chips de maíz picantes y jalapeños. notas de cilantro y limon, Una receta para los amantes del picante, El \"Infierno del Norte\", incluye un total de 29 tramos de pavé en sus 256,6 km de trayecto, todo un ejercicio de supervivencia que se divide en tres fases.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "eb352fa3-ae20-f24b-ed51-19715a5ebf39",
+   "nombre": "BICICLETA MONARETA",
+   "descripcion": "Sobre una base de salsa napolitana y queso mozzarella usamos peperoni, pimentón y miel mostaza creando una receta agridulce que se mantiene en nuestro top de pizzas más vendidas.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "85fea246-a81b-7391-e3f0-7d020ddaa4df",
+   "nombre": "DOÑA GUAYABA",
+   "descripcion": "Deliciosa receta, queso mozzarella fundido con bocadillo doña guayaba. Una combinación tan caleña como ciclista, ¿te sientes débil o sin energía? ¡un bocadillo y a rodar!",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 27200,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 43700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 61900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f83e2afa-064e-e02c-d8ed-c9efe9923d1d",
+   "nombre": "BULEVAR",
+   "descripcion": "pizza de salami, cebolla morada y rugula fresca.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "f5cd20a8-dfc0-6dc5-e380-b1d8dc7743d1",
+   "nombre": "LA VUELTA ARGENTINA",
+   "descripcion": "Deliciosa para los amantes del sabor a parrilla; sobre queso mozzarella fundido cubrimos con tocineta y chimichurri realzando todo su sabor. Inspirados en los asados ahumados con finas hierbas resaltando su sabor.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "7e2836b7-45e9-168c-db6d-3fc14d7f42f1",
+   "nombre": "PORCIÓN DE PIZZA",
+   "descripcion": "Una rodaja de pizza para la mesa o llevar en sabores clásicos.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "PORCIÓN DE PIZZA PEPERONI",
+     "precio": 12000,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "PORCIÓN DE PIZZA HAWAIANA",
+     "precio": 12000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "PORCIÓN DE PIZZA SAMBA",
+     "precio": 12000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "PORCIÓN DE PIZZA 3 CARNES",
+     "precio": 12000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "PORCIÓN DE PIZZA POLLO & CHAMPIÑONES",
+     "precio": 12000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "PORCIÓN DE PIZZA MARGARITA",
+     "precio": 11000,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "255288f8-b42c-92da-ba9f-ca72d9f0eca6",
+   "nombre": "POLLO CON CHAMPIÑONES",
+   "descripcion": "Cocinamos nuestro pollo con una receta que aromatiza y realza  su sabor, sobre salsa napolitana y mozzarella usamos champiñones frescos creando una receta clásica con toda la pasión y aromas de Cali.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 28800,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6  porciones (30 cm)",
+     "precio": 47600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 62900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "de3c0681-3b23-7b5b-54a1-15697f8b88ee",
+   "nombre": "MARGARITA LATINA",
+   "descripcion": "Rodajas de tomate, trocitos de tocineta ahumada y albahaca fresca.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 20 cm",
+     "precio": 27200,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana",
+     "precio": 43700,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande",
+     "precio": 61900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "72bda731-1cfd-476b-b28b-d064ecf2987f",
+   "nombre": "PIZZA SOLO JAMON",
+   "descripcion": "Queso Mozarella y jamon premium.",
+   "categoria": "PIZZAS DE LA CASA",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 27200,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 43700,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 61900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "41b092ff-a5cb-b0fa-0ed6-aa533f4f3685",
+   "nombre": "POLLO SALAME E RUCULA",
+   "descripcion": "pollo, pepperoni  y maíz dulce. Perfecta combinación de proteínas y vegetales.",
+   "categoria": "PIZZAS DE LUXE",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 34600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 56700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 72900,
+     "grupos_modificadores": [
+      "Adición de licor",
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "0c2db821-2a04-5cd0-6e3c-7154f1263a98",
+   "nombre": "PIZZA SERRANA DI BUFFALA",
+   "descripcion": "Sobre nuestra masa artesanal Pizzicleta y salsa napolitana, servimos  jamón serrano,boconccinis de buffala, rugula fresca y aceite de oliva.",
+   "categoria": "PIZZAS DE LUXE",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 34600,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 56700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 72900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "108e5052-5b6b-2c87-31d2-d6cd156ef47c",
+   "nombre": "QUATTRO FORMAGGI",
+   "descripcion": "Pizza blanca, masa artesanal estirada a mano, base crema sour, cheddar, mozarella, stracciatella dibuffala.",
+   "categoria": "PIZZAS DE LUXE",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 34600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 56700,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 72900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "edbfb81d-37eb-6bba-2af4-c763a1cd6c08",
+   "nombre": "POLLO E PANCETA AL POMODORO",
+   "descripcion": "Pizza con pollo al horno, panceta y tomates confitados con albahaca.",
+   "categoria": "PIZZAS DE LUXE",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 34600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 56700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 72900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "b7469d21-c7b7-4eb0-ab00-40991d571925",
+   "nombre": "MI DIAVOLLA",
+   "descripcion": "Base de salsa napolitana, mozarella, straciatellla de buffala, peperoni madurado, peperoncino rojo y notas de miel",
+   "categoria": "PIZZAS DE LUXE",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "pequeña 20 cm",
+     "precio": 34600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 56700,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 72900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "c5d78d5d-72ff-a038-db34-d9da27b74236",
+   "nombre": "PIZZA SUPREMA",
+   "descripcion": "Deliciosa combinación de peperoni, champiñones y aceitunas negras.",
+   "categoria": "PIZZAS DE LUXE",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones",
+     "precio": 34600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones",
+     "precio": 56700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones",
+     "precio": 72900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d7749d2d-c739-b851-1478-975f449c81aa",
+   "nombre": "PIZZA NAPOLITANA",
+   "descripcion": "Pizza artesanal estirada a mano, base de salsa napolitana y queso de straciatella de buffala.",
+   "categoria": "PIZZAS DE LUXE",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "pequeña 20 cm",
+     "precio": 34600,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Mediana 6 porciones",
+     "precio": 56700,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 72900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "7936975a-0bac-d519-dae9-ea44cf03716f",
+   "nombre": "PIZZA PANTALON CON SALSA CHAN CHAN",
+   "descripcion": "base de salsa napolitana, queso burrata en su interior.",
+   "categoria": "PIZZAS PANTALON",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "POLLO CHAMPIÑON",
+     "precio": 32600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "HAWAIANO",
+     "precio": 32600,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "SAMBA",
+     "precio": 32600,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "BOLOÑESA",
+     "precio": 32600,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "CHAN CHAN",
+     "precio": 32600,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "bd3634ef-ff13-5fb5-1f16-bca2b04725b8",
+   "nombre": "PIZZA PANTALON",
+   "descripcion": "pizza pantalon relleno con mozarella. cheddar y burrata",
+   "categoria": "PIZZAS PANTALON",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "NAPOLITANO",
+     "precio": 36500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "DIAVOLLA",
+     "precio": 36500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "TRES QUESOS",
+     "precio": 36500,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "SERRANO Y TOMATES",
+     "precio": 36500,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "d6ee4a1a-dbfa-d326-6ba5-9423aac4d862",
+   "nombre": "RUSTICA DI POLLO A PANCETTA",
+   "descripcion": "Deliciosa receta artesanal base de napolitana, queso mozarella., pollo al horno y tocineta ahumada, ordena con rugula.",
+   "categoria": "PIZZAS PREMIUM",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 34600,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 56700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 72900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "01f77fcd-9a65-cca3-1d37-fc39a0a1aece",
+   "nombre": "PIZZA BURRATA BONITA",
+   "descripcion": "Fantástica receta  vegetariana, masa artesanal Pizzicleta champiñon con berenjenas asadas, rugula entrelazando sabores y una deliciosa burrata para que puedas  esparcirla por la pizza.",
+   "categoria": "PIZZAS PREMIUM",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 44500,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 68000,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 83900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "ac2972f3-ac0d-c4f8-605a-5db9a5f3477a",
+   "nombre": "PIZZA BURRATA & TOMATES CONFITADOS",
+   "descripcion": "Pizza artesanal con salsa napolitana albahaca y burrata de nuestro maestro quesero. Para poder deleitarse, tu mismo vas a esparcir la straciatella del queso reconociendo sus notas de sabor y cremosidad.",
+   "categoria": "PIZZAS PREMIUM",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 44500,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 68000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 83900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "d9f6da49-32ac-0f09-69d6-bab042b5f547",
+   "nombre": "PIZZA BURRATA Y JAMON SERRANO,",
+   "descripcion": "Deliciosa pizza con base Napolitana, hojas de rugula, jamon serrano y burrata.",
+   "categoria": "PIZZAS PREMIUM",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 44500,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 68000,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 83900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "7a49c580-b90a-e135-7ed5-693249af9e6a",
+   "nombre": "GORGONA VEGANA",
+   "descripcion": "Sobre masa artesanal la Pizzicleta y nuestra napolitana con queso de coliflor hornearemos Champiñones combinados con berenjenas y rúgula fresca",
+   "categoria": "PIZZAS VEGANAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 29200,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 48700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 67900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "cf1c0ce0-ee03-4902-2e5d-28f7cb4f6d02",
+   "nombre": "ANDINA VEGANA",
+   "descripcion": "Rica receta con queso de coliflor, Salteamos cebolla y pimentón, endulzamos con maicitos y damos armonía con el umami del champiñon, agregamos rugula fresca.",
+   "categoria": "PIZZAS VEGANAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 29200,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 48700,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 67900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "47e9ed87-c208-4aa6-7855-0016fbc54364",
+   "nombre": "MARGARITA VEGANA",
+   "descripcion": "Prueba está deliciosa receta con queso de coliflor, Rodajas de tomate fresco, mozarella vegana y albahaca genovesa",
+   "categoria": "PIZZAS VEGANAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 29200,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 48700,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 67900,
+     "grupos_modificadores": [
+      "Adiciones"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "182beb6e-17b6-9d06-8bf6-c83184899482",
+   "nombre": "PINCHADA VEGANA",
+   "descripcion": "Deliciosa receta con queso de coliflor, Champiñones y piña.",
+   "categoria": "PIZZAS VEGANAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "Personal 4 porciones (20 cm)",
+     "precio": 29200,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 48700,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 67900,
+     "grupos_modificadores": []
+    }
+   ]
+  },
+  {
+   "id": "db6add50-da5d-4099-a940-791c94057c22",
+   "nombre": "PEGASO",
+   "descripcion": "sobre la masa vegana la pizzicleta y salsa napólitana usaremos champiñones frescos, cebollas al horno creando el umami perfecto junto a la  rugula fresca para el final.",
+   "categoria": "PIZZAS VEGANAS",
+   "impuesto": "8%",
+   "oculto_en_carta": false,
+   "variaciones": [
+    {
+     "nombre": "personal 20 cm",
+     "precio": 29200,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Mediana 6 porciones (30 cm)",
+     "precio": 48000,
+     "grupos_modificadores": []
+    },
+    {
+     "nombre": "Grande 8 porciones (40 cm)",
+     "precio": 67900,
+     "grupos_modificadores": []
+    }
+   ]
+  }
+ ],
+ "modificadores": [
+  {
+   "id": "1830",
+   "grupo": "Elige 2 sabores",
+   "nombre": "BBQ",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1841",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Bulevar",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1847",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Burguer",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "5245",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Burrata bonita",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1838",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Calaverita",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1842",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Caleñisima",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1840",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Calidosa",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1825",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Carnes",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1839",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Chaplin",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "4100",
+   "grupo": "Elige 2 sabores",
+   "nombre": "COMPLETA",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1835",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Doña guayaba",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1848",
+   "grupo": "Elige 2 sabores",
+   "nombre": "El jardín de las delicias",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1831",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Elvis",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1845",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Entonada",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1833",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Gorgona",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1822",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Hawaiana",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2587",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Jamon",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1937",
+   "grupo": "Elige 2 sabores",
+   "nombre": "jamon",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1823",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Margarita",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "3874",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Margarita latina",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1844",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Melomana",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "5859",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Mi Diavola",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1832",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Monareta",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1836",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Monticoro",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1828",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Ondina",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1834",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Pancho Villa",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1837",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Parrillada",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1829",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Pegaso",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1826",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Peperoni",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "5246",
+   "grupo": "Elige 2 sabores",
+   "nombre": "pizza blanca ruta del queso",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "5247",
+   "grupo": "Elige 2 sabores",
+   "nombre": "pizza burrata y jamon serrano",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "5248",
+   "grupo": "Elige 2 sabores",
+   "nombre": "pizza burrata y tomates confitados",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "5250",
+   "grupo": "Elige 2 sabores",
+   "nombre": "pizza del mar",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "5249",
+   "grupo": "Elige 2 sabores",
+   "nombre": "pizza suprema",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1824",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Pollo con champiñones",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7864",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Pollo e panceta al pomodoro",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "7863",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Pollo salame e rucula",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "7862",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Quattro formaggi",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "7861",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Rustica di pollo a panceta",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "1827",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Samba",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "5244",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Serrana di buffalla",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2588",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Solo queso",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1846",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Sucursal",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1843",
+   "grupo": "Elige 2 sabores",
+   "nombre": "Tres Quesos",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1850",
+   "grupo": "Escoge la salsa base",
+   "nombre": "Salsa Blanca",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1849",
+   "grupo": "Escoge la salsa base",
+   "nombre": "Salsa Napolitana",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1851",
+   "grupo": "¿Cómo quieres tu carne?",
+   "nombre": "Azul",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1854",
+   "grupo": "¿Cómo quieres tu carne?",
+   "nombre": "Bien asada",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1852",
+   "grupo": "¿Cómo quieres tu carne?",
+   "nombre": "Medio",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1853",
+   "grupo": "¿Cómo quieres tu carne?",
+   "nombre": "Tres Cuartos",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1856",
+   "grupo": "Adición de licor",
+   "nombre": "Con aguardiente",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1857",
+   "grupo": "Adición de licor",
+   "nombre": "con Baileys",
+   "precio": 8000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1858",
+   "grupo": "Adición de licor",
+   "nombre": "Con BAILEYS",
+   "precio": 6000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1855",
+   "grupo": "Adición de licor",
+   "nombre": "Con tequila",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1956",
+   "grupo": "Adiciones",
+   "nombre": "Albahaca fresca",
+   "precio": 1000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1952",
+   "grupo": "Adiciones",
+   "nombre": "berenjena asada",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "3771",
+   "grupo": "Adiciones",
+   "nombre": "BOCCONCINI",
+   "precio": 15000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2575",
+   "grupo": "Adiciones",
+   "nombre": "Borde queso",
+   "precio": 6000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "6494",
+   "grupo": "Adiciones",
+   "nombre": "BORDE QUESO MEDIANA",
+   "precio": 8000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "8574",
+   "grupo": "Adiciones",
+   "nombre": "BOWL PIZZA",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "3770",
+   "grupo": "Adiciones",
+   "nombre": "BURRATA GRANDE",
+   "precio": 21000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "3735",
+   "grupo": "Adiciones",
+   "nombre": "BURRATA PERSONAL",
+   "precio": 14000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1955",
+   "grupo": "Adiciones",
+   "nombre": "Cabano",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1948",
+   "grupo": "Adiciones",
+   "nombre": "Carne Boloñesa",
+   "precio": 6000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1938",
+   "grupo": "Adiciones",
+   "nombre": "Cebolla",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1944",
+   "grupo": "Adiciones",
+   "nombre": "Cebolla morada",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1941",
+   "grupo": "Adiciones",
+   "nombre": "Champiñones",
+   "precio": 3000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2106",
+   "grupo": "Adiciones",
+   "nombre": "Helado",
+   "precio": 6000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1950",
+   "grupo": "Adiciones",
+   "nombre": "Jalapeños",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1954",
+   "grupo": "Adiciones",
+   "nombre": "Jamon",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2563",
+   "grupo": "Adiciones",
+   "nombre": "jamon serrano",
+   "precio": 7000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2660",
+   "grupo": "Adiciones",
+   "nombre": "Jamon serrano",
+   "precio": 7000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1953",
+   "grupo": "Adiciones",
+   "nombre": "Maduro",
+   "precio": 3000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1942",
+   "grupo": "Adiciones",
+   "nombre": "Maíz dulce",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2090",
+   "grupo": "Adiciones",
+   "nombre": "Mozarella",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1951",
+   "grupo": "Adiciones",
+   "nombre": "parmesano",
+   "precio": 3000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7316",
+   "grupo": "Adiciones",
+   "nombre": "PARMESANO 1 ONZA",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "1945",
+   "grupo": "Adiciones",
+   "nombre": "pepperoni",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1939",
+   "grupo": "Adiciones",
+   "nombre": "Pimentón",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1949",
+   "grupo": "Adiciones",
+   "nombre": "Piña",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2052",
+   "grupo": "Adiciones",
+   "nombre": "Pollo",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2091",
+   "grupo": "Adiciones",
+   "nombre": "QUESO",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2092",
+   "grupo": "Adiciones",
+   "nombre": "QUESO",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2093",
+   "grupo": "Adiciones",
+   "nombre": "QUESO",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "3267",
+   "grupo": "Adiciones",
+   "nombre": "QUESO VEGANO PIZZA GRANDE",
+   "precio": 8000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "3266",
+   "grupo": "Adiciones",
+   "nombre": "QUESO VEGANO PIZZA MEDIANA",
+   "precio": 7000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1943",
+   "grupo": "Adiciones",
+   "nombre": "Rugula",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "4002",
+   "grupo": "Adiciones",
+   "nombre": "rugula",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1946",
+   "grupo": "Adiciones",
+   "nombre": "Salami",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2565",
+   "grupo": "Adiciones",
+   "nombre": "Tocineta",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1947",
+   "grupo": "Adiciones",
+   "nombre": "Tocineta",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1940",
+   "grupo": "Adiciones",
+   "nombre": "Tomate",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1960",
+   "grupo": "PULPAS",
+   "nombre": "Pulpa de mango",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1961",
+   "grupo": "PULPAS",
+   "nombre": "Pulpa de mora",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1962",
+   "grupo": "PULPAS",
+   "nombre": "Pulpa lulo",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1963",
+   "grupo": "PULPAS",
+   "nombre": "pulpa Maracuya",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1964",
+   "grupo": "Licor",
+   "nombre": "Ginebra Shot 2 onzas",
+   "precio": 6000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1997",
+   "grupo": "Licor",
+   "nombre": "Michelado",
+   "precio": 1500,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1965",
+   "grupo": "Licor",
+   "nombre": "Viche Shot 2 onzas",
+   "precio": 5000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1993",
+   "grupo": "Notas de sabores",
+   "nombre": "Almibar de cereza.",
+   "precio": 1000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1994",
+   "grupo": "Notas de sabores",
+   "nombre": "Michelado",
+   "precio": 1500,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "1995",
+   "grupo": "Notas de sabores",
+   "nombre": "Zumo de Limón",
+   "precio": 1000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2648",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA BBQ",
+   "precio": 11999,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2649",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA BBQ",
+   "precio": 11999,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2653",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA CHOCOLATE",
+   "precio": 12000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2652",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA GORGONA",
+   "precio": 12000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2647",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA HAWAIANA",
+   "precio": 11000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2644",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA MARGARITA",
+   "precio": 11000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2651",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA NAPOLITANA",
+   "precio": 8999,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2650",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA PANCHO VILLA",
+   "precio": 12000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2645",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA PEPERONI",
+   "precio": 11000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "2646",
+   "grupo": "SLIDE",
+   "nombre": "PORCION PIZZA POLLO CHAMPIÑONES",
+   "precio": 11000,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7925",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "2 Cerveza poker",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "5709",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "2 CERVEZAS CLUB COLOMBIA",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7599",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "2 COLA Y POLA LATA 330 ML",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "2935",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "COCACOLA 1.5 LTS",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7598",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "COLA Y POLA 1.5 LTS",
+   "precio": 3000,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "7684",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "Colombiana 1.5 lts",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "2934",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "COLOMBIANA 1.5 LTS",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7775",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "Heineken",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "7683",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "Manzana 1.5 lts",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "2933",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "MANZANA 1.5 LTS",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7685",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "Pepsi 1.5 lts",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "2932",
+   "grupo": "GASEOSAS EN COMBO",
+   "nombre": "PEPSI 1.5 LTS",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7774",
+   "grupo": "Elige un sabor",
+   "nombre": "2 Heineken",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "6353",
+   "grupo": "Elige un sabor",
+   "nombre": "Agua",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "6354",
+   "grupo": "Elige un sabor",
+   "nombre": "Agua con gas",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "6355",
+   "grupo": "Elige un sabor",
+   "nombre": "Club colombia",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "6349",
+   "grupo": "Elige un sabor",
+   "nombre": "Cocacola 400 ml",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "6352",
+   "grupo": "Elige un sabor",
+   "nombre": "Cocacola zero 400 ml",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "6356",
+   "grupo": "Elige un sabor",
+   "nombre": "Ginger ale",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "6350",
+   "grupo": "Elige un sabor",
+   "nombre": "Manzana 400 ml",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7690",
+   "grupo": "Elige un sabor",
+   "nombre": "naranja 400 ml",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "6351",
+   "grupo": "Elige un sabor",
+   "nombre": "Quatro 400 ml",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "8%"
+  },
+  {
+   "id": "7691",
+   "grupo": "Elige un sabor",
+   "nombre": "Uva 400 ml",
+   "precio": 0,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "7829",
+   "grupo": "CAJA PARA LLEVAR",
+   "nombre": "CAJA GRANDE",
+   "precio": 4000,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "7828",
+   "grupo": "CAJA PARA LLEVAR",
+   "nombre": "CAJA MEDIANA",
+   "precio": 3000,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  },
+  {
+   "id": "7827",
+   "grupo": "CAJA PARA LLEVAR",
+   "nombre": "CAJA PERSONAL",
+   "precio": 2000,
+   "disponible": "Si",
+   "impuesto": "Ninguno"
+  }
+ ]
+}

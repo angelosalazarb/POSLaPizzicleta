@@ -1,457 +1,1467 @@
 [
  {
-  "nombre": "Porcion De Pizza + Gaseosa En Botella",
-  "precio": 16000,
-  "categoria": "Combos"
- },
- {
-  "nombre": "Pizza Combo De La Casa + Gaseosa 1.5 Lts",
-  "precio": 58000,
-  "categoria": "Combos"
- },
- {
-  "nombre": "Pizza Combo Deluxe Pizza + Gaseosa 1.5 Lts",
-  "precio": 66000,
-  "categoria": "Combos"
- },
- {
-  "nombre": "Pizza Slice + Cerveza",
-  "precio": 17000,
-  "categoria": "Combos"
- },
- {
-  "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia",
-  "precio": 28000,
-  "categoria": "Combos"
- },
- {
-  "nombre": "Pasta Larga Lunch",
-  "precio": 23000,
-  "categoria": "Combos"
- },
- {
-  "nombre": "Rustica Di Pollo A Pancetta",
-  "precio": 34600,
-  "categoria": "Pizzas Premium"
- },
- {
-  "nombre": "Pizza Burrata Bonita",
-  "precio": 44500,
-  "categoria": "Pizzas Premium"
- },
- {
-  "nombre": "Pizza Burrata & Tomates Confitados",
-  "precio": 44500,
-  "categoria": "Pizzas Premium"
- },
- {
-  "nombre": "Pizza Burrata Y Jamon Serrano",
-  "precio": 44500,
-  "categoria": "Pizzas Premium"
- },
- {
-  "nombre": "Pollo Salame E Rucula",
-  "precio": 34600,
-  "categoria": "Pizzas De Luxe"
- },
- {
-  "nombre": "Pizza Serrana Di Buffala",
-  "precio": 34600,
-  "categoria": "Pizzas De Luxe"
- },
- {
-  "nombre": "Quattro Formaggi",
-  "precio": 34600,
-  "categoria": "Pizzas De Luxe"
- },
- {
-  "nombre": "Pollo E Panceta Al Pomodoro",
-  "precio": 34600,
-  "categoria": "Pizzas De Luxe"
- },
- {
-  "nombre": "Mi Diavolla",
-  "precio": 34600,
-  "categoria": "Pizzas De Luxe"
- },
- {
-  "nombre": "Pizza Suprema",
-  "precio": 34600,
-  "categoria": "Pizzas De Luxe"
- },
- {
-  "nombre": "Pizza Napolitana",
-  "precio": 34600,
-  "categoria": "Pizzas De Luxe"
- },
- {
-  "nombre": "Sandwich de Tomates y jamon serrano",
-  "precio": 31900,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Americano",
-  "precio": 5500,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Espresso",
-  "precio": 5000,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Sandwich Diavolla",
-  "precio": 31900,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Capuccino",
-  "precio": 8600,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Torta",
-  "precio": 9900,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Cuadrito de focaccia",
-  "precio": 13000,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Sandwich Fungi & melanzane",
-  "precio": 31900,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Porcion Focaccia",
-  "precio": 6000,
-  "categoria": "Brunch"
- },
- {
-  "nombre": "Ensalada De Burrata & Tomates",
-  "precio": 28000,
-  "categoria": "Entradas"
- },
- {
-  "nombre": "Pancitos Bicicleta Con Salsa Napolitana",
-  "precio": 11000,
-  "categoria": "Entradas"
- },
- {
-  "nombre": "Pan Baguette Con Jamon Serrano Y Burrata.",
-  "precio": 28000,
-  "categoria": "Entradas"
- },
- {
-  "nombre": "Pizza Pantalon Con Salsa Chan Chan",
-  "precio": 32600,
-  "categoria": "Pizzas Pantalon"
- },
- {
-  "nombre": "Pizza Pantalon",
-  "precio": 36500,
-  "categoria": "Pizzas Pantalon"
- },
- {
-  "nombre": "Bicicleta Pegaso",
-  "precio": 27200,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Hawaiana",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Margarita",
-  "precio": 27200,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Samba",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Carnes",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Bici Bbq",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Peperoni",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Sprint Monticoro",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "La Rueda Gorgona",
-  "precio": 27200,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Andina",
-  "precio": 27200,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Pancho Villa En Bicicleta",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Bicicleta Monareta",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Doña Guayaba",
-  "precio": 27200,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Bulevar",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "La Vuelta Argentina",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Porción De Pizza",
-  "precio": 12000,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Pollo Con Champiñones",
-  "precio": 28800,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Margarita Latina",
-  "precio": 27200,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Pizza Solo Jamon",
-  "precio": 27200,
-  "categoria": "Pizzas De La Casa"
- },
- {
-  "nombre": "Pizza Mitad Y Mitad 2 Sabores",
-  "precio": 48000,
-  "categoria": "Pizza Combinada"
- },
- {
-  "nombre": "Pizza Mitad Y Mitad De Luxe 2 Sabores",
-  "precio": 57000,
-  "categoria": "Pizza Combinada"
- },
- {
-  "nombre": "Gorgona Vegana",
-  "precio": 29200,
-  "categoria": "Pizzas Veganas"
- },
- {
-  "nombre": "Andina Vegana",
-  "precio": 29200,
-  "categoria": "Pizzas Veganas"
- },
- {
-  "nombre": "Margarita Vegana",
-  "precio": 29200,
-  "categoria": "Pizzas Veganas"
- },
- {
-  "nombre": "Pinchada Vegana",
-  "precio": 29200,
-  "categoria": "Pizzas Veganas"
- },
- {
-  "nombre": "Pegaso",
-  "precio": 29200,
-  "categoria": "Pizzas Veganas"
- },
- {
-  "nombre": "Lasaña & Pan Baguette",
-  "precio": 29300,
-  "categoria": "Lasaña"
- },
- {
-  "nombre": "Soda schweppes",
+  "nombre": "Soda Schweppes — Botella 400 Ml",
   "precio": 5800,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Gaseosa Cocacola 1.5 Lts",
-  "precio": 12000,
+  "nombre": "Soda Schweppes — Personal Michelada",
+  "precio": 7800,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "GASEOSAS 500 ml",
-  "precio": 5800,
-  "categoria": "Bebidas"
- },
- {
-  "nombre": "Limonada Sandia",
-  "precio": 11000,
-  "categoria": "Bebidas"
- },
- {
-  "nombre": "Limonada Natural",
+  "nombre": "Soda Schweppes — Soda Bretaña Michelada Con Zumo De Cereza",
   "precio": 9000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Agua Brisa",
+  "nombre": "Soda Schweppes — Soda Bretaña Michelada Con Flor De Jamaica",
+  "precio": 9000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosa Cocacola 1.5 Lts — Cocacola",
+  "precio": 12000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosa Cocacola 1.5 Lts — Quatro",
+  "precio": 12000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosa Cocacola 1.5 Lts — Sprite",
+  "precio": 12000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosa Cocacola 1.5 Lts — Premio",
+  "precio": 12000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosa Cocacola 1.5 Lts — Ginger Ale",
+  "precio": 16000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosas 500 Ml — Cocacola 400 Ml",
+  "precio": 5800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosas 500 Ml — Cocacola Zero 400 Ml",
+  "precio": 5800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosas 500 Ml — Cocacola Zero",
+  "precio": 5800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosas 500 Ml — Quatro",
+  "precio": 5800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Gaseosas 500 Ml — Sprite",
+  "precio": 5800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada Sandia — Personal",
+  "precio": 11000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada Sandia — Limonada Sandia Michelada",
+  "precio": 13500,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada Natural — Personal",
+  "precio": 9000,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Agua Brisa — Botella",
   "precio": 4000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Schweppes ginger ale",
+  "nombre": "Agua Brisa — Agua Gas",
+  "precio": 4500,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Schweppes Ginger Ale — Botella 400 Ml",
   "precio": 6000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Limonada Cerezada",
+  "nombre": "Schweppes Ginger Ale — Michelado Vaso 16 Oz",
+  "precio": 7800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada Cerezada — Vaso 16 Oz",
   "precio": 11000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Vaso Michelado",
+  "nombre": "Vaso Michelado — Vaso 16 Oz Sal Y Limón",
   "precio": 2000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Vaso de hielo",
+  "nombre": "Vaso De Hielo — Vaso 16 Oz",
   "precio": 1000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Jugo Natural En Agua",
+  "nombre": "Jugo Natural En Agua — Jugo Natural Mora",
   "precio": 9800,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Hatsu Soda",
+  "nombre": "Jugo Natural En Agua — Jugo Natural Mango",
+  "precio": 9800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Jugo Natural En Agua — Jugo Natural Lulo",
+  "precio": 9800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Jugo Natural En Agua — Jugo Natural Maracuya",
+  "precio": 9800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Hatsu Soda — Botella 330 Ml",
   "precio": 8000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Limonada de vino Tinto",
+  "nombre": "Limonada De Vino Tinto — Vaso 16 Oz",
   "precio": 16000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Soda Italiana",
+  "nombre": "Soda Italiana — Frutos Rojos Copa",
   "precio": 14800,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Limonada De Menta",
+  "nombre": "Soda Italiana — Frutos Amarillos Copa",
+  "precio": 14800,
+  "categoria": "Bebidas"
+ },
+ {
+  "nombre": "Limonada De Menta — Vaso 16 Oz",
   "precio": 10000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Limonada Mango Biche",
+  "nombre": "Limonada Mango Biche — Vaso 16 Oz",
   "precio": 12000,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Jugos En Leche",
+  "nombre": "Jugos En Leche — Mango Leche",
   "precio": 11500,
   "categoria": "Bebidas"
  },
  {
-  "nombre": "Club Colombia",
-  "precio": 6500,
-  "categoria": "Cervezas"
+  "nombre": "Jugos En Leche — Mora Leche",
+  "precio": 11500,
+  "categoria": "Bebidas"
  },
  {
-  "nombre": "Cannabis Seena Ewa",
-  "precio": 12000,
-  "categoria": "Cervezas"
+  "nombre": "Jugos En Leche — Maracuya Leche",
+  "precio": 11500,
+  "categoria": "Bebidas"
  },
  {
-  "nombre": "Aguila light",
-  "precio": 6500,
-  "categoria": "Cervezas"
+  "nombre": "Jugos En Leche — Lulo Leche",
+  "precio": 11500,
+  "categoria": "Bebidas"
  },
  {
-  "nombre": "Stella artois",
-  "precio": 12000,
-  "categoria": "Cervezas"
+  "nombre": "Sandwich De Tomates Y Jamon Serrano — Personal",
+  "precio": 31900,
+  "categoria": "Brunch"
  },
  {
-  "nombre": "Cerveza Amanecera Y Veremos",
-  "precio": 16000,
-  "categoria": "Cervezas"
+  "nombre": "Americano — Taza",
+  "precio": 5500,
+  "categoria": "Brunch"
  },
  {
-  "nombre": "Tres Cordilleras Rosada",
+  "nombre": "Americano — Suave",
+  "precio": 5500,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Espresso — Taza",
+  "precio": 5000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Sandwich Diavolla — Sandwich De Foccacia",
+  "precio": 31900,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Capuccino — Personal",
+  "precio": 8600,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Torta — Chocolate Cubiertas Con Granola",
+  "precio": 9900,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Torta — Vainilla Rellanas Con Mermelada Frutos Rojos",
+  "precio": 9900,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Cuadrito De Focaccia — Peperoni",
+  "precio": 13000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Cuadrito De Focaccia — Napolitano",
   "precio": 9000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Cuadrito De Focaccia — Champiñones Con Crema",
+  "precio": 10000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Cuadrito De Focaccia — Serrano Con Rugula",
+  "precio": 15000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Cuadrito De Focaccia — Peperoni Con Burrata & Miel Pícate",
+  "precio": 15000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Sandwich Fungi & Melanzane — Personal",
+  "precio": 31900,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Porcion Focaccia — Focaccia Entera",
+  "precio": 6000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Porcion Focaccia — Focaccia Con Muzza",
+  "precio": 15000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Porcion Focaccia — Focaccia Medio Dia",
+  "precio": 2000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Porcion Focaccia — Focaccia Muzza, Tomates & Rugula",
+  "precio": 19000,
+  "categoria": "Brunch"
+ },
+ {
+  "nombre": "Club Colombia — Lata",
+  "precio": 6500,
   "categoria": "Cervezas"
  },
  {
-  "nombre": "Cerveza Rubisima",
-  "precio": 16000,
+  "nombre": "Club Colombia — Cerveza Club Michelada",
+  "precio": 8000,
   "categoria": "Cervezas"
  },
  {
-  "nombre": "Cerveza Mangozadera",
-  "precio": 16000,
-  "categoria": "Cervezas"
- },
- {
-  "nombre": "Cerveza Piper Ipa",
-  "precio": 16000,
-  "categoria": "Cervezas"
- },
- {
-  "nombre": "Casilda",
-  "precio": 16000,
-  "categoria": "Cervezas"
- },
- {
-  "nombre": "Corona 330 Ml",
+  "nombre": "Cannabis Seena Ewa — Botella 330 Ml",
   "precio": 12000,
   "categoria": "Cervezas"
  },
  {
-  "nombre": "Club Roja lata 330 ml",
+  "nombre": "Cannabis Seena Ewa — Heineken Zero Michelada",
   "precio": 7000,
   "categoria": "Cervezas"
  },
  {
-  "nombre": "Club Trigo",
+  "nombre": "Aguila Light — Lata",
   "precio": 6500,
   "categoria": "Cervezas"
  },
  {
-  "nombre": "Corona Cero Alcohol",
+  "nombre": "Aguila Light — Aguila Michelada",
+  "precio": 8000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Stella Artois — Stella Artois 300 Ml",
+  "precio": 12000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cerveza Amanecera Y Veremos — Botella 330 Ml",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cerveza Rubisima — Botella 330 Ml",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Tres Cordilleras Rosada — Botella 330 Ml",
+  "precio": 9000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cerveza Mangozadera — Botella 330 Ml",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Cerveza Piper Ipa — Botella 330 Ml",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Corona 330 Ml — Corona Botella 330 Ml",
+  "precio": 12000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Casilda — Botella 330 Ml",
+  "precio": 16000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Club Roja Lata 330 Ml — Lata 330 Ml",
+  "precio": 7000,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Bbc Rose Lata 269 Ml — Lata 269 Ml",
   "precio": 10000,
   "categoria": "Cervezas"
  },
  {
-  "nombre": "Bbc Rose Lata 269 Ml",
+  "nombre": "Club Trigo — Lata 330 Ml",
+  "precio": 6500,
+  "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Corona Cero Alcohol — Botella 330 Ml",
   "precio": 10000,
   "categoria": "Cervezas"
  },
  {
-  "nombre": "Poker",
+  "nombre": "Poker — Lata 330 Ml",
   "precio": 5500,
   "categoria": "Cervezas"
+ },
+ {
+  "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Carnes",
+  "precio": 16000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Pollo Champiñones",
+  "precio": 16000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Samba",
+  "precio": 16000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Pancho Villa",
+  "precio": 16000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Margarita",
+  "precio": 16000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Hawaiana",
+  "precio": 16000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Combo De La Casa + Gaseosa 1.5 Lts — Pizza Mediana En Combo + Gaseosa 1.5 Lts",
+  "precio": 58000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Combo De La Casa + Gaseosa 1.5 Lts — Pizza Grande En Combo + Gaseosa 1.5 Lts",
+  "precio": 73000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Combo Deluxe Pizza + Gaseosa 1.5 Lts — Deluxe Mediana + Gaseosa 1.5 Lts",
+  "precio": 66000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Combo Deluxe Pizza + Gaseosa 1.5 Lts — Grande + Gaseosa 1.5 Lts",
+  "precio": 80000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Slice + Cerveza — Pizza Slice Carnes",
+  "precio": 17000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Slice + Cerveza — Pizza Slice Póllo Champiñon",
+  "precio": 17000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Slice + Cerveza — Pizza Slice Samba",
+  "precio": 17000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Slice + Cerveza — Pizza Slice Gorgona",
+  "precio": 17000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Slice + Cerveza — Pizza Slice Margarita",
+  "precio": 17000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pizza Slice + Cerveza — Pizza Slice Hawaiana",
+  "precio": 17000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Mixta + Focaccia",
+  "precio": 28000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Pollo Champiñon + Focaccia",
+  "precio": 28000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Boloñesa + Focaccia",
+  "precio": 28000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Vegetariana+ Focaccia",
+  "precio": 28000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Mexicana + Focaccia",
+  "precio": 29900,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Sopa De Tomate + Proteina + Ensalada + Focaccia",
+  "precio": 32000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pasta Larga Lunch — Pollo Con Champiñones",
+  "precio": 23000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pasta Larga Lunch — Boloñesa",
+  "precio": 23000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pasta Larga Lunch — Napolitana",
+  "precio": 23000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pasta Larga Lunch — Tres Quesos",
+  "precio": 25000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pasta Larga Lunch — Carbonara",
+  "precio": 26000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Pasta Larga Lunch — Frutos Del Mar",
+  "precio": 32000,
+  "categoria": "Combos"
+ },
+ {
+  "nombre": "Ensalada De Burrata & Tomates — Entrada",
+  "precio": 28000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Ensalada De Burrata & Tomates — Con Jamón Serrano Sobre El Baguette",
+  "precio": 35000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Ensalada De Burrata & Tomates — Burrata Personal",
+  "precio": 15000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Pancitos Bicicleta Con Salsa Napolitana — Personal",
+  "precio": 11000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Pancitos Bicicleta Con Salsa Napolitana — Pancitos Bicicleta Con De Salsa Napolitana",
+  "precio": 9000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Pan Baguette Con Jamon Serrano Y Burrata. — Unidad",
+  "precio": 28000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Pan Baguette Con Jamon Serrano Y Burrata. — Con Tomate Confitado & Burrata",
+  "precio": 26000,
+  "categoria": "Entradas"
+ },
+ {
+  "nombre": "Lasaña & Pan Baguette — Cazuela Boloñesa",
+  "precio": 29300,
+  "categoria": "Lasaña"
+ },
+ {
+  "nombre": "Lasaña & Pan Baguette — Cazuela Pollo Champiñones",
+  "precio": 29300,
+  "categoria": "Lasaña"
+ },
+ {
+  "nombre": "Lasaña & Pan Baguette — Cazuela Vegetariana Vegetales Y Rugula",
+  "precio": 28000,
+  "categoria": "Lasaña"
+ },
+ {
+  "nombre": "Lasaña & Pan Baguette — Cazuela Mixta",
+  "precio": 32000,
+  "categoria": "Lasaña"
+ },
+ {
+  "nombre": "Lasaña & Pan Baguette — Lasaña Vegetariana Setas Champiñon & Orellana",
+  "precio": 28000,
+  "categoria": "Lasaña"
+ },
+ {
+  "nombre": "Lasaña & Pan Baguette — Lasaña Mexicana",
+  "precio": 32000,
+  "categoria": "Lasaña"
+ },
+ {
+  "nombre": "Pizza Mitad Y Mitad 2 Sabores — Mediana 6 Porciones (30 Cm)",
+  "precio": 48000,
+  "categoria": "Pizza Combinada"
+ },
+ {
+  "nombre": "Pizza Mitad Y Mitad 2 Sabores — Grande 8 Porciones (40 Cm)",
+  "precio": 63000,
+  "categoria": "Pizza Combinada"
+ },
+ {
+  "nombre": "Pizza Mitad Y Mitad De Luxe 2 Sabores — Mediana 6 Porciones (30 Cm)",
+  "precio": 57000,
+  "categoria": "Pizza Combinada"
+ },
+ {
+  "nombre": "Pizza Mitad Y Mitad De Luxe 2 Sabores — Grande 8 Porciones (40 Cm)",
+  "precio": 71000,
+  "categoria": "Pizza Combinada"
+ },
+ {
+  "nombre": "Bicicleta Pegaso — Personal 4 Porciones (20 Cm)",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bicicleta Pegaso — Mediana 6 Porciones (30 Cm)",
+  "precio": 43700,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bicicleta Pegaso — Grande 8 Porciones (40 Cm)",
+  "precio": 61900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Hawaiana — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Hawaiana — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Hawaiana — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Margarita — Personal 4 Porciones (20 Cm)",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Margarita — Mediana 6 Porciones (30 Cm)2",
+  "precio": 43700,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Margarita — Grande 8 Porciones (40 Cm)",
+  "precio": 61900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Samba — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Samba — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Samba — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Carnes — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Carnes — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Carnes — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bici Bbq — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bici Bbq — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bici Bbq — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Peperoni — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Peperoni — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Peperoni — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Sprint Monticoro — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Sprint Monticoro — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Sprint Monticoro — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "La Rueda Gorgona — Personal 4 Porciones (20 Cm)",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "La Rueda Gorgona — Mediana 6 Porciones (30 Cm)",
+  "precio": 43700,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "La Rueda Gorgona — Grande 8 Porciones (40 Cm)",
+  "precio": 61900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Andina — Personal 4 Porciones (20 Cm)",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Andina — Mediana 6 Porciones (30 Cm)",
+  "precio": 43700,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Andina — Grande 8 Porciones (40 Cm)",
+  "precio": 61900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pancho Villa En Bicicleta — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pancho Villa En Bicicleta — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pancho Villa En Bicicleta — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bicicleta Monareta — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bicicleta Monareta — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bicicleta Monareta — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Doña Guayaba — Personal 4 Porciones (20 Cm)",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Doña Guayaba — Mediana 6 Porciones (30 Cm)",
+  "precio": 43700,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Doña Guayaba — Grande 8 Porciones (40 Cm)",
+  "precio": 61900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bulevar — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bulevar — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Bulevar — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "La Vuelta Argentina — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "La Vuelta Argentina — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "La Vuelta Argentina — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Porción De Pizza — Porción De Pizza Peperoni",
+  "precio": 12000,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Porción De Pizza — Porción De Pizza Hawaiana",
+  "precio": 12000,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Porción De Pizza — Porción De Pizza Samba",
+  "precio": 12000,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Porción De Pizza — Porción De Pizza 3 Carnes",
+  "precio": 12000,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Porción De Pizza — Porción De Pizza Pollo & Champiñones",
+  "precio": 12000,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Porción De Pizza — Porción De Pizza Margarita",
+  "precio": 11000,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pollo Con Champiñones — Personal 4 Porciones (20 Cm)",
+  "precio": 28800,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pollo Con Champiñones — Mediana 6 Porciones (30 Cm)",
+  "precio": 47600,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pollo Con Champiñones — Grande 8 Porciones (40 Cm)",
+  "precio": 62900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Margarita Latina — Personal 20 Cm",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Margarita Latina — Mediana",
+  "precio": 43700,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Margarita Latina — Grande",
+  "precio": 61900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pizza Solo Jamon — Personal 4 Porciones (20 Cm)",
+  "precio": 27200,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pizza Solo Jamon — Mediana 6 Porciones (30 Cm)",
+  "precio": 43700,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pizza Solo Jamon — Grande 8 Porciones (40 Cm)",
+  "precio": 61900,
+  "categoria": "Pizzas De La Casa"
+ },
+ {
+  "nombre": "Pollo Salame E Rucula — Personal 4 Porciones (20 Cm)",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pollo Salame E Rucula — Mediana 6 Porciones (30 Cm)",
+  "precio": 56700,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pollo Salame E Rucula — Grande 8 Porciones (40 Cm)",
+  "precio": 72900,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Serrana Di Buffala — Personal 4 Porciones (20 Cm)",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Serrana Di Buffala — Mediana 6 Porciones (30 Cm)",
+  "precio": 56700,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Serrana Di Buffala — Grande 8 Porciones (40 Cm)",
+  "precio": 72900,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Quattro Formaggi — Personal 4 Porciones (20 Cm)",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Quattro Formaggi — Mediana 6 Porciones (30 Cm)",
+  "precio": 56700,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Quattro Formaggi — Grande 8 Porciones (40 Cm)",
+  "precio": 72900,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pollo E Panceta Al Pomodoro — Personal 4 Porciones (20 Cm)",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pollo E Panceta Al Pomodoro — Mediana 6 Porciones (30 Cm)",
+  "precio": 56700,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pollo E Panceta Al Pomodoro — Grande 8 Porciones (40 Cm)",
+  "precio": 72900,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Mi Diavolla — Pequeña 20 Cm",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Mi Diavolla — Mediana 6 Porciones (30 Cm)",
+  "precio": 56700,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Mi Diavolla — Grande 8 Porciones (40 Cm)",
+  "precio": 72900,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Suprema — Personal 4 Porciones",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Suprema — Mediana 6 Porciones",
+  "precio": 56700,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Suprema — Grande 8 Porciones",
+  "precio": 72900,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Napolitana — Pequeña 20 Cm",
+  "precio": 34600,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Napolitana — Mediana 6 Porciones",
+  "precio": 56700,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Napolitana — Grande 8 Porciones (40 Cm)",
+  "precio": 72900,
+  "categoria": "Pizzas De Luxe"
+ },
+ {
+  "nombre": "Pizza Pantalon Con Salsa Chan Chan — Pollo Champiñon",
+  "precio": 32600,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon Con Salsa Chan Chan — Hawaiano",
+  "precio": 32600,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon Con Salsa Chan Chan — Samba",
+  "precio": 32600,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon Con Salsa Chan Chan — Boloñesa",
+  "precio": 32600,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon Con Salsa Chan Chan — Chan Chan",
+  "precio": 32600,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon — Napolitano",
+  "precio": 36500,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon — Diavolla",
+  "precio": 36500,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon — Tres Quesos",
+  "precio": 36500,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Pizza Pantalon — Serrano Y Tomates",
+  "precio": 36500,
+  "categoria": "Pizzas Pantalon"
+ },
+ {
+  "nombre": "Rustica Di Pollo A Pancetta — Personal 4 Porciones (20 Cm)",
+  "precio": 34600,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Rustica Di Pollo A Pancetta — Mediana 6 Porciones (30 Cm)",
+  "precio": 56700,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Rustica Di Pollo A Pancetta — Grande 8 Porciones (40 Cm)",
+  "precio": 72900,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata Bonita — Personal 4 Porciones (20 Cm)",
+  "precio": 44500,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata Bonita — Mediana 6 Porciones (30 Cm)",
+  "precio": 68000,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata Bonita — Grande 8 Porciones (40 Cm)",
+  "precio": 83900,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata & Tomates Confitados — Personal 4 Porciones (20 Cm)",
+  "precio": 44500,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata & Tomates Confitados — Mediana 6 Porciones (30 Cm)",
+  "precio": 68000,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata & Tomates Confitados — Grande 8 Porciones (40 Cm)",
+  "precio": 83900,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata Y Jamon Serrano, — Personal 4 Porciones (20 Cm)",
+  "precio": 44500,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata Y Jamon Serrano, — Mediana 6 Porciones (30 Cm)",
+  "precio": 68000,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Pizza Burrata Y Jamon Serrano, — Grande 8 Porciones (40 Cm)",
+  "precio": 83900,
+  "categoria": "Pizzas Premium"
+ },
+ {
+  "nombre": "Gorgona Vegana — Personal 4 Porciones (20 Cm)",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Gorgona Vegana — Mediana 6 Porciones (30 Cm)",
+  "precio": 48700,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Gorgona Vegana — Grande 8 Porciones (40 Cm)",
+  "precio": 67900,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Andina Vegana — Personal 4 Porciones (20 Cm)",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Andina Vegana — Mediana 6 Porciones (30 Cm)",
+  "precio": 48700,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Andina Vegana — Grande 8 Porciones (40 Cm)",
+  "precio": 67900,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Margarita Vegana — Personal 4 Porciones (20 Cm)",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Margarita Vegana — Mediana 6 Porciones (30 Cm)",
+  "precio": 48700,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Margarita Vegana — Grande 8 Porciones (40 Cm)",
+  "precio": 67900,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Pinchada Vegana — Personal 4 Porciones (20 Cm)",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Pinchada Vegana — Mediana 6 Porciones (30 Cm)",
+  "precio": 48700,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Pinchada Vegana — Grande 8 Porciones (40 Cm)",
+  "precio": 67900,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Pegaso — Personal 20 Cm",
+  "precio": 29200,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Pegaso — Mediana 6 Porciones (30 Cm)",
+  "precio": 48000,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Pegaso — Grande 8 Porciones (40 Cm)",
+  "precio": 67900,
+  "categoria": "Pizzas Veganas"
+ },
+ {
+  "nombre": "Adición Con Aguardiente",
+  "precio": 4000,
+  "categoria": "Adición De Licor"
+ },
+ {
+  "nombre": "Adición Con Baileys",
+  "precio": 8000,
+  "categoria": "Adición De Licor"
+ },
+ {
+  "nombre": "Adición Con Baileys",
+  "precio": 6000,
+  "categoria": "Adición De Licor"
+ },
+ {
+  "nombre": "Adición Con Tequila",
+  "precio": 4000,
+  "categoria": "Adición De Licor"
+ },
+ {
+  "nombre": "Adición Albahaca Fresca",
+  "precio": 1000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Berenjena Asada",
+  "precio": 4000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Bocconcini",
+  "precio": 15000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Borde Queso",
+  "precio": 6000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Borde Queso Mediana",
+  "precio": 8000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Bowl Pizza",
+  "precio": 5000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Burrata Grande",
+  "precio": 21000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Burrata Personal",
+  "precio": 14000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Cabano",
+  "precio": 4000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Carne Boloñesa",
+  "precio": 6000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Cebolla",
+  "precio": 2000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Cebolla Morada",
+  "precio": 2000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Champiñones",
+  "precio": 3000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Helado",
+  "precio": 6000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Jalapeños",
+  "precio": 2000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Jamon",
+  "precio": 4000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Jamon Serrano",
+  "precio": 7000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Maduro",
+  "precio": 3000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Maíz Dulce",
+  "precio": 2000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Mozarella",
+  "precio": 5000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Parmesano",
+  "precio": 3000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Parmesano 1 Onza",
+  "precio": 4000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Pepperoni",
+  "precio": 4000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Pimentón",
+  "precio": 2000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Piña",
+  "precio": 2000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Pollo",
+  "precio": 5000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Queso",
+  "precio": 5000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Queso Vegano Pizza Grande",
+  "precio": 8000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Queso Vegano Pizza Mediana",
+  "precio": 7000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Rugula",
+  "precio": 2000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Salami",
+  "precio": 4000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Tocineta",
+  "precio": 5000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Tomate",
+  "precio": 2000,
+  "categoria": "Adiciones"
+ },
+ {
+  "nombre": "Adición Ginebra Shot 2 Onzas",
+  "precio": 6000,
+  "categoria": "Licor"
+ },
+ {
+  "nombre": "Adición Michelado",
+  "precio": 1500,
+  "categoria": "Licor"
+ },
+ {
+  "nombre": "Adición Viche Shot 2 Onzas",
+  "precio": 5000,
+  "categoria": "Licor"
+ },
+ {
+  "nombre": "Adición Almibar De Cereza.",
+  "precio": 1000,
+  "categoria": "Notas De Sabores"
+ },
+ {
+  "nombre": "Adición Zumo De Limón",
+  "precio": 1000,
+  "categoria": "Notas De Sabores"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Bbq",
+  "precio": 11999,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Chocolate",
+  "precio": 12000,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Gorgona",
+  "precio": 12000,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Hawaiana",
+  "precio": 11000,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Margarita",
+  "precio": 11000,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Napolitana",
+  "precio": 8999,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Pancho Villa",
+  "precio": 12000,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Peperoni",
+  "precio": 11000,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Porcion Pizza Pollo Champiñones",
+  "precio": 11000,
+  "categoria": "Slide"
+ },
+ {
+  "nombre": "Adición Cola Y Pola 1.5 Lts",
+  "precio": 3000,
+  "categoria": "Gaseosas En Combo"
+ },
+ {
+  "nombre": "Adición Heineken",
+  "precio": 2000,
+  "categoria": "Gaseosas En Combo"
+ },
+ {
+  "nombre": "Adición Caja Grande",
+  "precio": 4000,
+  "categoria": "Caja Para Llevar"
+ },
+ {
+  "nombre": "Adición Caja Mediana",
+  "precio": 3000,
+  "categoria": "Caja Para Llevar"
+ },
+ {
+  "nombre": "Adición Caja Personal",
+  "precio": 2000,
+  "categoria": "Caja Para Llevar"
  }
 ]
