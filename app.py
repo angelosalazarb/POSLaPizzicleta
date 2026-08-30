@@ -62,6 +62,10 @@ CREATE TABLE IF NOT EXISTS aperturas (
     conteo_efectivo TEXT NOT NULL DEFAULT '',
     guardado_en TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS mesas (
+    nombre TEXT PRIMARY KEY,
+    orden INTEGER NOT NULL DEFAULT 0
+);
 CREATE TABLE IF NOT EXISTS cierres (
     fecha TEXT PRIMARY KEY,
     base INTEGER NOT NULL DEFAULT 0,
@@ -117,7 +121,8 @@ METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
 TIPOS_MOVIMIENTO = ("Retiro", "Pago proveedor", "Gasto", "Propinas")
 ORIGENES_MOVIMIENTO = ("Efectivo", "Transferencia")  # de dónde sale la plata
 
-NUM_MESAS = 8              # número de mesas del local: editar aquí
+NUM_MESAS = 8              # solo la semilla inicial; las mesas se editan desde la UI
+MESAS_FIJAS = ("Para llevar", "Domicilio")  # canales fijos, no son mesas editables
 RETENCION_PAGADA_MIN = 10  # minutos que una cuenta pagada sigue visible en caja
 SEMAFORO_MIN = [10, 18]    # verde < 10 min, amarillo 10–18, rojo > 18
 # ciclo operativo de la cuenta; solo avanza, nunca retrocede
@@ -136,6 +141,11 @@ def init_db():
         # una cerrada es por definición pagada (facturas de antes de la columna etapa)
         db.execute("UPDATE facturas SET etapa='pagada'"
                    " WHERE estado='cerrada' AND etapa='en_progreso'")
+        # semilla de mesas la primera vez; después se administran desde la UI
+        if db.execute("SELECT COUNT(*) FROM mesas").fetchone()[0] == 0:
+            for i in range(1, NUM_MESAS + 1):
+                db.execute("INSERT INTO mesas (nombre, orden) VALUES (?, ?)",
+                           (f"Mesa {i}", i))
 
 
 def calcular_totales(items, descuento_tipo, descuento_valor,
@@ -191,6 +201,48 @@ def get_config():
         "retencion_pagada_min": RETENCION_PAGADA_MIN,
         "semaforo_min": SEMAFORO_MIN,
     })
+
+
+# ---------- mesas configurables ----------
+
+@app.get("/api/mesas")
+def listar_mesas():
+    db = get_db()
+    rows = db.execute("SELECT nombre FROM mesas ORDER BY orden, nombre").fetchall()
+    return jsonify({"mesas": [r["nombre"] for r in rows]})
+
+
+@app.post("/api/mesas")
+def crear_mesa():
+    db = get_db()
+    nombre = str((request.get_json(force=True) or {}).get("nombre") or "").strip()[:20]
+    if not nombre:
+        return jsonify({"error": "la mesa necesita un nombre"}), 400
+    if nombre in MESAS_FIJAS:
+        return jsonify({"error": f"«{nombre}» ya existe como opción fija"}), 409
+    if db.execute("SELECT 1 FROM mesas WHERE nombre = ?", (nombre,)).fetchone():
+        return jsonify({"error": f"la mesa «{nombre}» ya existe"}), 409
+    orden = db.execute("SELECT COALESCE(MAX(orden), 0) + 1 AS o FROM mesas").fetchone()["o"]
+    db.execute("INSERT INTO mesas (nombre, orden) VALUES (?, ?)", (nombre, orden))
+    db.commit()
+    return listar_mesas(), 201
+
+
+@app.delete("/api/mesas/<path:nombre>")
+def eliminar_mesa(nombre):
+    """Quita la mesa de la lista; las cuentas viejas conservan su rótulo."""
+    db = get_db()
+    nombre = nombre.strip()
+    if db.execute("SELECT 1 FROM mesas WHERE nombre = ?", (nombre,)).fetchone() is None:
+        return jsonify({"error": "esa mesa no existe"}), 404
+    abiertas = db.execute(
+        "SELECT COUNT(*) AS c FROM facturas WHERE estado='abierta' AND mesa = ?",
+        (nombre,)).fetchone()["c"]
+    if abiertas:
+        return jsonify({"error": f"la mesa «{nombre}» tiene cuentas abiertas"}), 409
+    db.execute("DELETE FROM mesas WHERE nombre = ?", (nombre,))
+    db.commit()
+    return listar_mesas()
 
 
 # ---------- API facturas ----------

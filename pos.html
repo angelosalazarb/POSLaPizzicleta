@@ -157,6 +157,36 @@ input, select { font:inherit; color:inherit; }
 .mesa-cuenta .badge-etapa { font-size:9.5px; padding:1px 8px; }
 .mesa-cuenta .timer { font-size:10px; padding:1px 7px; }
 
+/* edición de mesas */
+.mesa-tile.editable { align-items:center; justify-content:center; gap:10px; cursor:default; }
+.mesa-tile.editable .mesa-nombre { color:var(--tinta); }
+.mesa-fija { font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+.btn-del-mesa {
+  display:flex; align-items:center; gap:6px;
+  min-height:40px; padding:0 14px; border-radius:100px;
+  border:1.5px solid var(--error); color:var(--error);
+  font-weight:600; font-size:13px;
+  transition:background var(--trans);
+}
+.btn-del-mesa:hover { background:var(--error-dim); }
+.btn-del-mesa svg { width:15px; height:15px; }
+.mesa-add { border-style:dashed; border-color:var(--naranja-tx); gap:8px; }
+.mesa-add input {
+  width:100%; min-height:42px; padding:0 12px;
+  border:1.5px solid var(--linea); border-radius:10px; background:var(--papel);
+  font-size:14px;
+}
+.mesa-add input:focus { border-color:var(--azul); outline:none; }
+.btn-agregar-mesa {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  min-height:40px; border-radius:100px;
+  border:1.5px dashed var(--naranja-tx); color:var(--naranja-tx);
+  font-weight:600; font-size:13px;
+  transition:background var(--trans);
+}
+.btn-agregar-mesa:hover { background:var(--naranja-dim); }
+.btn-agregar-mesa svg { width:15px; height:15px; }
+
 .kanban { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:14px; }
 @media (max-width: 1020px) {
   .kanban { display:flex; overflow-x:auto; padding-bottom:10px; }
@@ -863,6 +893,8 @@ const state = {
   activaId: null,
   vista: 'tablero',    // 'tablero' | 'cuenta' | 'ventas'
   seccion: 'mesas',    // sección activa del tablero: 'mesas' | 'pedidos'
+  mesas: [],           // nombres de mesa configurables, del servidor
+  editandoMesas: false, // modo edición de la grilla de mesas
   guardados: new Map(), // id -> timeout de debounce
   pendientes: new Set(), // ids con cambios sin guardar
   config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]},
@@ -873,15 +905,42 @@ const state = {
 
 const facturaActiva = () => state.facturas.find(f => f.id === state.activaId) || null;
 
+const MESAS_FIJAS = ['Para llevar', 'Domicilio'];
+
 const OPCIONES_MESA = () => {
-  const o = [];
-  for (let i = 1; i <= state.config.num_mesas; i++) o.push('Mesa ' + i);
-  o.push('Para llevar', 'Domicilio');
+  // mesas configurables del servidor; si aún no cargan, la semilla clásica
+  const o = state.mesas.length ? [...state.mesas]
+    : Array.from({length: state.config.num_mesas}, (_, i) => 'Mesa ' + (i + 1));
+  o.push(...MESAS_FIJAS);
   return o;
 };
 
 async function cargarConfig() {
   try { state.config = {...state.config, ...(await api('/api/config'))}; } catch {}
+}
+
+async function cargarMesas() {
+  try { state.mesas = (await api('/api/mesas')).mesas || []; } catch {}
+}
+
+async function crearMesa(nombre) {
+  nombre = (nombre || '').trim();
+  if (!nombre) { toast('Escribí el nombre de la mesa', true); return; }
+  try {
+    state.mesas = (await api('/api/mesas', {method:'POST', body:{nombre}})).mesas;
+    renderTablero();
+    toast(`Mesa «${nombre}» creada`);
+    const inp = $('#inpNuevaMesa');
+    if (inp) inp.focus();
+  } catch (e) { toast(e.message, true); }
+}
+
+async function eliminarMesa(nombre) {
+  try {
+    state.mesas = (await api('/api/mesas/' + encodeURIComponent(nombre), {method:'DELETE'})).mesas;
+    renderTablero();
+    toast(`Mesa «${nombre}» eliminada`);
+  } catch (e) { toast(e.message, true); }
 }
 
 /* ---------- menú (carta niceeat) ---------- */
@@ -1228,15 +1287,27 @@ function renderTablero() {
       <span class="tot">${fmt(f.total + (f.propina || 0))}</span>
     </button>`;
 
+  const editando = state.editandoMesas && state.seccion === 'mesas';
   const tiles = nombres.map(m => {
     const cs = porMesa.get(m) || [];
-    if (!cs.length) return `<button type="button" class="mesa-tile libre" data-mesa="${esc(m)}">
+    if (!cs.length) {
+      if (editando) {
+        // en modo edición las libres se eliminan; las fijas solo se marcan
+        return `<div class="mesa-tile libre editable">
+          <span class="mesa-nombre">${esc(m)}</span>
+          ${MESAS_FIJAS.includes(m) || !state.mesas.includes(m)
+            ? '<span class="mesa-fija">fija</span>'
+            : `<button type="button" class="btn-del-mesa" data-delmesa="${esc(m)}" aria-label="Eliminar ${esc(m)}">${ICONOS.borrar} Eliminar</button>`}
+        </div>`;
+      }
+      return `<button type="button" class="mesa-tile libre" data-mesa="${esc(m)}">
       <span class="mesa-nombre">${esc(m)}</span>
       <span class="mesa-abrir">+ abrir cuenta</span>
     </button>`;
+    }
     return `<div class="mesa-tile ocupada">
       <span class="mesa-nombre">${esc(m)}
-        <button type="button" class="mesa-mas" data-mesa="${esc(m)}" aria-label="Otra cuenta en ${esc(m)}">+</button>
+        ${editando ? '<span class="mesa-fija">en uso</span>' : `<button type="button" class="mesa-mas" data-mesa="${esc(m)}" aria-label="Otra cuenta en ${esc(m)}">+</button>`}
       </span>
       ${cs.map(chipCuenta).join('')}
     </div>`;
@@ -1246,6 +1317,13 @@ function renderTablero() {
     tiles.push(`<div class="mesa-tile ocupada">
       <span class="mesa-nombre">Sin mesa</span>
       ${sinMesa.map(chipCuenta).join('')}
+    </div>`);
+  }
+  if (editando) {
+    tiles.push(`<div class="mesa-tile mesa-add">
+      <span class="mesa-nombre">Nueva mesa</span>
+      <input id="inpNuevaMesa" type="text" maxlength="20" placeholder="Mesa 9, Barra, Terraza...">
+      <button type="button" class="btn-agregar-mesa" id="btnCrearMesa">${ICONOS.mas} Agregar</button>
     </div>`);
   }
 
@@ -1267,6 +1345,7 @@ function renderTablero() {
     : `<div class="mesas-grid">${tiles.join('')}</div>`;
   cont.innerHTML = `<div class="tablero">
     <div class="tab-head">
+      ${state.seccion === 'mesas' ? `<button type="button" class="btn-volver" id="btnEditarMesas">${editando ? 'Listo' : ICONOS.editar + ' Editar mesas'}</button>` : ''}
       <button type="button" class="btn btn-primario" id="btnNuevaTablero">${ICONOS.mas} Nueva cuenta</button>
     </div>
     ${cuerpo}
@@ -1274,6 +1353,22 @@ function renderTablero() {
   pintarSecciones();
 
   $('#btnNuevaTablero').addEventListener('click', () => nuevaFactura());
+  const btnEd = $('#btnEditarMesas');
+  if (btnEd) btnEd.addEventListener('click', () => {
+    state.editandoMesas = !state.editandoMesas;
+    renderTablero();
+    const inp = $('#inpNuevaMesa');
+    if (inp) inp.focus();
+  });
+  cont.querySelectorAll('[data-delmesa]').forEach(b =>
+    b.addEventListener('click', () => eliminarMesa(b.dataset.delmesa)));
+  const inpMesa = $('#inpNuevaMesa');
+  if (inpMesa) {
+    $('#btnCrearMesa').addEventListener('click', () => crearMesa(inpMesa.value));
+    inpMesa.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); crearMesa(inpMesa.value); }
+    });
+  }
   cont.querySelectorAll('[data-mesa]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
     nuevaFactura(b.dataset.mesa);
@@ -2636,7 +2731,7 @@ setInterval(refrescarSiInactivo, 60000);
 
 (async () => {
   try {
-    await Promise.all([cargarFacturas(), cargarMenu(), cargarConfig(), cargarApertura()]);
+    await Promise.all([cargarFacturas(), cargarMenu(), cargarConfig(), cargarMesas(), cargarApertura()]);
     if (state.vista === 'tablero') renderTablero(); // ya con config y menú cargados
     await cargarTotalDia();
     // primera apertura del día: pedir la base contada por denominaciones
