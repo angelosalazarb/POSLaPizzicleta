@@ -159,6 +159,11 @@ def init_db():
         # una cerrada es por definición pagada (facturas de antes de la columna etapa)
         db.execute("UPDATE facturas SET etapa='pagada'"
                    " WHERE estado='cerrada' AND etapa='en_progreso'")
+        # histórico: en una cuenta entregada todos sus ítems quedaron entregados
+        # (antes el chulito por ítem era opcional; ahora 'entregada' lo implica)
+        db.execute(
+            "UPDATE items SET entregado=1 WHERE entregado=0 AND factura_id IN"
+            " (SELECT id FROM facturas WHERE etapa IN ('entregada','pagada'))")
         # semilla de mesas la primera vez; después se administran desde la UI
         if db.execute("SELECT COUNT(*) FROM mesas").fetchone()[0] == 0:
             for i in range(1, NUM_MESAS + 1):
@@ -381,6 +386,14 @@ def guardar_factura(fid):
         (descuento_tipo, descuento_valor, subtotal, total, nota,
          propina_tipo, propina_valor, propina, metodo_pago, mesa, fid),
     )
+    # si a una cuenta ya entregada le llega un pedido nuevo (ítem sin chulito),
+    # vuelve a cocina: la comanda imprimirá solo lo pendiente
+    if row["etapa"] == "entregada" and any(
+            not i["entregado"] and (i["descripcion"] or i["precio_unitario"] > 0)
+            for i in items_in):
+        db.execute(
+            "UPDATE facturas SET etapa='enviada', fecha_entregada=NULL WHERE id=?",
+            (fid,))
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))
@@ -424,6 +437,10 @@ def cambiar_etapa(fid):
             f"UPDATE facturas SET etapa=?, {campo}=COALESCE({campo}, ?) WHERE id=?",
             (nueva, datetime.now().isoformat(timespec="seconds"), fid),
         )
+        if nueva == "entregada":
+            # entregada = todo entregado; lo que se agregue después nace sin
+            # chulito y eso la devuelve a cocina (ver guardar_factura)
+            db.execute("UPDATE items SET entregado=1 WHERE factura_id=?", (fid,))
         db.commit()
         row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))
@@ -472,6 +489,7 @@ def archivar_factura(fid):
         " fecha_entregada=COALESCE(fecha_entregada, ?) WHERE id=?",
         (datetime.now().isoformat(timespec="seconds"), fid),
     )
+    db.execute("UPDATE items SET entregado=1 WHERE factura_id=?", (fid,))
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))
@@ -1018,6 +1036,12 @@ def comanda(fid):
     auto_print = request.args.get("print") == "1"
 
     items = [i for i in f["items"] if (i["descripcion"] or "").strip()]
+    # a cocina va solo lo pendiente (sin chulito de entregado); si ya está todo
+    # entregado la reimpresión muestra la comanda completa
+    pendientes = [i for i in items if not i["entregado"]]
+    es_adicion = bool(pendientes) and len(pendientes) < len(items)
+    if pendientes:
+        items = pendientes
     mapa = _mapa_categorias()
 
     def es_bebida(desc):
@@ -1039,8 +1063,12 @@ def comanda(fid):
     mesa = f'<p class="mesa">{html.escape(f["mesa"])}</p>' if f.get("mesa") else ""
     nota = f'<p class="nota">{html.escape(f["nota"])}</p>' if f["nota"] else ""
     # el frontend marca 'enviada' antes de abrir la comanda, así que fecha_enviada
-    # no distingue la primera impresión: la reimpresión la declara la caja con ?re=1
-    reimpresion = '<p class="reimp">— REIMPRESIÓN —</p>' if request.args.get("re") == "1" else ""
+    # no distingue la primera impresión: la reimpresión la declara la caja con ?re=1;
+    # si hay ítems entregados y otros pendientes, es un pedido agregado, no un duplicado
+    if es_adicion:
+        reimpresion = '<p class="reimp">— ADICIÓN AL PEDIDO —</p>'
+    else:
+        reimpresion = '<p class="reimp">— REIMPRESIÓN —</p>' if request.args.get("re") == "1" else ""
     script = "<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150))</script>" if auto_print else ""
 
     def seccion_html(titulo, its):

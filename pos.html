@@ -2194,7 +2194,7 @@ async function guardar(f) {
   if (!state.pendientes.has(f.id)) return;
   state.pendientes.delete(f.id);
   try {
-    await api(`/api/facturas/${f.id}`, {method:'PUT', body:{
+    const r = await api(`/api/facturas/${f.id}`, {method:'PUT', body:{
       items: f.items, descuento_tipo: f.descuento_tipo,
       descuento_valor: f.descuento_valor, nota: f.nota || '',
       mesa: f.mesa || '',
@@ -2202,6 +2202,21 @@ async function guardar(f) {
       propina_valor: f.propina_valor || 0,
       metodo_pago: f.metodo_pago || 'Efectivo'
     }});
+    // el server puede devolver una cuenta entregada a cocina (pedido nuevo);
+    // se toma solo la etapa para no pisar lo que se esté editando
+    if (r.etapa !== f.etapa) {
+      f.etapa = r.etapa;
+      f.fecha_enviada = r.fecha_enviada;
+      f.fecha_entregada = r.fecha_entregada;
+      renderTabs();
+      // re-render de la cuenta solo si no interrumpe la escritura
+      if (state.vista === 'cuenta' && state.activaId === f.id &&
+          !document.activeElement?.closest?.('#vistaFactura input, #vistaFactura textarea') &&
+          !['INPUT','TEXTAREA'].includes(document.activeElement?.tagName)) {
+        renderFactura();
+      }
+      if (r.etapa === 'enviada') toast(`${f.numero} volvió a cocina: hay pedido nuevo`);
+    }
   } catch (e) {
     state.pendientes.add(f.id);
     toast('No se pudo guardar: ' + e.message, true);
