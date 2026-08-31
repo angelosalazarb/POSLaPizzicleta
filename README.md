@@ -4,6 +4,10 @@ Sistema de facturación sencillo para la sede sur mientras llega el POS definiti
 Servidor web local en el Mac; se accede desde el PC de caja por el navegador y los
 tickets se imprimen en la térmica SAT (papel POS80) desde Chrome.
 
+Tipografía: títulos en Pirata One; el cuerpo va en **Century Gothic** (usa la del
+sistema; si el equipo no la tiene carga TeX Gyre Adventor autohospedada, un clon
+libre); precios y tickets térmicos en IBM Plex Mono para que las cifras alineen.
+
 - Facturas como **pestañas** ("cuentas"): cantidad × ítem × precio, texto libre.
 - **Autocompletado desde la carta**: al escribir el ítem sugiere los productos del
   menú de niceeat (nombre, categoría y precio) y al elegir uno llena el precio solo.
@@ -22,7 +26,20 @@ tickets se imprimen en la térmica SAT (papel POS80) desde Chrome.
   producto usa qué grupos.
 - **Canal obligatorio en todo pedido**: cada cuenta debe decir si es en mesa,
   para llevar o domicilio (selector arriba, resaltado mientras falte); no deja
-  cobrar ni enviar a cocina sin elegirlo.
+  cobrar ni enviar a cocina sin elegirlo. El botón **Nueva cuenta** lo pregunta
+  de una vez en un modal: Para llevar / Domicilio como botones grandes y las
+  mesas en un desplegable con **solo las disponibles** (sin cuentas activas).
+- **Confirmación del pedido con el cliente**: si hay ítems nuevos sin confirmar
+  (primera creación o productos agregados después), volver al tablero, "A
+  cocina" y "Cobrar e imprimir" abren un modal con los ítems y valores — lo
+  nuevo marcado con badge "nuevo" / "+N nuevo" — y el botón **Confirmar pedido**
+  continúa con la acción ("Seguir editando" se queda). Sin cambios no vuelve a
+  preguntar.
+- **Pedido agregado a cuenta ya entregada**: marcar "Entregado" pone el chulito
+  a todos los ítems; si después llega un ítem nuevo (sin chulito), la cuenta
+  **vuelve sola a "En cocina"** y la comanda imprime **solo lo pendiente** con
+  el banner "— ADICIÓN AL PEDIDO —" (si todo está entregado, la reimpresión
+  sale completa).
 - **Descuento** por cuenta en $ o %, el total nunca baja de 0.
 - **Propina** debajo del descuento, en % (típico 10) o $ fijo: muestra el valor
   calculado y el **A pagar** = total + propina. Sale en el ticket y en el export.
