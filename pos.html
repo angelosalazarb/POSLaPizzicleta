@@ -157,6 +157,15 @@ input, select { font:inherit; color:inherit; }
 .mesa-cuenta .badge-etapa { font-size:9.5px; padding:1px 8px; }
 .mesa-cuenta .timer { font-size:10px; padding:1px 7px; }
 
+/* arrastrar cuentas (a una mesa o de columna en el kanban) */
+.mesa-cuenta[draggable="true"], .kcard[draggable="true"] { cursor:grab; }
+.mesa-cuenta[draggable="true"]:active, .kcard[draggable="true"]:active { cursor:grabbing; }
+.arrastrando { opacity:.4; }
+.drop-hover {
+  outline:2.5px dashed var(--naranja); outline-offset:-3px;
+  background:var(--naranja-dim) !important;
+}
+
 /* edición de mesas */
 .mesa-tile.editable { align-items:center; justify-content:center; gap:10px; cursor:default; }
 .mesa-tile.editable .mesa-nombre { color:var(--tinta); }
@@ -973,6 +982,44 @@ async function crearMesa(nombre) {
   } catch (e) { toast(e.message, true); }
 }
 
+// failsafe: si el elemento arrastrado se destruye por un re-render antes del
+// dragend, esto limpia resaltados y desbloquea el click de abrir cuenta
+function limpiarDrag() {
+  document.querySelectorAll('.drop-hover').forEach(x => x.classList.remove('drop-hover'));
+  setTimeout(() => { state.dragReciente = false; }, 150);
+}
+document.addEventListener('dragend', limpiarDrag);
+
+async function cambiarMesaFactura(id, mesa) {
+  const f = state.facturas.find(x => x.id === id);
+  if (!f || (f.mesa || '') === mesa) return;
+  try {
+    Object.assign(f, await api(`/api/facturas/${id}/mesa`, {method:'POST', body:{mesa}}));
+    renderTablero();
+    toast(mesa ? `${f.numero} → ${mesa}` : `${f.numero} quedó sin mesa`);
+  } catch (e) { toast(e.message, true); }
+}
+
+// soltar una tarjeta del kanban en otra columna: la etapa solo avanza
+async function moverEtapaDrag(id, col) {
+  const f = state.facturas.find(x => x.id === id);
+  if (!f) return;
+  if (col === 'fin') {
+    if (f.estado !== 'cerrada') { toast('Primero cobrala: abrí la cuenta y tocá Cobrar', true); return; }
+    if (f.etapa !== 'entregada' && f.etapa !== 'pagada') marcarEntregada(f);
+    return;
+  }
+  const ORDEN = ['en_progreso', 'enviada', 'entregada'];
+  const actual = ORDEN.indexOf(f.etapa === 'pagada' ? 'entregada' : f.etapa);
+  const destino = ORDEN.indexOf(col);
+  if (destino <= actual) {
+    if (destino < actual) toast('La etapa solo avanza, no retrocede', true);
+    return;
+  }
+  if (col === 'enviada') enviarCocina(f);        // marca enviada e imprime la comanda
+  else if (col === 'entregada') marcarEntregada(f);
+}
+
 async function eliminarMesa(nombre) {
   try {
     state.mesas = (await api('/api/mesas/' + encodeURIComponent(nombre), {method:'DELETE'})).mesas;
@@ -1294,7 +1341,7 @@ function kcardHTML(f) {
   } else {
     accion = `<button type="button" class="kaccion" data-accion="cerrar" data-id="${f.id}">${ICONOS.cerrarX} Cerrar cuenta</button>`;
   }
-  return `<div class="kcard" data-abrir="${f.id}" role="button" tabindex="0" aria-label="Abrir cuenta ${f.numero}">
+  return `<div class="kcard" ${cuentaCompleta(f) ? '' : 'draggable="true"'} data-abrir="${f.id}" role="button" tabindex="0" aria-label="Abrir cuenta ${f.numero}">
     <div class="kfila">
       <span class="knum">${f.numero}</span>
       ${f.mesa ? `<span class="mesa-tab">${esc(f.mesa)}</span>` : ''}
@@ -1323,7 +1370,7 @@ function renderTablero() {
   const nombres = OPCIONES_MESA();
   for (const k of porMesa.keys()) if (k && !nombres.includes(k)) nombres.push(k);
 
-  const chipCuenta = f => `<button type="button" class="mesa-cuenta" data-abrir="${f.id}">
+  const chipCuenta = f => `<button type="button" class="mesa-cuenta" draggable="true" data-abrir="${f.id}">
       <span class="num">${f.numero}</span>
       ${f.estado !== 'abierta' ? '<span class="badge-etapa pagada">Pagado</span>' : ''}
       ${ETAPA_LABEL[f.etapa] ? `<span class="badge-etapa ${f.etapa}">${ETAPA_LABEL[f.etapa]}</span>` : ''}
@@ -1337,19 +1384,19 @@ function renderTablero() {
     if (!cs.length) {
       if (editando) {
         // en modo edición las libres se eliminan; las fijas solo se marcan
-        return `<div class="mesa-tile libre editable">
+        return `<div class="mesa-tile libre editable" data-drop="${esc(m)}">
           <span class="mesa-nombre">${esc(m)}</span>
           ${MESAS_FIJAS.includes(m) || !state.mesas.includes(m)
             ? '<span class="mesa-fija">fija</span>'
             : `<button type="button" class="btn-del-mesa" data-delmesa="${esc(m)}" aria-label="Eliminar ${esc(m)}">${ICONOS.borrar} Eliminar</button>`}
         </div>`;
       }
-      return `<button type="button" class="mesa-tile libre" data-mesa="${esc(m)}">
+      return `<button type="button" class="mesa-tile libre" data-mesa="${esc(m)}" data-drop="${esc(m)}">
       <span class="mesa-nombre">${esc(m)}</span>
       <span class="mesa-abrir">+ abrir cuenta</span>
     </button>`;
     }
-    return `<div class="mesa-tile ocupada">
+    return `<div class="mesa-tile ocupada" data-drop="${esc(m)}">
       <span class="mesa-nombre">${esc(m)}
         ${editando ? '<span class="mesa-fija">en uso</span>' : `<button type="button" class="mesa-mas" data-mesa="${esc(m)}" aria-label="Otra cuenta en ${esc(m)}">+</button>`}
       </span>
@@ -1358,7 +1405,7 @@ function renderTablero() {
   });
   const sinMesa = porMesa.get('') || [];
   if (sinMesa.length) {
-    tiles.push(`<div class="mesa-tile ocupada">
+    tiles.push(`<div class="mesa-tile ocupada" data-drop="">
       <span class="mesa-nombre">Sin mesa</span>
       ${sinMesa.map(chipCuenta).join('')}
     </div>`);
@@ -1373,12 +1420,12 @@ function renderTablero() {
 
   // kanban por etapa; la última columna es el ciclo terminado (pagada + entregada)
   const cols = [
-    {cls: '', titulo: 'En progreso', fs: activas.filter(f => f.etapa === 'en_progreso')},
-    {cls: 'k-cocina', titulo: 'En cocina', fs: activas.filter(f => f.etapa === 'enviada')},
-    {cls: 'k-entregada', titulo: 'Entregada', fs: activas.filter(f => f.etapa === 'entregada')},
-    {cls: 'k-fin', titulo: 'Pagada y entregada', fs: state.facturas.filter(cuentaCompleta)},
+    {cls: '', col: 'en_progreso', titulo: 'En progreso', fs: activas.filter(f => f.etapa === 'en_progreso')},
+    {cls: 'k-cocina', col: 'enviada', titulo: 'En cocina', fs: activas.filter(f => f.etapa === 'enviada')},
+    {cls: 'k-entregada', col: 'entregada', titulo: 'Entregada', fs: activas.filter(f => f.etapa === 'entregada')},
+    {cls: 'k-fin', col: 'fin', titulo: 'Pagada y entregada', fs: state.facturas.filter(cuentaCompleta)},
   ];
-  const kanban = cols.map(c => `<div class="kcol ${c.cls}">
+  const kanban = cols.map(c => `<div class="kcol ${c.cls}" data-col="${c.col}">
       <div class="kcol-head"><span>${c.titulo}</span><span class="cnt">${c.fs.length}</span></div>
       ${c.fs.length ? c.fs.map(kcardHTML).join('') : '<p class="kvacia">—</p>'}
     </div>`).join('');
@@ -1418,9 +1465,45 @@ function renderTablero() {
     nuevaFactura(b.dataset.mesa);
   }));
   cont.querySelectorAll('[data-abrir]').forEach(el => {
-    el.addEventListener('click', () => abrirCuenta(Number(el.dataset.abrir)));
+    el.addEventListener('click', () => {
+      if (state.dragReciente) return; // el drop no debe abrir la cuenta
+      abrirCuenta(Number(el.dataset.abrir));
+    });
     el.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirCuenta(Number(el.dataset.abrir)); }
+    });
+  });
+
+  // arrastrar cuentas: chip → mesa (asigna) o tarjeta → columna (avanza etapa)
+  cont.querySelectorAll('[draggable="true"]').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      state.dragReciente = true;
+      el.classList.add('arrastrando');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', el.dataset.abrir);
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('arrastrando');
+      setTimeout(() => { state.dragReciente = false; }, 120);
+    });
+  });
+  const zonas = [...cont.querySelectorAll('[data-drop]'), ...cont.querySelectorAll('.kcol[data-col]')];
+  zonas.forEach(z => {
+    z.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      z.classList.add('drop-hover');
+    });
+    z.addEventListener('dragleave', e => {
+      if (!z.contains(e.relatedTarget)) z.classList.remove('drop-hover');
+    });
+    z.addEventListener('drop', e => {
+      e.preventDefault();
+      limpiarDrag();
+      const id = Number(e.dataTransfer.getData('text/plain'));
+      if (!id) return;
+      if (z.dataset.drop !== undefined) cambiarMesaFactura(id, z.dataset.drop);
+      else moverEtapaDrag(id, z.dataset.col);
     });
   });
   cont.querySelectorAll('[data-accion]').forEach(b => b.addEventListener('click', e => {

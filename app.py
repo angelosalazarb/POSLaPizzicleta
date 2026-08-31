@@ -404,6 +404,23 @@ def cambiar_etapa(fid):
     return jsonify(factura_dict(db, row))
 
 
+@app.post("/api/facturas/<int:fid>/mesa")
+def cambiar_mesa(fid):
+    """La mesa es un rótulo operativo: se puede mover también una pagada
+    (mostrador: pagan primero y después se sientan). Solo anuladas no."""
+    db = get_db()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    if row is None:
+        return jsonify({"error": "factura no existe"}), 404
+    if row["estado"] == "anulada":
+        return jsonify({"error": "la factura está anulada"}), 409
+    mesa = str((request.get_json(force=True) or {}).get("mesa") or "").strip()[:20]
+    db.execute("UPDATE facturas SET mesa=? WHERE id=?", (mesa, fid))
+    db.commit()
+    row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
+    return jsonify(factura_dict(db, row))
+
+
 @app.post("/api/facturas/<int:fid>/cerrar")
 def cerrar_factura(fid):
     return _cambiar_estado(fid, "cerrada")
