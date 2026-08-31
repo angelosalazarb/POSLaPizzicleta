@@ -71,7 +71,8 @@ input, select { font:inherit; color:inherit; }
 .brand h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(26px, 4vw, 34px); line-height:1.05; letter-spacing:.01em; }
 .brand .lema { font-size:11.5px; font-weight:600; letter-spacing:.28em; text-transform:uppercase; color:var(--muted); }
 .topbar .derecha { margin-left:auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.fecha-hoy { font-size:13px; color:var(--muted); text-transform:capitalize; }
+.fecha-hoy { margin-top:2px; font-size:12px; color:var(--muted); text-transform:capitalize; white-space:nowrap; }
+.fecha-hoy .hora { font-family:var(--font-mono); font-weight:600; font-variant-numeric:tabular-nums; color:var(--tinta); }
 .stats-dia {
   display:flex; align-items:stretch;
   border:1.5px solid var(--linea); border-radius:16px;
@@ -944,13 +945,13 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
   <div class="brand">
     <h1>La Pizzicleta</h1>
     <div class="lema">Caja &middot; Sede Sur</div>
+    <div class="fecha-hoy"><span id="fechaHoy"></span> <span class="hora" id="horaHoy"></span></div>
   </div>
   <nav class="secciones" aria-label="Secciones">
     <button type="button" class="seccion" id="secMesas">Mesas</button>
     <button type="button" class="seccion" id="secPedidos">Pedidos <span class="cnt" id="secPedidosCnt"></span></button>
   </nav>
   <div class="derecha">
-    <span class="fecha-hoy" id="fechaHoy"></span>
     <div class="stats-dia">
       <div class="stat-dia vendido">
         <span class="ico" aria-hidden="true">
@@ -3493,8 +3494,15 @@ $('#btnVentas').addEventListener('click', () => alternarVentas(state.vista !== '
 $('#secMesas').addEventListener('click', () => setSeccion('mesas'));
 $('#secPedidos').addEventListener('click', () => setSeccion('pedidos'));
 
-$('#fechaHoy').textContent = new Date().toLocaleDateString('es-CO',
-  {weekday:'long', day:'numeric', month:'long'});
+function pintarReloj() {
+  const ahora = new Date();
+  $('#fechaHoy').textContent = ahora.toLocaleDateString('es-CO',
+    {weekday:'long', day:'numeric', month:'long'});
+  $('#horaHoy').textContent = ahora.toLocaleTimeString('es-CO',
+    {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+}
+pintarReloj();
+setInterval(pintarReloj, 1000);
 
 async function refrescarSiInactivo() {
   // recargar solo si no se está editando nada
