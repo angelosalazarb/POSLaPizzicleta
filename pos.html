@@ -810,6 +810,26 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .modal-acciones .btn-limpiar { margin-left:auto; color:var(--muted); font-weight:600; min-height:44px; padding:0 14px; border-radius:100px; }
 .modal-acciones .btn-limpiar:hover { background:var(--error-dim); color:var(--error); }
 
+/* modal de confirmación del pedido */
+.modal-confirmar { width:min(520px, 100%); }
+.conf-linea {
+  display:grid; grid-template-columns:36px 1fr auto; gap:8px; align-items:baseline;
+  padding:8px 0; border-bottom:1px dashed var(--linea);
+}
+.conf-linea .cant { font-family:var(--font-mono); font-weight:600; }
+.conf-linea .nom { font-size:14px; word-break:break-word; }
+.conf-linea .val { font-family:var(--font-mono); font-weight:600; white-space:nowrap; }
+.badge-nuevo {
+  display:inline-block; margin-left:8px; padding:2px 9px; border-radius:100px;
+  font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  background:var(--naranja-dim); color:var(--naranja-tx); vertical-align:middle;
+}
+.conf-totales { padding:10px 22px 8px; border-top:2px solid var(--tinta); margin-top:8px; }
+.conf-tot { display:flex; justify-content:space-between; gap:16px; padding:3px 0; font-size:13.5px; }
+.conf-tot .val { font-family:var(--font-mono); font-weight:600; }
+.conf-tot.grande { font-size:18px; font-weight:700; padding-top:7px; }
+.conf-tot.grande .val { font-size:21px; }
+
 /* modal de sabores y acompañantes (combos) */
 .modal-mods { width:min(560px, 100%); }
 .modal-mods .modal-head h3 { font-size:19px; line-height:1.3; }
@@ -988,6 +1008,7 @@ const state = {
   editandoMesas: false, // modo edición de la grilla de mesas
   guardados: new Map(), // id -> timeout de debounce
   pendientes: new Set(), // ids con cambios sin guardar
+  confirmadas: new Map(), // id -> firma del último pedido confirmado con el cliente
   config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]},
   fechaVentas: hoyISO(), // día mostrado en la vista Ventas (filtrable)
   catSel: 'Todos',     // categoría elegida en el panel del menú
@@ -1503,6 +1524,15 @@ function actualizarPendiente() {
 
 /* ---------- navegación entre vistas ---------- */
 function setVista(v) {
+  // al salir de una cuenta con pedido nuevo sin confirmar, primero se
+  // confirma con el cliente; al confirmar la navegación continúa sola
+  if (state.vista === 'cuenta' && v !== 'cuenta') {
+    const f = facturaActiva();
+    if (f && necesitaConfirmacion(f)) {
+      abrirConfirmarPedido(f, () => setVista(v));
+      return;
+    }
+  }
   state.vista = v;
   $('#vistaTablero').hidden = v !== 'tablero';
   $('#vistaFactura').hidden = v !== 'cuenta';
@@ -2239,6 +2269,90 @@ async function guardar(f) {
   }
 }
 
+/* ---------- confirmación del pedido con el cliente ---------- */
+// firma del contenido cobrable: si cambia, hay pedido nuevo sin confirmar
+function firmaPedido(f) {
+  return f.items
+    .filter(i => (i.descripcion || '').trim() || i.precio_unitario > 0)
+    .map(i => `${i.cantidad || 0}|${i.descripcion}|${i.precio_unitario || 0}`)
+    .join('\n');
+}
+
+function necesitaConfirmacion(f) {
+  if (f.estado !== 'abierta') return false;
+  const firma = firmaPedido(f);
+  return !!firma && state.confirmadas.get(f.id) !== firma;
+}
+
+// modal con los ítems y valores del pedido; "Confirmar pedido" sigue con la
+// acción (volver al tablero, enviar a cocina o cobrar), cerrar se queda editando
+function abrirConfirmarPedido(f, alConfirmar) {
+  if (document.querySelector('.modal-confirmar')) return;
+
+  // cantidades ya confirmadas por ítem, para marcar lo nuevo
+  const previas = {};
+  for (const l of (state.confirmadas.get(f.id) || '').split('\n')) {
+    if (!l) continue;
+    const [cant, ...resto] = l.split('|');
+    const clave = resto.join('|');
+    previas[clave] = (previas[clave] || 0) + (parseFloat(cant) || 0);
+  }
+
+  const items = f.items.filter(i => (i.descripcion || '').trim() || i.precio_unitario > 0);
+  const t = calcularLocal(f);
+  const filas = items.map(i => {
+    const clave = `${i.descripcion}|${i.precio_unitario || 0}`;
+    const nuevas = (i.cantidad || 0) - (previas[clave] || 0);
+    const badge = nuevas > 0
+      ? `<span class="badge-nuevo">${previas[clave] ? `+${nuevas % 1 ? nuevas.toFixed(1) : nuevas} ` : ''}nuevo</span>`
+      : '';
+    return `
+      <div class="conf-linea">
+        <span class="cant">${i.cantidad || 0}&times;</span>
+        <span class="nom">${esc(i.descripcion)}${badge}</span>
+        <span class="val">${fmt(Math.round((i.cantidad || 0) * (i.precio_unitario || 0)))}</span>
+      </div>`;
+  }).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal modal-confirmar" role="dialog" aria-modal="true" aria-label="Confirmar pedido ${f.numero}">
+      <div class="modal-head">
+        <h3>Confirmar pedido &middot; ${f.numero}</h3>
+        <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
+      </div>
+      <p class="modal-sub">${f.mesa ? `${esc(f.mesa)} &middot; ` : ''}Revis&aacute; el pedido con el cliente antes de continuar.</p>
+      <div class="modal-cuerpo">${filas}</div>
+      <div class="conf-totales">
+        ${t.descuento > 0 ? `
+        <div class="conf-tot"><span>Subtotal</span><span class="val">${fmt(t.subtotal)}</span></div>
+        <div class="conf-tot"><span>Descuento</span><span class="val desc-monto">&minus;${fmt(t.descuento)}</span></div>` : ''}
+        ${t.propina > 0 ? `
+        <div class="conf-tot"><span>Total</span><span class="val">${fmt(t.total)}</span></div>
+        <div class="conf-tot"><span>Propina</span><span class="val prop-monto">+${fmt(t.propina)}</span></div>` : ''}
+        <div class="conf-tot grande"><span>A pagar</span><span class="val">${fmt(t.pagar)}</span></div>
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-primario" id="btnConfirmarPedido">${ICONOS.entregado} Confirmar pedido</button>
+        <button type="button" class="btn-limpiar" id="btnSeguirEditando">Seguir editando</button>
+      </div>
+    </div>`;
+
+  const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
+  const alEscape = e => { if (e.key === 'Escape') cerrar(); };
+  document.addEventListener('keydown', alEscape);
+  overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(); });
+  overlay.querySelector('.cerrar-modal').addEventListener('click', cerrar);
+  overlay.querySelector('#btnSeguirEditando').addEventListener('click', cerrar);
+  overlay.querySelector('#btnConfirmarPedido').addEventListener('click', () => {
+    state.confirmadas.set(f.id, firmaPedido(f));
+    cerrar();
+    alConfirmar();
+  });
+  document.body.appendChild(overlay);
+}
+
 /* ---------- acciones ---------- */
 // todo pedido debe decir si es en mesa, para llevar o domicilio
 function exigirCanal(f) {
@@ -2254,6 +2368,7 @@ async function cobrar(f) {
     toast('La cuenta está vacía', true); return;
   }
   if (!exigirCanal(f)) return;
+  if (necesitaConfirmacion(f)) { abrirConfirmarPedido(f, () => cobrar(f)); return; }
   try {
     await guardar(f);
     const r = await api(`/api/facturas/${f.id}/cerrar`, {method:'POST'});
@@ -2271,6 +2386,7 @@ async function enviarCocina(f) {
     toast('La cuenta está vacía', true); return;
   }
   if (!exigirCanal(f)) return;
+  if (necesitaConfirmacion(f)) { abrirConfirmarPedido(f, () => enviarCocina(f)); return; }
   try {
     if (f.estado === 'abierta') await guardar(f); // una pagada ya no se edita
     const primera = f.etapa === 'en_progreso';
