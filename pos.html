@@ -458,34 +458,38 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .btn-agregar:hover { border-color:var(--naranja-tx); color:var(--naranja-tx); background:var(--naranja-dim); }
 .btn-agregar svg { width:19px; height:19px; }
 
-/* totales */
+/* totales (compactos: filas en cero se ocultan desde recalcular) */
 .totales {
-  margin-top:26px; padding-top:18px;
+  margin-top:16px; padding-top:12px;
   border-top:2px solid var(--tinta);
-  display:grid; gap:10px; justify-content:end;
+  display:grid; gap:6px; justify-content:end;
 }
-.tot-linea { display:flex; align-items:center; justify-content:space-between; gap:40px; min-width:min(360px, 100%); }
-.tot-linea .lbl { font-size:13px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
-.tot-linea .val { font-family:var(--font-mono); font-size:17px; }
-.desc-ctl { display:flex; align-items:center; gap:8px; }
+.tot-linea { display:flex; align-items:center; justify-content:space-between; gap:24px; min-width:min(330px, 100%); }
+.tot-linea[hidden] { display:none; }
+.tot-linea .lbl { font-size:11.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+.tot-linea .val { font-family:var(--font-mono); font-size:15px; }
+.desc-ctl { display:flex; align-items:center; gap:6px; }
 .desc-ctl input {
-  min-height:44px; width:110px; padding:0 12px; text-align:right;
-  font-family:var(--font-mono);
+  min-height:38px; width:90px; padding:0 10px; text-align:right;
+  font-family:var(--font-mono); font-size:14px;
   border:1.5px solid var(--linea); border-radius:10px; background:var(--papel);
 }
 .desc-ctl input:focus { border-color:var(--azul); outline:none; }
 .toggle { display:flex; border:1.5px solid var(--linea); border-radius:100px; overflow:hidden; }
 .toggle button {
-  min-width:44px; min-height:44px; font-family:var(--font-mono); font-weight:600; color:var(--muted);
+  min-width:38px; min-height:38px; font-family:var(--font-mono); font-weight:600; font-size:13px; color:var(--muted);
   transition:background var(--trans), color var(--trans);
 }
 .toggle button.on { background:var(--tinta); color:var(--papel); }
 .desc-monto { color:var(--naranja-tx); }
 .prop-monto { color:var(--azul-tx); }
-.gran-total { border-top:1px dashed var(--linea); padding-top:12px; }
-.gran-total .lbl { color:var(--tinta); font-size:15px; }
-.gran-total .val { font-weight:600; font-size:clamp(26px, 4vw, 34px); }
-.total-medio .val { font-weight:600; font-size:20px; }
+.gran-total { border-top:1px dashed var(--linea); padding-top:8px; margin-top:2px; }
+.gran-total .lbl { color:var(--tinta); font-size:13px; }
+.gran-total .val { font-weight:600; font-size:clamp(21px, 3vw, 26px); }
+.gran-total .btn-conteo { width:38px; height:38px; }
+.total-medio .val { font-weight:600; font-size:16px; }
+.totales .metodos { gap:6px; margin-top:2px; }
+.totales .metodo { min-height:38px; padding:0 13px; font-size:13px; }
 
 /* autocompletado del menú */
 .ac-lista {
@@ -1604,7 +1608,7 @@ function renderFactura() {
     <div id="filas"></div>
     <button type="button" class="btn-agregar" id="btnAgregar">${ICONOS.mas} &Iacute;tem manual</button>
     <div class="totales">
-      <div class="tot-linea">
+      <div class="tot-linea" id="filaSubtotal" hidden>
         <span class="lbl">Subtotal</span>
         <span class="val" id="vSubtotal">$0</span>
       </div>
@@ -1618,11 +1622,11 @@ function renderFactura() {
           </span>
         </span>
       </div>
-      <div class="tot-linea">
+      <div class="tot-linea" id="filaDescAplicado" hidden>
         <span class="lbl">Descuento aplicado</span>
         <span class="val desc-monto" id="vDescuento">&minus;$0</span>
       </div>
-      <div class="tot-linea total-medio">
+      <div class="tot-linea total-medio" id="filaTotal" hidden>
         <span class="lbl">Total</span>
         <span class="val" id="vTotal">$0</span>
       </div>
@@ -1636,8 +1640,8 @@ function renderFactura() {
           </span>
         </span>
       </div>
-      <div class="tot-linea">
-        <span class="lbl">Propina</span>
+      <div class="tot-linea" id="filaPropinaVal" hidden>
+        <span class="lbl">Propina agregada</span>
         <span class="val prop-monto" id="vPropina">+$0</span>
       </div>
       <div class="tot-linea gran-total">
@@ -1877,6 +1881,11 @@ function recalcular(f) {
   $('#vTotal').textContent = fmt(t.total);
   $('#vPropina').textContent = '+' + fmt(t.propina);
   $('#vPagar').textContent = fmt(t.pagar);
+  // filas informativas solo cuando aportan algo (si no, A pagar lo dice todo)
+  $('#filaSubtotal').hidden = t.descuento <= 0;
+  $('#filaDescAplicado').hidden = t.descuento <= 0;
+  $('#filaTotal').hidden = t.propina <= 0;
+  $('#filaPropinaVal').hidden = t.propina <= 0;
   actualizarPendiente();
 }
 
