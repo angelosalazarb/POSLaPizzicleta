@@ -101,7 +101,8 @@ pos/
 ├── static/
 │   ├── logo.png        # sticker a color (512px)
 │   ├── logo-ticket.png # sticker B/N para la térmica
-│   └── fonts/          # Pirata One, Archivo, IBM Plex Mono (funciona sin internet)
+│   └── fonts/          # Pirata One (títulos), TeX Gyre Adventor (respaldo libre de
+│                       # Century Gothic para el cuerpo), Archivo, IBM Plex Mono — sin internet
 └── data/pos.db         # base SQLite (respaldar este archivo = respaldar las ventas)
 ```
 

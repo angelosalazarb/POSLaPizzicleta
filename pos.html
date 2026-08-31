@@ -9,6 +9,10 @@
 /* ---------- fuentes autohospedadas ---------- */
 @font-face { font-family:'Pirata One'; src:url('/static/fonts/pirataone-400.woff2') format('woff2'); font-weight:400; font-display:swap; }
 @font-face { font-family:'Archivo'; src:url('/static/fonts/archivo-var.woff2') format('woff2'); font-weight:400 800; font-display:swap; }
+/* respaldo libre de Century Gothic (TeX Gyre Adventor, licencia GUST) para
+   equipos sin la fuente instalada; el PC de caja con Windows usa la real */
+@font-face { font-family:'TeX Gyre Adventor'; src:url('/static/fonts/texgyreadventor-400.woff2') format('woff2'); font-weight:400; font-display:swap; }
+@font-face { font-family:'TeX Gyre Adventor'; src:url('/static/fonts/texgyreadventor-700.woff2') format('woff2'); font-weight:700; font-display:swap; }
 @font-face { font-family:'IBM Plex Mono'; src:url('/static/fonts/ibmplexmono-400.woff2') format('woff2'); font-weight:400; font-display:swap; }
 @font-face { font-family:'IBM Plex Mono'; src:url('/static/fonts/ibmplexmono-600.woff2') format('woff2'); font-weight:600; font-display:swap; }
 
@@ -31,7 +35,7 @@
   --touch: 52px;
   --radius: 14px;
   --font-display: 'Pirata One', Georgia, serif;
-  --font-body: 'Archivo', -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'Century Gothic', 'CenturyGothic', 'TeX Gyre Adventor', 'Archivo', -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
   --sombra: 0 1px 2px rgba(26,26,26,.05), 0 8px 28px rgba(26,26,26,.06);
   --trans: 200ms ease-out;
