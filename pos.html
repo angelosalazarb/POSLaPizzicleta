@@ -810,6 +810,23 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .modal-acciones .btn-limpiar { margin-left:auto; color:var(--muted); font-weight:600; min-height:44px; padding:0 14px; border-radius:100px; }
 .modal-acciones .btn-limpiar:hover { background:var(--error-dim); color:var(--error); }
 
+/* modal de nueva cuenta: canal del pedido */
+.modal-canal { width:min(480px, 100%); }
+.modal-canal .modal-cuerpo { padding-bottom:18px; }
+.canal-grandes { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:6px 0 4px; }
+.canal-btn {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:16px 10px; border-radius:14px; border:1.5px solid var(--linea);
+  background:var(--papel); font-weight:700; font-size:14.5px;
+  transition:border-color var(--trans), background var(--trans);
+}
+.canal-btn:hover { border-color:var(--naranja-tx); background:var(--naranja-dim); }
+.canal-emoji { font-size:26px; }
+.canal-titulo {
+  font-size:10.5px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--muted); padding:14px 0 8px;
+}
+
 /* modal de confirmación del pedido */
 .modal-confirmar { width:min(520px, 100%); }
 .conf-linea {
@@ -1696,7 +1713,7 @@ function renderTablero() {
   </div>`;
   pintarSecciones();
 
-  $('#btnNuevaTablero').addEventListener('click', () => nuevaFactura());
+  $('#btnNuevaTablero').addEventListener('click', abrirNuevaCuenta);
   const btnEd = $('#btnEditarMesas');
   if (btnEd) btnEd.addEventListener('click', () => {
     state.editandoMesas = !state.editandoMesas;
@@ -1814,6 +1831,44 @@ function actualizarTimers() {
 }
 setInterval(actualizarTimers, 15000);
 
+// "Nueva cuenta" pregunta de una vez el canal: mesa, para llevar o domicilio
+// (los tiles de mesa del tablero crean directo porque la mesa ya está elegida)
+function abrirNuevaCuenta() {
+  if (document.querySelector('.modal-canal')) return;
+  const mesas = state.mesas || [];
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal modal-canal" role="dialog" aria-modal="true" aria-label="Nueva cuenta">
+      <div class="modal-head">
+        <h3>Nueva cuenta</h3>
+        <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
+      </div>
+      <p class="modal-sub">&iquest;Para d&oacute;nde es el pedido?</p>
+      <div class="modal-cuerpo">
+        <div class="canal-grandes">
+          <button type="button" class="canal-btn" data-canal="Para llevar"><span class="canal-emoji">🛍️</span>Para llevar</button>
+          <button type="button" class="canal-btn" data-canal="Domicilio"><span class="canal-emoji">🚲</span>Domicilio</button>
+        </div>
+        ${mesas.length ? `
+        <p class="canal-titulo">En mesa</p>
+        <div class="mod-pills">${mesas.map(m =>
+          `<button type="button" class="mod-pill" data-canal="${esc(m)}">${esc(m)}</button>`).join('')}
+        </div>` : ''}
+      </div>
+    </div>`;
+  const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
+  const alEscape = e => { if (e.key === 'Escape') cerrar(); };
+  document.addEventListener('keydown', alEscape);
+  overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(); });
+  overlay.querySelector('.cerrar-modal').addEventListener('click', cerrar);
+  overlay.querySelectorAll('[data-canal]').forEach(b => b.addEventListener('click', () => {
+    cerrar();
+    nuevaFactura(b.dataset.canal);
+  }));
+  document.body.appendChild(overlay);
+}
+
 async function nuevaFactura(mesa) {
   try {
     const f = await api('/api/facturas', {method:'POST'});
@@ -1843,7 +1898,7 @@ function renderFactura() {
         <button type="button" class="btn btn-primario" id="btnPrimera">${ICONOS.mas} Nueva cuenta</button>
         <button type="button" class="btn btn-secundario" id="btnVacioVolver">${ICONOS.volver} Tablero</button>
       </div>`;
-    $('#btnPrimera').addEventListener('click', () => nuevaFactura());
+    $('#btnPrimera').addEventListener('click', abrirNuevaCuenta);
     $('#btnVacioVolver').addEventListener('click', () => setVista('tablero'));
     return;
   }
