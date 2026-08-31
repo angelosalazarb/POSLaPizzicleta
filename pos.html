@@ -72,13 +72,26 @@ input, select { font:inherit; color:inherit; }
 .brand .lema { font-size:11.5px; font-weight:600; letter-spacing:.28em; text-transform:uppercase; color:var(--muted); }
 .topbar .derecha { margin-left:auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .fecha-hoy { font-size:13px; color:var(--muted); text-transform:capitalize; }
-.pill-dia {
-  display:flex; flex-direction:column; align-items:flex-end;
-  padding:4px 13px; border:1.5px solid var(--linea); border-radius:100px; background:var(--papel);
+.stats-dia {
+  display:flex; align-items:stretch;
+  border:1.5px solid var(--linea); border-radius:16px;
+  background:var(--card); box-shadow:var(--sombra); overflow:hidden;
 }
-.pill-dia .lbl { font-size:9px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
-.pill-dia .val { font-family:var(--font-mono); font-weight:600; font-size:14px; }
-.pill-dia.pendiente .val { color:var(--naranja-tx); }
+.stat-dia { display:flex; align-items:center; gap:11px; padding:7px 18px 7px 12px; }
+.stat-dia + .stat-dia { border-left:1.5px solid var(--linea); }
+.stat-dia .ico {
+  width:38px; height:38px; flex:none; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--azul-dim); color:var(--azul-tx);
+}
+.stat-dia .ico svg { width:20px; height:20px; }
+.stat-dia .txt { display:flex; flex-direction:column; line-height:1.25; }
+.stat-dia .lbl { font-size:9.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+.stat-dia .val { font-family:var(--font-mono); font-weight:600; font-size:18px; font-variant-numeric:tabular-nums; }
+.stat-dia.pendiente .ico { background:var(--naranja-dim); color:var(--naranja-tx); }
+.stat-dia.pendiente .val { color:var(--naranja-tx); }
+.stat-dia.pendiente.aldia .ico { background:rgba(46,125,79,.12); color:var(--ok); }
+.stat-dia.pendiente.aldia .val { color:var(--ok); }
 .btn-ventas {
   display:flex; align-items:center; gap:8px;
   min-height:var(--touch); padding:0 20px;
@@ -938,13 +951,25 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
   </nav>
   <div class="derecha">
     <span class="fecha-hoy" id="fechaHoy"></span>
-    <div class="pill-dia">
-      <span class="lbl">Vendido hoy</span>
-      <span class="val" id="totalDia">$0</span>
-    </div>
-    <div class="pill-dia pendiente">
-      <span class="lbl">Pendiente por cobrar</span>
-      <span class="val" id="totalPendiente">$0</span>
+    <div class="stats-dia">
+      <div class="stat-dia vendido">
+        <span class="ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
+        </span>
+        <span class="txt">
+          <span class="lbl">Vendido hoy</span>
+          <span class="val" id="totalDia">$0</span>
+        </span>
+      </div>
+      <div class="stat-dia pendiente aldia" id="statPendiente">
+        <span class="ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v4.5l3 2"/></svg>
+        </span>
+        <span class="txt">
+          <span class="lbl">Pendiente por cobrar</span>
+          <span class="val" id="totalPendiente">$0</span>
+        </span>
+      </div>
     </div>
     <button class="btn-ventas" id="btnVentas" type="button" aria-pressed="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
@@ -1546,6 +1571,7 @@ function actualizarPendiente() {
   const total = state.facturas.filter(f => f.estado === 'abierta')
     .reduce((s, f) => s + calcularLocal(f).pagar, 0);
   $('#totalPendiente').textContent = fmt(total);
+  $('#statPendiente').classList.toggle('aldia', total === 0);
   pintarSecciones(); // el badge de Pedidos acompaña cualquier cambio de cuentas
 }
 
