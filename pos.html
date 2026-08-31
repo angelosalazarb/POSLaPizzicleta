@@ -1043,6 +1043,7 @@ async function cambiarMesaFactura(id, mesa) {
   const f = state.facturas.find(x => x.id === id);
   if (!f || (f.mesa || '') === mesa) return;
   try {
+    await guardar(f); // la respuesta reemplaza f.items: nada puede quedar sin guardar
     Object.assign(f, await api(`/api/facturas/${id}/mesa`, {method:'POST', body:{mesa}}));
     renderTablero();
     toast(mesa ? `${f.numero} → ${mesa}` : `${f.numero} quedó sin mesa`);
@@ -1438,13 +1439,28 @@ function armarPanelMenu(f) {
 /* ---------- carga inicial ---------- */
 async function cargarFacturas(preservarActiva=true) {
   const previa = state.activaId;
-  state.facturas = await api('/api/facturas'); // abiertas + pagadas en retención
+  const nuevas = await api('/api/facturas'); // abiertas + pagadas en retención
+  // la cuenta abierta que se está editando conserva su OBJETO local: puede
+  // tener cambios aún sin guardar (debounce) o un modal apuntándole, y
+  // reemplazarla por la copia del server los pisaría en el siguiente PUT
+  const local = state.facturas.find(x => x.id === previa);
+  if (preservarActiva && local && local.estado === 'abierta' &&
+      (state.vista === 'cuenta' || state.pendientes.has(previa) || state.guardados.has(previa))) {
+    const i = nuevas.findIndex(x => x.id === previa);
+    if (i >= 0) nuevas[i] = local;
+  }
+  state.facturas = nuevas;
   if (!preservarActiva || !state.facturas.some(f => f.id === previa)) {
     state.activaId = state.facturas.length ? state.facturas[state.facturas.length-1].id : null;
     if (state.vista === 'cuenta') { setVista('tablero'); return; }
   }
   renderTabs();
-  if (state.vista === 'cuenta') renderFactura();
+  // no re-pintar la cuenta debajo de un modal abierto ni robarle el foco
+  // a quien está escribiendo (el re-render destruye los inputs)
+  if (state.vista === 'cuenta' && !document.querySelector('.overlay') &&
+      !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+    renderFactura();
+  }
 }
 
 async function cargarTotalDia() {
@@ -2281,6 +2297,9 @@ async function cerrarCuenta(f) {
 
 async function marcarEntregada(f) {
   try {
+    // vaciar el debounce ANTES: la respuesta reemplaza f.items y un cambio
+    // sin guardar (ítem recién agregado) se perdería en el siguiente PUT
+    await guardar(f);
     Object.assign(f, await api(`/api/facturas/${f.id}/etapa`, {method:'POST', body:{etapa:'entregada'}}));
     renderTabs(); renderFactura();
     toast(`Cuenta ${f.numero} entregada`);
