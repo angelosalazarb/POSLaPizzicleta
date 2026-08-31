@@ -1,0 +1,490 @@
+{
+ "Adición de licor": {
+  "obligatorio": false,
+  "min": 0,
+  "max": 4,
+  "opciones": [
+   {
+    "nombre": "Con aguardiente",
+    "precio": 4000
+   },
+   {
+    "nombre": "con Baileys",
+    "precio": 8000
+   },
+   {
+    "nombre": "Con tequila",
+    "precio": 4000
+   }
+  ]
+ },
+ "Adiciones": {
+  "obligatorio": false,
+  "min": 0,
+  "max": 4,
+  "opciones": [
+   {
+    "nombre": "Albahaca fresca",
+    "precio": 1000
+   },
+   {
+    "nombre": "berenjena asada",
+    "precio": 4000
+   },
+   {
+    "nombre": "BOCCONCINI",
+    "precio": 15000
+   },
+   {
+    "nombre": "Borde queso",
+    "precio": 6000
+   },
+   {
+    "nombre": "BORDE QUESO MEDIANA",
+    "precio": 8000
+   },
+   {
+    "nombre": "BOWL PIZZA",
+    "precio": 5000
+   },
+   {
+    "nombre": "BURRATA GRANDE",
+    "precio": 21000
+   },
+   {
+    "nombre": "BURRATA PERSONAL",
+    "precio": 14000
+   },
+   {
+    "nombre": "Cabano",
+    "precio": 4000
+   },
+   {
+    "nombre": "Carne Boloñesa",
+    "precio": 6000
+   },
+   {
+    "nombre": "Cebolla",
+    "precio": 2000
+   },
+   {
+    "nombre": "Cebolla morada",
+    "precio": 2000
+   },
+   {
+    "nombre": "Champiñones",
+    "precio": 3000
+   },
+   {
+    "nombre": "Helado",
+    "precio": 6000
+   },
+   {
+    "nombre": "Jalapeños",
+    "precio": 2000
+   },
+   {
+    "nombre": "Jamon",
+    "precio": 4000
+   },
+   {
+    "nombre": "jamon serrano",
+    "precio": 7000
+   },
+   {
+    "nombre": "Maduro",
+    "precio": 3000
+   },
+   {
+    "nombre": "Maíz dulce",
+    "precio": 2000
+   },
+   {
+    "nombre": "Mozarella",
+    "precio": 5000
+   },
+   {
+    "nombre": "parmesano",
+    "precio": 3000
+   },
+   {
+    "nombre": "PARMESANO 1 ONZA",
+    "precio": 4000
+   },
+   {
+    "nombre": "pepperoni",
+    "precio": 4000
+   },
+   {
+    "nombre": "Pimentón",
+    "precio": 2000
+   },
+   {
+    "nombre": "Piña",
+    "precio": 2000
+   },
+   {
+    "nombre": "Pollo",
+    "precio": 5000
+   },
+   {
+    "nombre": "QUESO",
+    "precio": 5000
+   },
+   {
+    "nombre": "QUESO VEGANO PIZZA GRANDE",
+    "precio": 8000
+   },
+   {
+    "nombre": "QUESO VEGANO PIZZA MEDIANA",
+    "precio": 7000
+   },
+   {
+    "nombre": "Rugula",
+    "precio": 2000
+   },
+   {
+    "nombre": "Salami",
+    "precio": 4000
+   },
+   {
+    "nombre": "Tocineta",
+    "precio": 5000
+   },
+   {
+    "nombre": "Tomate",
+    "precio": 2000
+   }
+  ]
+ },
+ "CAJA PARA LLEVAR": {
+  "obligatorio": false,
+  "min": 0,
+  "max": 4,
+  "opciones": [
+   {
+    "nombre": "CAJA GRANDE",
+    "precio": 4000
+   },
+   {
+    "nombre": "CAJA MEDIANA",
+    "precio": 3000
+   },
+   {
+    "nombre": "CAJA PERSONAL",
+    "precio": 2000
+   }
+  ]
+ },
+ "Elige 2 sabores": {
+  "obligatorio": true,
+  "min": 2,
+  "max": 2,
+  "opciones": [
+   {
+    "nombre": "BBQ",
+    "precio": 0
+   },
+   {
+    "nombre": "Bulevar",
+    "precio": 0
+   },
+   {
+    "nombre": "Burguer",
+    "precio": 0
+   },
+   {
+    "nombre": "Burrata bonita",
+    "precio": 0
+   },
+   {
+    "nombre": "Calaverita",
+    "precio": 0
+   },
+   {
+    "nombre": "Caleñisima",
+    "precio": 0
+   },
+   {
+    "nombre": "Calidosa",
+    "precio": 0
+   },
+   {
+    "nombre": "Carnes",
+    "precio": 0
+   },
+   {
+    "nombre": "Chaplin",
+    "precio": 0
+   },
+   {
+    "nombre": "COMPLETA",
+    "precio": 0
+   },
+   {
+    "nombre": "Doña guayaba",
+    "precio": 0
+   },
+   {
+    "nombre": "El jardín de las delicias",
+    "precio": 0
+   },
+   {
+    "nombre": "Elvis",
+    "precio": 0
+   },
+   {
+    "nombre": "Entonada",
+    "precio": 0
+   },
+   {
+    "nombre": "Gorgona",
+    "precio": 0
+   },
+   {
+    "nombre": "Hawaiana",
+    "precio": 0
+   },
+   {
+    "nombre": "Jamon",
+    "precio": 0
+   },
+   {
+    "nombre": "Margarita",
+    "precio": 0
+   },
+   {
+    "nombre": "Margarita latina",
+    "precio": 0
+   },
+   {
+    "nombre": "Melomana",
+    "precio": 0
+   },
+   {
+    "nombre": "Mi Diavola",
+    "precio": 0
+   },
+   {
+    "nombre": "Monareta",
+    "precio": 0
+   },
+   {
+    "nombre": "Monticoro",
+    "precio": 0
+   },
+   {
+    "nombre": "Ondina",
+    "precio": 0
+   },
+   {
+    "nombre": "Pancho Villa",
+    "precio": 0
+   },
+   {
+    "nombre": "Parrillada",
+    "precio": 0
+   },
+   {
+    "nombre": "Pegaso",
+    "precio": 0
+   },
+   {
+    "nombre": "Peperoni",
+    "precio": 0
+   },
+   {
+    "nombre": "pizza blanca ruta del queso",
+    "precio": 0
+   },
+   {
+    "nombre": "pizza burrata y jamon serrano",
+    "precio": 0
+   },
+   {
+    "nombre": "pizza burrata y tomates confitados",
+    "precio": 0
+   },
+   {
+    "nombre": "pizza del mar",
+    "precio": 0
+   },
+   {
+    "nombre": "pizza suprema",
+    "precio": 0
+   },
+   {
+    "nombre": "Pollo con champiñones",
+    "precio": 0
+   },
+   {
+    "nombre": "Pollo e panceta al pomodoro",
+    "precio": 0
+   },
+   {
+    "nombre": "Pollo salame e rucula",
+    "precio": 0
+   },
+   {
+    "nombre": "Quattro formaggi",
+    "precio": 0
+   },
+   {
+    "nombre": "Rustica di pollo a panceta",
+    "precio": 0
+   },
+   {
+    "nombre": "Samba",
+    "precio": 0
+   },
+   {
+    "nombre": "Serrana di buffalla",
+    "precio": 0
+   },
+   {
+    "nombre": "Solo queso",
+    "precio": 0
+   },
+   {
+    "nombre": "Sucursal",
+    "precio": 0
+   },
+   {
+    "nombre": "Tres Quesos",
+    "precio": 0
+   }
+  ]
+ },
+ "Elige un sabor": {
+  "obligatorio": true,
+  "min": 1,
+  "max": 1,
+  "opciones": [
+   {
+    "nombre": "2 Heineken",
+    "precio": 0
+   },
+   {
+    "nombre": "Agua",
+    "precio": 0
+   },
+   {
+    "nombre": "Agua con gas",
+    "precio": 0
+   },
+   {
+    "nombre": "Club colombia",
+    "precio": 0
+   },
+   {
+    "nombre": "Cocacola 400 ml",
+    "precio": 0
+   },
+   {
+    "nombre": "Cocacola zero 400 ml",
+    "precio": 0
+   },
+   {
+    "nombre": "Ginger ale",
+    "precio": 0
+   },
+   {
+    "nombre": "Manzana 400 ml",
+    "precio": 0
+   },
+   {
+    "nombre": "naranja 400 ml",
+    "precio": 0
+   },
+   {
+    "nombre": "Quatro 400 ml",
+    "precio": 0
+   },
+   {
+    "nombre": "Uva 400 ml",
+    "precio": 0
+   }
+  ]
+ },
+ "GASEOSAS EN COMBO": {
+  "obligatorio": true,
+  "min": 1,
+  "max": 1,
+  "opciones": [
+   {
+    "nombre": "2 Cerveza poker",
+    "precio": 0
+   },
+   {
+    "nombre": "2 CERVEZAS CLUB COLOMBIA",
+    "precio": 0
+   },
+   {
+    "nombre": "2 COLA Y POLA LATA 330 ML",
+    "precio": 0
+   },
+   {
+    "nombre": "COCACOLA 1.5 LTS",
+    "precio": 0
+   },
+   {
+    "nombre": "COLA Y POLA 1.5 LTS",
+    "precio": 3000
+   },
+   {
+    "nombre": "Colombiana 1.5 lts",
+    "precio": 0
+   },
+   {
+    "nombre": "Heineken",
+    "precio": 2000
+   },
+   {
+    "nombre": "Manzana 1.5 lts",
+    "precio": 0
+   },
+   {
+    "nombre": "Pepsi 1.5 lts",
+    "precio": 0
+   }
+  ]
+ },
+ "Licor": {
+  "obligatorio": false,
+  "min": 0,
+  "max": 4,
+  "opciones": [
+   {
+    "nombre": "Ginebra Shot 2 onzas",
+    "precio": 6000
+   },
+   {
+    "nombre": "Michelado",
+    "precio": 1500
+   },
+   {
+    "nombre": "Viche Shot 2 onzas",
+    "precio": 5000
+   }
+  ]
+ },
+ "Notas de sabores": {
+  "obligatorio": false,
+  "min": 0,
+  "max": 4,
+  "opciones": [
+   {
+    "nombre": "Almibar de cereza.",
+    "precio": 1000
+   },
+   {
+    "nombre": "Michelado",
+    "precio": 1500
+   },
+   {
+    "nombre": "Zumo de Limón",
+    "precio": 1000
+   }
+  ]
+ }
+}

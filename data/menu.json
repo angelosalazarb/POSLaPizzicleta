@@ -22,7 +22,10 @@
  {
   "nombre": "Gaseosa Cocacola 1.5 Lts — Cocacola",
   "precio": 12000,
-  "categoria": "Bebidas"
+  "categoria": "Bebidas",
+  "modificadores": [
+   "Notas de sabores"
+  ]
  },
  {
   "nombre": "Gaseosa Cocacola 1.5 Lts — Quatro",
@@ -72,7 +75,10 @@
  {
   "nombre": "Limonada Sandia — Personal",
   "precio": 11000,
-  "categoria": "Bebidas"
+  "categoria": "Bebidas",
+  "modificadores": [
+   "Licor"
+  ]
  },
  {
   "nombre": "Limonada Sandia — Limonada Sandia Michelada",
@@ -192,7 +198,10 @@
  {
   "nombre": "Sandwich De Tomates Y Jamon Serrano — Personal",
   "precio": 31900,
-  "categoria": "Brunch"
+  "categoria": "Brunch",
+  "modificadores": [
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Americano — Taza",
@@ -212,7 +221,10 @@
  {
   "nombre": "Sandwich Diavolla — Sandwich De Foccacia",
   "precio": 31900,
-  "categoria": "Brunch"
+  "categoria": "Brunch",
+  "modificadores": [
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Capuccino — Personal",
@@ -257,7 +269,11 @@
  {
   "nombre": "Sandwich Fungi & Melanzane — Personal",
   "precio": 31900,
-  "categoria": "Brunch"
+  "categoria": "Brunch",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Porcion Focaccia — Focaccia Entera",
@@ -377,102 +393,178 @@
  {
   "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Carnes",
   "precio": 16000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones",
+   "Elige un sabor",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Pollo Champiñones",
   "precio": 16000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Samba",
   "precio": 16000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Pancho Villa",
   "precio": 16000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Margarita",
   "precio": 16000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Porcion De Pizza + Gaseosa En Botella — Slice Hawaiana",
   "precio": 16000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Pizza Combo De La Casa + Gaseosa 1.5 Lts — Pizza Mediana En Combo + Gaseosa 1.5 Lts",
   "precio": 58000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige 2 sabores",
+   "Adiciones",
+   "GASEOSAS EN COMBO",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Pizza Combo De La Casa + Gaseosa 1.5 Lts — Pizza Grande En Combo + Gaseosa 1.5 Lts",
   "precio": 73000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige 2 sabores",
+   "Adiciones",
+   "GASEOSAS EN COMBO",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Pizza Combo Deluxe Pizza + Gaseosa 1.5 Lts — Deluxe Mediana + Gaseosa 1.5 Lts",
   "precio": 66000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige 2 sabores",
+   "Adiciones",
+   "GASEOSAS EN COMBO",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Pizza Combo Deluxe Pizza + Gaseosa 1.5 Lts — Grande + Gaseosa 1.5 Lts",
   "precio": 80000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige 2 sabores",
+   "Adiciones",
+   "GASEOSAS EN COMBO",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Pizza Slice + Cerveza — Pizza Slice Carnes",
   "precio": 17000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Pizza Slice + Cerveza — Pizza Slice Póllo Champiñon",
   "precio": 17000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Pizza Slice + Cerveza — Pizza Slice Samba",
   "precio": 17000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Pizza Slice + Cerveza — Pizza Slice Gorgona",
   "precio": 17000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Pizza Slice + Cerveza — Pizza Slice Margarita",
   "precio": 17000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Pizza Slice + Cerveza — Pizza Slice Hawaiana",
   "precio": 17000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Elige un sabor"
+  ]
  },
  {
   "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Mixta + Focaccia",
   "precio": 28000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Pollo Champiñon + Focaccia",
   "precio": 28000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Boloñesa + Focaccia",
   "precio": 28000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Vegetariana+ Focaccia",
   "precio": 28000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Combo Almuerzo Molde 16 Onzas Con Focaccia — Mexicana + Focaccia",
@@ -487,37 +579,60 @@
  {
   "nombre": "Pasta Larga Lunch — Pollo Con Champiñones",
   "precio": 23000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pasta Larga Lunch — Boloñesa",
   "precio": 23000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Pasta Larga Lunch — Napolitana",
   "precio": 23000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pasta Larga Lunch — Tres Quesos",
   "precio": 25000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pasta Larga Lunch — Carbonara",
   "precio": 26000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pasta Larga Lunch — Frutos Del Mar",
   "precio": 32000,
-  "categoria": "Combos"
+  "categoria": "Combos",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Ensalada De Burrata & Tomates — Entrada",
   "precio": 28000,
-  "categoria": "Entradas"
+  "categoria": "Entradas",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Ensalada De Burrata & Tomates — Con Jamón Serrano Sobre El Baguette",
@@ -532,7 +647,11 @@
  {
   "nombre": "Pancitos Bicicleta Con Salsa Napolitana — Personal",
   "precio": 11000,
-  "categoria": "Entradas"
+  "categoria": "Entradas",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Pancitos Bicicleta Con Salsa Napolitana — Pancitos Bicicleta Con De Salsa Napolitana",
@@ -542,7 +661,11 @@
  {
   "nombre": "Pan Baguette Con Jamon Serrano Y Burrata. — Unidad",
   "precio": 28000,
-  "categoria": "Entradas"
+  "categoria": "Entradas",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Pan Baguette Con Jamon Serrano Y Burrata. — Con Tomate Confitado & Burrata",
@@ -552,7 +675,10 @@
  {
   "nombre": "Lasaña & Pan Baguette — Cazuela Boloñesa",
   "precio": 29300,
-  "categoria": "Lasaña"
+  "categoria": "Lasaña",
+  "modificadores": [
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Lasaña & Pan Baguette — Cazuela Pollo Champiñones",
@@ -582,237 +708,388 @@
  {
   "nombre": "Pizza Mitad Y Mitad 2 Sabores — Mediana 6 Porciones (30 Cm)",
   "precio": 48000,
-  "categoria": "Pizza Combinada"
+  "categoria": "Pizza Combinada",
+  "modificadores": [
+   "Elige 2 sabores",
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Mitad Y Mitad 2 Sabores — Grande 8 Porciones (40 Cm)",
   "precio": 63000,
-  "categoria": "Pizza Combinada"
+  "categoria": "Pizza Combinada",
+  "modificadores": [
+   "Elige 2 sabores",
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Mitad Y Mitad De Luxe 2 Sabores — Mediana 6 Porciones (30 Cm)",
   "precio": 57000,
-  "categoria": "Pizza Combinada"
+  "categoria": "Pizza Combinada",
+  "modificadores": [
+   "Elige 2 sabores"
+  ]
  },
  {
   "nombre": "Pizza Mitad Y Mitad De Luxe 2 Sabores — Grande 8 Porciones (40 Cm)",
   "precio": 71000,
-  "categoria": "Pizza Combinada"
+  "categoria": "Pizza Combinada",
+  "modificadores": [
+   "Elige 2 sabores"
+  ]
  },
  {
   "nombre": "Bicicleta Pegaso — Personal 4 Porciones (20 Cm)",
   "precio": 27200,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adición de licor",
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Bicicleta Pegaso — Mediana 6 Porciones (30 Cm)",
   "precio": 43700,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Bicicleta Pegaso — Grande 8 Porciones (40 Cm)",
   "precio": 61900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Hawaiana — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Hawaiana — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Hawaiana — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adición de licor",
+   "Adiciones",
+   "CAJA PARA LLEVAR"
+  ]
  },
  {
   "nombre": "Margarita — Personal 4 Porciones (20 Cm)",
   "precio": 27200,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Margarita — Mediana 6 Porciones (30 Cm)2",
   "precio": 43700,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Margarita — Grande 8 Porciones (40 Cm)",
   "precio": 61900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Samba — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Samba — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Samba — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Carnes — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Carnes — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Carnes — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bici Bbq — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bici Bbq — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bici Bbq — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Peperoni — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Peperoni — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Peperoni — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Sprint Monticoro — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Sprint Monticoro — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Sprint Monticoro — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "La Rueda Gorgona — Personal 4 Porciones (20 Cm)",
   "precio": 27200,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "La Rueda Gorgona — Mediana 6 Porciones (30 Cm)",
   "precio": 43700,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "La Rueda Gorgona — Grande 8 Porciones (40 Cm)",
   "precio": 61900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Andina — Personal 4 Porciones (20 Cm)",
   "precio": 27200,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Andina — Mediana 6 Porciones (30 Cm)",
   "precio": 43700,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Andina — Grande 8 Porciones (40 Cm)",
   "precio": 61900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pancho Villa En Bicicleta — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pancho Villa En Bicicleta — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pancho Villa En Bicicleta — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bicicleta Monareta — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bicicleta Monareta — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bicicleta Monareta — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Doña Guayaba — Personal 4 Porciones (20 Cm)",
   "precio": 27200,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Doña Guayaba — Mediana 6 Porciones (30 Cm)",
   "precio": 43700,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Doña Guayaba — Grande 8 Porciones (40 Cm)",
   "precio": 61900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bulevar — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bulevar — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Bulevar — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "La Vuelta Argentina — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "La Vuelta Argentina — Mediana 6 Porciones (30 Cm)",
@@ -822,12 +1099,18 @@
  {
   "nombre": "La Vuelta Argentina — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Porción De Pizza — Porción De Pizza Peperoni",
   "precio": 12000,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Porción De Pizza — Porción De Pizza Hawaiana",
@@ -857,22 +1140,34 @@
  {
   "nombre": "Pollo Con Champiñones — Personal 4 Porciones (20 Cm)",
   "precio": 28800,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pollo Con Champiñones — Mediana 6 Porciones (30 Cm)",
   "precio": 47600,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pollo Con Champiñones — Grande 8 Porciones (40 Cm)",
   "precio": 62900,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Margarita Latina — Personal 20 Cm",
   "precio": 27200,
-  "categoria": "Pizzas De La Casa"
+  "categoria": "Pizzas De La Casa",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Margarita Latina — Mediana",
@@ -902,17 +1197,27 @@
  {
   "nombre": "Pollo Salame E Rucula — Personal 4 Porciones (20 Cm)",
   "precio": 34600,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pollo Salame E Rucula — Mediana 6 Porciones (30 Cm)",
   "precio": 56700,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pollo Salame E Rucula — Grande 8 Porciones (40 Cm)",
   "precio": 72900,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adición de licor",
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Serrana Di Buffala — Personal 4 Porciones (20 Cm)",
@@ -922,17 +1227,26 @@
  {
   "nombre": "Pizza Serrana Di Buffala — Mediana 6 Porciones (30 Cm)",
   "precio": 56700,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Serrana Di Buffala — Grande 8 Porciones (40 Cm)",
   "precio": 72900,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Quattro Formaggi — Personal 4 Porciones (20 Cm)",
   "precio": 34600,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Quattro Formaggi — Mediana 6 Porciones (30 Cm)",
@@ -947,22 +1261,34 @@
  {
   "nombre": "Pollo E Panceta Al Pomodoro — Personal 4 Porciones (20 Cm)",
   "precio": 34600,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pollo E Panceta Al Pomodoro — Mediana 6 Porciones (30 Cm)",
   "precio": 56700,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pollo E Panceta Al Pomodoro — Grande 8 Porciones (40 Cm)",
   "precio": 72900,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Mi Diavolla — Pequeña 20 Cm",
   "precio": 34600,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Mi Diavolla — Mediana 6 Porciones (30 Cm)",
@@ -977,17 +1303,26 @@
  {
   "nombre": "Pizza Suprema — Personal 4 Porciones",
   "precio": 34600,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Suprema — Mediana 6 Porciones",
   "precio": 56700,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Suprema — Grande 8 Porciones",
   "precio": 72900,
-  "categoria": "Pizzas De Luxe"
+  "categoria": "Pizzas De Luxe",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Napolitana — Pequeña 20 Cm",
@@ -1007,7 +1342,10 @@
  {
   "nombre": "Pizza Pantalon Con Salsa Chan Chan — Pollo Champiñon",
   "precio": 32600,
-  "categoria": "Pizzas Pantalon"
+  "categoria": "Pizzas Pantalon",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Pantalon Con Salsa Chan Chan — Hawaiano",
@@ -1052,27 +1390,42 @@
  {
   "nombre": "Rustica Di Pollo A Pancetta — Personal 4 Porciones (20 Cm)",
   "precio": 34600,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Rustica Di Pollo A Pancetta — Mediana 6 Porciones (30 Cm)",
   "precio": 56700,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Rustica Di Pollo A Pancetta — Grande 8 Porciones (40 Cm)",
   "precio": 72900,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Burrata Bonita — Personal 4 Porciones (20 Cm)",
   "precio": 44500,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Burrata Bonita — Mediana 6 Porciones (30 Cm)",
   "precio": 68000,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Burrata Bonita — Grande 8 Porciones (40 Cm)",
@@ -1082,7 +1435,10 @@
  {
   "nombre": "Pizza Burrata & Tomates Confitados — Personal 4 Porciones (20 Cm)",
   "precio": 44500,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Burrata & Tomates Confitados — Mediana 6 Porciones (30 Cm)",
@@ -1092,22 +1448,34 @@
  {
   "nombre": "Pizza Burrata & Tomates Confitados — Grande 8 Porciones (40 Cm)",
   "precio": 83900,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Burrata Y Jamon Serrano, — Personal 4 Porciones (20 Cm)",
   "precio": 44500,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Burrata Y Jamon Serrano, — Mediana 6 Porciones (30 Cm)",
   "precio": 68000,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pizza Burrata Y Jamon Serrano, — Grande 8 Porciones (40 Cm)",
   "precio": 83900,
-  "categoria": "Pizzas Premium"
+  "categoria": "Pizzas Premium",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Gorgona Vegana — Personal 4 Porciones (20 Cm)",
@@ -1117,7 +1485,10 @@
  {
   "nombre": "Gorgona Vegana — Mediana 6 Porciones (30 Cm)",
   "precio": 48700,
-  "categoria": "Pizzas Veganas"
+  "categoria": "Pizzas Veganas",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Gorgona Vegana — Grande 8 Porciones (40 Cm)",
@@ -1127,12 +1498,18 @@
  {
   "nombre": "Andina Vegana — Personal 4 Porciones (20 Cm)",
   "precio": 29200,
-  "categoria": "Pizzas Veganas"
+  "categoria": "Pizzas Veganas",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Andina Vegana — Mediana 6 Porciones (30 Cm)",
   "precio": 48700,
-  "categoria": "Pizzas Veganas"
+  "categoria": "Pizzas Veganas",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Andina Vegana — Grande 8 Porciones (40 Cm)",
@@ -1152,7 +1529,10 @@
  {
   "nombre": "Margarita Vegana — Grande 8 Porciones (40 Cm)",
   "precio": 67900,
-  "categoria": "Pizzas Veganas"
+  "categoria": "Pizzas Veganas",
+  "modificadores": [
+   "Adiciones"
+  ]
  },
  {
   "nombre": "Pinchada Vegana — Personal 4 Porciones (20 Cm)",

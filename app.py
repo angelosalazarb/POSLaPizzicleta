@@ -10,6 +10,7 @@ import html
 import io
 import json
 import os
+import re
 import sqlite3
 import unicodedata
 from datetime import date, datetime, timedelta
@@ -22,6 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(os.environ.get("POS_DB", BASE_DIR / "data" / "pos.db"))
 POS_HTML = BASE_DIR / "pos.html"
 MENU_JSON = BASE_DIR / "data" / "menu.json"
+MODIFICADORES_JSON = BASE_DIR / "data" / "modificadores.json"
 
 app = Flask(__name__)
 
@@ -208,6 +210,15 @@ def menu():
     if not MENU_JSON.exists():
         return jsonify([])
     return send_file(MENU_JSON, mimetype="application/json")
+
+
+@app.get("/api/modificadores")
+def modificadores():
+    """Grupos de modificadores (sabores de combo, adiciones, gaseosas...):
+    {grupo: {obligatorio, min, max, opciones: [{nombre, precio}]}}."""
+    if not MODIFICADORES_JSON.exists():
+        return jsonify({})
+    return send_file(MODIFICADORES_JSON, mimetype="application/json")
 
 
 @app.get("/api/config")
@@ -1011,7 +1022,10 @@ def comanda(fid):
 
     def es_bebida(desc):
         n = _norm(desc)
-        cat = mapa.get(n)
+        # los sabores/acompañantes elegidos van en un sufijo "(...)" que no
+        # está en el menú; se quita para clasificar por la categoría real
+        sin_sufijo = _norm(re.sub(r"\s*\([^()]*\)$", "", desc or ""))
+        cat = mapa.get(n) or mapa.get(sin_sufijo)
         if cat is not None:
             return cat in CATS_BEBIDAS
         return any(p in n for p in PALABRAS_BEBIDA)

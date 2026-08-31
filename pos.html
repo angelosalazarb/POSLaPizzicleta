@@ -426,6 +426,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
   border:1.5px solid var(--linea); border-radius:10px; background:var(--papel);
 }
 .campo-mesa select:focus { border-color:var(--azul); outline:none; }
+.campo-mesa select.falta { border-color:var(--naranja-tx); background:var(--naranja-dim); }
 
 /* cuenta pagada (solo lectura) */
 .pagada-items .item-linea {
@@ -809,6 +810,47 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .modal-acciones .btn-limpiar { margin-left:auto; color:var(--muted); font-weight:600; min-height:44px; padding:0 14px; border-radius:100px; }
 .modal-acciones .btn-limpiar:hover { background:var(--error-dim); color:var(--error); }
 
+/* modal de sabores y acompañantes (combos) */
+.modal-mods { width:min(560px, 100%); }
+.modal-mods .modal-head h3 { font-size:19px; line-height:1.3; }
+.modal-mods .modal-acciones { padding-top:14px; border-top:2px solid var(--tinta); }
+.modal-mods .modal-acciones .btn { flex:1; }
+.mod-grupo { padding:12px 0 6px; }
+.mod-grupo + .mod-grupo { border-top:1.5px dashed var(--linea); }
+.mod-cab { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.mod-titulo { font-weight:700; font-size:14.5px; }
+.mod-regla {
+  margin-left:auto; flex:none; font-size:10.5px; font-weight:700; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--muted);
+  padding:4px 11px; border-radius:100px; background:var(--papel);
+}
+.mod-regla.oblig { background:var(--error-dim); color:var(--error); }
+.mod-regla.oblig.ok { background:rgba(46,125,79,.14); color:var(--ok); }
+.mod-busca {
+  width:100%; min-height:42px; padding:0 12px; margin-bottom:6px;
+  border:1.5px solid var(--linea); border-radius:10px; background:var(--papel);
+  font-size:14px;
+}
+.mod-busca:focus { border-color:var(--azul); outline:none; }
+.mod-op {
+  display:flex; align-items:center; gap:10px; padding:3px 0;
+  border-bottom:1px dashed var(--linea);
+}
+.mod-op:last-child { border-bottom:none; }
+.mod-op[hidden] { display:none; }
+.mod-op .mod-nom { font-size:14px; }
+.mod-op.con .mod-nom { font-weight:700; }
+.mod-op .stepper { margin-left:auto; flex:none; }
+.mod-precio { color:var(--naranja-tx); font-family:var(--font-mono); font-size:12.5px; font-weight:600; }
+.mod-pills { display:flex; flex-wrap:wrap; gap:8px; padding-bottom:8px; }
+.mod-pill {
+  min-height:44px; padding:0 16px; border-radius:100px; border:1.5px solid var(--linea);
+  background:var(--card); font-weight:600; font-size:13.5px;
+  transition:background var(--trans), border-color var(--trans), color var(--trans);
+}
+.mod-pill:hover { border-color:var(--tinta); }
+.mod-pill.on { background:var(--tinta); border-color:var(--tinta); color:var(--papel); }
+
 /* toast */
 #toast {
   position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
@@ -1041,6 +1083,14 @@ async function cargarMenu() {
     const m = await api('/api/menu');
     state.menu = m.map(i => ({...i, buscar: norm(i.nombre + ' ' + i.categoria)}));
   } catch { state.menu = []; }
+  try {
+    state.modificadores = await api('/api/modificadores');
+  } catch { state.modificadores = {}; }
+}
+
+// grupos de modificadores que aplican a un producto del menú (solo los cargados)
+function gruposDe(prod) {
+  return (prod?.modificadores || []).filter(g => state.modificadores?.[g]);
 }
 
 function buscarMenu(q) {
@@ -1062,11 +1112,18 @@ function armarAutocompletado(fila, desc, precio, it, f) {
   const cerrar = () => { if (lista) { lista.remove(); lista = null; sel = -1; resultados = []; } };
 
   const elegir = item => {
+    cerrar();
+    if (gruposDe(item).length) {
+      // el combo se arma en el modal; la fila queda libre para reusarla
+      it.descripcion = ''; desc.value = '';
+      it.precio_unitario = 0; precio.value = '';
+      abrirModificadores(f, item);
+      return;
+    }
     it.descripcion = item.nombre;
     desc.value = item.nombre;
     it.precio_unitario = item.precio;
     precio.value = fmtInputPrecio(String(item.precio));
-    cerrar();
     recalcular(f); programarGuardado(f);
   };
 
@@ -1156,24 +1213,165 @@ function renderLineas(f) {
 
 function agregarProducto(f, prod) {
   if (!prod || f.estado !== 'abierta') return;
+  if (gruposDe(prod).length) { abrirModificadores(f, prod); return; }
+  insertarItem(f, prod.nombre, prod.precio);
+}
+
+// mete una línea a la cuenta (sumando cantidad si ya existe idéntica)
+function insertarItem(f, descripcion, precio) {
   const existente = f.items.find(i =>
-    i.descripcion === prod.nombre && i.precio_unitario === prod.precio);
+    i.descripcion === descripcion && i.precio_unitario === precio);
   if (existente) {
     existente.cantidad = (existente.cantidad || 0) + 1;
   } else {
     // reusar la línea vacía del arranque en vez de dejarla huérfana
     const vacia = f.items.find(i => !(i.descripcion || '').trim() && !i.precio_unitario);
     if (vacia) {
-      vacia.descripcion = prod.nombre;
-      vacia.precio_unitario = prod.precio;
+      vacia.descripcion = descripcion;
+      vacia.precio_unitario = precio;
       vacia.cantidad = vacia.cantidad || 1;
     } else {
-      f.items.push({cantidad:1, descripcion: prod.nombre, precio_unitario: prod.precio});
+      f.items.push({cantidad:1, descripcion, precio_unitario: precio});
     }
   }
   renderLineas(f);
   recalcular(f);
   programarGuardado(f);
+}
+
+/* ---------- modal de sabores y acompañantes (combos y pizzas) ---------- */
+function abrirModificadores(f, prod) {
+  const grupos = gruposDe(prod).map(g => ({nombre: g, ...state.modificadores[g]}));
+  if (!grupos.length) { insertarItem(f, prod.nombre, prod.precio); return; }
+
+  // sel[gi][oi] = cuántas veces se eligió esa opción
+  const sel = grupos.map(g => g.opciones.map(() => 0));
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+
+  const grupoHTML = (g, gi) => {
+    const busca = g.max > 1 && g.opciones.length > 12
+      ? `<input class="mod-busca" type="search" data-busca="${gi}" placeholder="Buscar ${esc(g.nombre.toLowerCase())}...">` : '';
+    const opciones = g.max === 1
+      ? `<div class="mod-pills">${g.opciones.map((o, oi) =>
+          `<button type="button" class="mod-pill" data-gi="${gi}" data-oi="${oi}">${esc(o.nombre)}${o.precio ? ` +${fmt(o.precio)}` : ''}</button>`).join('')}</div>`
+      : g.opciones.map((o, oi) => `
+        <div class="mod-op" data-op="${gi}-${oi}">
+          <span class="mod-nom">${esc(o.nombre)}${o.precio ? ` <span class="mod-precio">+${fmt(o.precio)}</span>` : ''}</span>
+          <span class="stepper">
+            <button type="button" data-gi="${gi}" data-oi="${oi}" data-d="-1" aria-label="Una menos">&minus;</button>
+            <input class="cant" readonly tabindex="-1" value="0" id="modCant-${gi}-${oi}" aria-label="Cantidad de ${esc(o.nombre)}">
+            <button type="button" data-gi="${gi}" data-oi="${oi}" data-d="1" aria-label="Una m&aacute;s">+</button>
+          </span>
+        </div>`).join('');
+    return `
+      <section class="mod-grupo">
+        <div class="mod-cab">
+          <span class="mod-titulo">${esc(g.nombre)}</span>
+          <span class="mod-regla${g.obligatorio ? ' oblig' : ''}" data-regla="${gi}"></span>
+        </div>
+        ${busca}${opciones}
+      </section>`;
+  };
+
+  overlay.innerHTML = `
+    <div class="modal modal-mods" role="dialog" aria-modal="true" aria-label="Opciones de ${esc(prod.nombre)}">
+      <div class="modal-head">
+        <h3>${esc(prod.nombre)}</h3>
+        <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
+      </div>
+      <div class="modal-cuerpo">${grupos.map(grupoHTML).join('')}</div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-primario" id="btnModAgregar"></button>
+      </div>
+    </div>`;
+
+  const cuenta = gi => sel[gi].reduce((s, n) => s + n, 0);
+  const extras = () => grupos.reduce((s, g, gi) =>
+    s + g.opciones.reduce((t, o, oi) => t + sel[gi][oi] * o.precio, 0), 0);
+
+  const reglaTexto = (g, n) => {
+    if (g.obligatorio) {
+      if (n >= g.min) return g.max === 1 ? 'listo' : `${n} de ${g.max} · listo`;
+      const faltan = g.min - n;
+      return g.min === 1 ? 'elige 1' : `elige ${g.min} · falta${faltan > 1 ? 'n' : ''} ${faltan}`;
+    }
+    return g.max === 1 ? 'opcional' : `opcional · máx. ${g.max}`;
+  };
+
+  const actualizar = () => {
+    grupos.forEach((g, gi) => {
+      const n = cuenta(gi);
+      const regla = overlay.querySelector(`[data-regla="${gi}"]`);
+      regla.textContent = reglaTexto(g, n);
+      regla.classList.toggle('ok', n >= g.min);
+      if (g.max === 1) {
+        overlay.querySelectorAll(`.mod-pill[data-gi="${gi}"]`).forEach(b =>
+          b.classList.toggle('on', sel[gi][Number(b.dataset.oi)] > 0));
+      } else {
+        sel[gi].forEach((c, oi) => {
+          const inp = overlay.querySelector(`#modCant-${gi}-${oi}`);
+          inp.value = c;
+          inp.closest('.mod-op').classList.toggle('con', c > 0);
+        });
+      }
+    });
+    const btn = overlay.querySelector('#btnModAgregar');
+    btn.disabled = grupos.some((g, gi) => g.obligatorio && cuenta(gi) < g.min);
+    btn.innerHTML = `${ICONOS.mas} Agregar &middot; ${fmt(prod.precio + extras())}`;
+  };
+
+  const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
+  const alEscape = e => { if (e.key === 'Escape') cerrar(); };
+  document.addEventListener('keydown', alEscape);
+  overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(); });
+  overlay.querySelector('.cerrar-modal').addEventListener('click', cerrar);
+
+  // steppers (grupos de varias unidades)
+  overlay.querySelectorAll('.stepper button').forEach(b => b.addEventListener('click', () => {
+    const gi = Number(b.dataset.gi), oi = Number(b.dataset.oi), d = Number(b.dataset.d);
+    if (d > 0 && cuenta(gi) >= grupos[gi].max) {
+      toast(`Máximo ${grupos[gi].max} en «${grupos[gi].nombre}»`, true);
+      return;
+    }
+    sel[gi][oi] = Math.max(sel[gi][oi] + d, 0);
+    actualizar();
+  }));
+
+  // pastillas (grupos de una sola opción): tocar elige, volver a tocar quita
+  overlay.querySelectorAll('.mod-pill').forEach(b => b.addEventListener('click', () => {
+    const gi = Number(b.dataset.gi), oi = Number(b.dataset.oi);
+    const ya = sel[gi][oi] > 0;
+    sel[gi] = sel[gi].map(() => 0);
+    if (!ya) sel[gi][oi] = 1;
+    actualizar();
+  }));
+
+  // filtro de sabores en grupos largos
+  overlay.querySelectorAll('.mod-busca').forEach(inp => inp.addEventListener('input', () => {
+    const gi = inp.dataset.busca;
+    const q = norm(inp.value).trim();
+    overlay.querySelectorAll(`.mod-op[data-op^="${gi}-"]`).forEach(op => {
+      const oi = Number(op.dataset.op.split('-')[1]);
+      // las ya elegidas siguen visibles para poder restarlas
+      op.hidden = !!q && !norm(grupos[gi].opciones[oi].nombre).includes(q) && !sel[gi][oi];
+    });
+  }));
+
+  overlay.querySelector('#btnModAgregar').addEventListener('click', () => {
+    const partes = [];
+    grupos.forEach((g, gi) => g.opciones.forEach((o, oi) => {
+      const c = sel[gi][oi];
+      if (c > 0) partes.push((c > 1 ? `${c}× ` : '') + o.nombre);
+    }));
+    const desc = partes.length ? `${prod.nombre} (${partes.join(', ')})` : prod.nombre;
+    insertarItem(f, desc, prod.precio + extras());
+    cerrar();
+  });
+
+  actualizar();
+  document.body.appendChild(overlay);
 }
 
 function armarPanelMenu(f) {
@@ -1677,8 +1875,8 @@ function renderFactura() {
       ${etiquetaEtapa}
       <div class="campo-nota campo-mesa">
         <label for="mesaSel">Mesa</label>
-        <select id="mesaSel">
-          <option value="">&mdash;</option>
+        <select id="mesaSel"${f.mesa ? '' : ' class="falta"'}>
+          <option value="">&iquest;Mesa, llevar o domicilio?</option>
           ${opcionesMesa.map(m => `<option value="${esc(m)}"${f.mesa === m ? ' selected' : ''}>${esc(m)}</option>`).join('')}
         </select>
       </div>
@@ -1769,6 +1967,7 @@ function renderFactura() {
   const mesaSel = $('#mesaSel');
   mesaSel.addEventListener('change', () => {
     f.mesa = mesaSel.value;
+    mesaSel.classList.toggle('falta', !f.mesa);
     programarGuardado(f);
     renderTabs(); // refresca el rótulo de mesa en la pestaña
   });
@@ -2008,10 +2207,20 @@ async function guardar(f) {
 }
 
 /* ---------- acciones ---------- */
+// todo pedido debe decir si es en mesa, para llevar o domicilio
+function exigirCanal(f) {
+  if (f.estado !== 'abierta' || f.mesa) return true;
+  toast('¿Es en mesa, para llevar o domicilio? Elegilo arriba', true);
+  const sel = $('#mesaSel');
+  if (sel) { sel.classList.add('falta'); sel.focus(); }
+  return false;
+}
+
 async function cobrar(f) {
   if (!f.items.some(i => (i.descripcion||'').trim() || i.precio_unitario > 0)) {
     toast('La cuenta está vacía', true); return;
   }
+  if (!exigirCanal(f)) return;
   try {
     await guardar(f);
     const r = await api(`/api/facturas/${f.id}/cerrar`, {method:'POST'});
@@ -2028,6 +2237,7 @@ async function enviarCocina(f) {
   if (!f.items.some(i => (i.descripcion||'').trim() || i.precio_unitario > 0)) {
     toast('La cuenta está vacía', true); return;
   }
+  if (!exigirCanal(f)) return;
   try {
     if (f.estado === 'abierta') await guardar(f); // una pagada ya no se edita
     const primera = f.etapa === 'en_progreso';

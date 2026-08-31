@@ -10,3 +10,6 @@ __pycache__/
 # Logs y temporales
 *.log
 .DS_Store
+
+# Respaldos puntuales de la carta
+data/menu.json.bak-*

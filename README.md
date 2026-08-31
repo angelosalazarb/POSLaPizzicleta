@@ -7,9 +7,22 @@ tickets se imprimen en la térmica SAT (papel POS80) desde Chrome.
 - Facturas como **pestañas** ("cuentas"): cantidad × ítem × precio, texto libre.
 - **Autocompletado desde la carta**: al escribir el ítem sugiere los productos del
   menú de niceeat (nombre, categoría y precio) y al elegir uno llena el precio solo.
-  El catálogo vive en `data/menu.json` (91 productos scrapeados de
-  lapizzicleta.niceeat.co el 2026-08-27); es un JSON editable a mano si cambian
+  El catálogo vive en `data/menu.json` (productos scrapeados de
+  lapizzicleta.niceeat.co); es un JSON editable a mano si cambian
   precios o hay productos nuevos.
+- **Sabores y acompañantes de los combos**: al tocar un producto que en niceeat
+  pide opciones (combos, pizza mitad y mitad, slices) se abre un modal igual al
+  de la carta: sabores obligatorios ("Elige 2 sabores" exige exactamente 2, con
+  buscador), adiciones con precio (máx. 4, se suman al valor del ítem), gaseosa
+  del combo obligatoria y caja para llevar. Lo elegido queda en la descripción
+  del ítem entre paréntesis y sale en el ticket y la comanda. Las reglas y
+  opciones viven en `data/modificadores.json`, generado con
+  `python3 data/generar-modificadores.py` desde la carta scrapeada
+  (`data/carta-niceeat-completa.json`), que también anota en `menu.json` qué
+  producto usa qué grupos.
+- **Canal obligatorio en todo pedido**: cada cuenta debe decir si es en mesa,
+  para llevar o domicilio (selector arriba, resaltado mientras falte); no deja
+  cobrar ni enviar a cocina sin elegirlo.
 - **Descuento** por cuenta en $ o %, el total nunca baja de 0.
 - **Propina** debajo del descuento, en % (típico 10) o $ fijo: muestra el valor
   calculado y el **A pagar** = total + propina. Sale en el ticket y en el export.
@@ -97,6 +110,7 @@ pos/
 | Método | Ruta | Qué hace |
 |---|---|---|
 | GET | `/api/menu` | catálogo de la carta (`data/menu.json`) para el autocompletado |
+| GET | `/api/modificadores` | grupos de sabores/acompañantes (`data/modificadores.json`) |
 | GET | `/api/facturas?estado=abierta` | cuentas abiertas con sus ítems |
 | POST | `/api/facturas` | nueva cuenta (numeración F-001 reinicia cada día) |
 | PUT | `/api/facturas/<id>` | guardar ítems + descuento + nota |
