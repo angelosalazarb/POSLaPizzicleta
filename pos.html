@@ -947,8 +947,13 @@ const state = {
   config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]},
   fechaVentas: hoyISO(), // día mostrado en la vista Ventas (filtrable)
   catSel: 'Todos',     // categoría elegida en el panel del menú
-  buscaProd: ''        // búsqueda del panel del menú
+  buscaProd: '',       // búsqueda del panel del menú
+  ventasHoy: 0,        // nº de cuentas cobradas hoy (para sugerir el cuadre)
+  cuadresHoy: [],      // cuadres de turno guardados hoy
+  cuadreAbierto: false,
+  cuadrePospuesto: 0   // timestamp hasta el que no se vuelve a sugerir
 };
+try { state.cuadrePospuesto = Number(localStorage.getItem('posCuadrePospuesto')) || 0; } catch {}
 
 const facturaActiva = () => state.facturas.find(f => f.id === state.activaId) || null;
 
@@ -1246,10 +1251,12 @@ async function cargarTotalDia() {
   try {
     const v = await api('/api/ventas'); // la pill del header siempre es HOY
     $('#totalDia').textContent = fmt(v.total_dia);
+    state.ventasHoy = v.num_facturas || 0;
     if (state.fechaVentas === hoyISO()) {
       state.ventasVista = v;
       if (state.vista === 'ventas') renderVentas();
     }
+    chequearCuadre();
   } catch {}
 }
 
@@ -2480,6 +2487,152 @@ function abrirModalApertura() {
   });
 }
 
+/* ---------- cuadre de turno (auditoría intermedia de caja) ---------- */
+async function cargarCuadresHoy() {
+  try { state.cuadresHoy = (await api('/api/cuadres?fecha=' + hoyISO())).cuadres || []; } catch {}
+}
+
+// sugiere el cuadre solo cuando: apertura hace >3 h, hubo ventas, la caja está
+// tranquila (≤3 cuentas activas) y no hay cuadre reciente ni fue pospuesto
+const CUADRE_CADA_MS = 3 * 3600 * 1000;
+function chequearCuadre() {
+  if (state.cuadreAbierto || state.vista === 'cuenta') return;
+  if (document.querySelector('.overlay')) return; // ya hay otro modal abierto
+  const editando = document.activeElement && document.activeElement.matches('input, select');
+  if (editando) return;
+  const a = state.apertura?.apertura;
+  if (!a || (state.apertura.fecha || hoyISO()) !== hoyISO()) return;
+  const ahora = Date.now();
+  if (ahora - new Date(a.guardado_en).getTime() < CUADRE_CADA_MS) return;
+  if (!(state.ventasHoy > 0)) return;
+  const activas = state.facturas.filter(f => !cuentaCompleta(f)).length;
+  if (activas > 3) return;
+  const ultimo = state.cuadresHoy.reduce(
+    (m, q) => Math.max(m, new Date(q.creado_en).getTime()), 0);
+  if (ultimo && ahora - ultimo < CUADRE_CADA_MS) return;
+  if (ahora < state.cuadrePospuesto) return;
+  abrirCuadre(true);
+}
+
+async function abrirCuadre(auto = false) {
+  if (state.cuadreAbierto) return;
+  state.cuadreAbierto = true;
+  let esp, base;
+  try {
+    const c = await api('/api/cierre?fecha=' + hoyISO());
+    esp = c.esperados;
+    base = c.base_sugerida || 0;
+  } catch (e) { state.cuadreAbierto = false; toast(e.message, true); return; }
+  const espEf = base + esp.efectivo - (esp.salidas_efectivo ?? esp.salidas ?? 0);
+  const espTr = esp.transferencias - (esp.salidas_transferencias || 0);
+  const conteo = {};
+
+  const filasDen = Object.entries(DENOMINACIONES).map(([grupo, dens]) =>
+    `<div class="den-grupo">${grupo}</div>` +
+    dens.map(d => `
+      <div class="den-fila">
+        <span class="den">$${d.toLocaleString('es-CO')}</span>
+        <input inputmode="numeric" placeholder="0" data-den="${d}"
+               aria-label="Cantidad de ${grupo.toLowerCase()} de ${d}">
+        <span class="sub" data-sub="${d}"></span>
+      </div>`).join('')
+  ).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Cuadre de turno">
+      <div class="modal-head">
+        <h3>Cuadre de turno</h3>
+        <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
+      </div>
+      <p class="modal-sub">${auto ? 'Momento tranquilo: buena hora para cuadrar la caja. ' : ''}Cont&aacute; el efectivo del caj&oacute;n (incluida la base) y compar&aacute; las transferencias con la app del banco. Queda guardado como auditor&iacute;a del turno.</p>
+      <div class="modal-cuerpo">
+        ${filasDen}
+        <div class="res-fila"><span class="lbl">Efectivo contado</span><span class="val" id="qEf">$0</span></div>
+        <div class="res-fila"><span class="lbl">Esperado en caj&oacute;n (base ${fmt(base)} + ventas &minus; salidas)</span><span class="val">${fmt(espEf)}</span></div>
+        <div class="res-fila"><span class="lbl">Diferencia efectivo</span><span class="dif" id="qDifEf">&mdash;</span></div>
+        <div class="vuelto-campo">
+          <label for="qTr">Transferencias de hoy seg&uacute;n la app del banco</label>
+          <input id="qTr" inputmode="numeric" placeholder="0">
+        </div>
+        <div class="res-fila"><span class="lbl">Transferencias esperadas</span><span class="val">${fmt(espTr)}</span></div>
+        <div class="res-fila"><span class="lbl">Diferencia transferencias</span><span class="dif" id="qDifTr">&mdash;</span></div>
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-primario" id="qGuardar">Guardar cuadre</button>
+        <button type="button" class="btn-limpiar" id="qLuego">Ahora no</button>
+      </div>
+    </div>`;
+
+  const totalConteo = () =>
+    Object.entries(conteo).reduce((s, [d, c]) => s + Number(d) * (c || 0), 0);
+  const trContado = () =>
+    Number(soloDigitos(overlay.querySelector('#qTr').value)) || 0;
+
+  const pintar = () => {
+    overlay.querySelectorAll('input[data-den]').forEach(inp => {
+      const d = Number(inp.dataset.den), c = conteo[d] || 0;
+      const sub = overlay.querySelector(`[data-sub="${d}"]`);
+      sub.textContent = c ? fmt(d * c) : '';
+      sub.classList.toggle('con-valor', c > 0);
+    });
+    overlay.querySelector('#qEf').textContent = fmt(totalConteo());
+    pintarDif(overlay.querySelector('#qDifEf'), totalConteo() - espEf);
+    pintarDif(overlay.querySelector('#qDifTr'), trContado() - espTr);
+  };
+
+  // cerrar sin guardar = posponer, para que la sugerencia no vuelva enseguida
+  const posponer = () => {
+    state.cuadrePospuesto = Date.now() + 45 * 60000;
+    try { localStorage.setItem('posCuadrePospuesto', String(state.cuadrePospuesto)); } catch {}
+  };
+  const cerrar = () => {
+    overlay.remove();
+    document.removeEventListener('keydown', alEscape);
+    state.cuadreAbierto = false;
+  };
+  const alEscape = e => { if (e.key === 'Escape') { posponer(); cerrar(); } };
+  document.addEventListener('keydown', alEscape);
+  overlay.addEventListener('click', e => { if (e.target === overlay) { posponer(); cerrar(); } });
+  overlay.querySelector('.cerrar-modal').addEventListener('click', () => { posponer(); cerrar(); });
+  overlay.querySelector('#qLuego').addEventListener('click', () => {
+    posponer(); cerrar();
+    toast('Listo, te lo sugiero de nuevo en un rato');
+  });
+
+  overlay.querySelectorAll('input[data-den]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      inp.value = soloDigitos(inp.value);
+      const c = Number(inp.value) || 0;
+      const d = Number(inp.dataset.den);
+      if (c > 0) conteo[d] = c; else delete conteo[d];
+      pintar();
+    });
+  });
+  const qTr = overlay.querySelector('#qTr');
+  qTr.addEventListener('input', () => { qTr.value = fmtInputPrecio(qTr.value); pintar(); });
+
+  overlay.querySelector('#qGuardar').addEventListener('click', async () => {
+    try {
+      const r = await api('/api/cuadres', {method:'POST', body:{
+        efectivo_contado: totalConteo(),
+        transferencias_contado: trContado(),
+        conteo_efectivo: conteo
+      }});
+      state.cuadresHoy.push(r);
+      cerrar();
+      const parte = d => d === 0 ? 'cuadra' : (d < 0 ? `falta ${fmt(-d)}` : `sobra ${fmt(d)}`);
+      toast(`Cuadre guardado — efectivo: ${parte(r.dif_efectivo)} · transferencias: ${parte(r.dif_transferencias)}`);
+      if (state.vista === 'ventas') renderVentas();
+    } catch (e) { toast(e.message, true); }
+  });
+
+  document.body.appendChild(overlay);
+  pintar();
+  overlay.querySelector('input[data-den]').focus();
+}
+
 async function guardarCierre() {
   const f = state.cierreForm || {};
   try {
@@ -2657,6 +2810,23 @@ function renderVentas() {
         <span class="val">&minus;${fmt(state.movimientos?.total || 0)}</span>
       </div>
     </div>
+    ${esHoy ? `
+    <div class="cierre">
+      <h3>Cuadres de turno</h3>
+      <p class="sub-cierre">Auditor&iacute;a intermedia: contado vs esperado en ese momento. El sistema la sugiere solo cada ~3 horas cuando la caja est&aacute; tranquila.</p>
+      ${state.cuadresHoy.length ? state.cuadresHoy.map(q => {
+        const h = new Date(q.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+        const d = v => v === 0 ? '<span class="dif ok">cuadra</span>'
+          : v < 0 ? `<span class="dif falta">&minus;${fmt(-v)}</span>` : `<span class="dif sobra">+${fmt(v)}</span>`;
+        return `<div class="res-fila">
+          <span class="lbl">${h} &middot; efectivo ${fmt(q.efectivo_contado)} &middot; transf. ${fmt(q.transferencias_contado)}</span>
+          <span class="val">ef ${d(q.dif_efectivo)} &nbsp; tr ${d(q.dif_transferencias)}</span>
+        </div>`;
+      }).join('') : '<p class="sin-movs">Sin cuadres hoy.</p>'}
+      <div class="cierre-acciones">
+        <button type="button" class="btn btn-secundario" id="btnCuadreAhora">${ICONOS.billetes} Hacer cuadre ahora</button>
+      </div>
+    </div>` : ''}
     <div class="cierre">
       <h3>Cierre de caja</h3>
       <p class="sub-cierre">Contá la plata y compar&aacute; contra lo registrado. El "seg&uacute;n POS" incluye propinas y ya descuenta las salidas de arriba.</p>
@@ -2759,6 +2929,8 @@ function renderVentas() {
     });
   });
   $('#btnGuardarCierre').addEventListener('click', guardarCierre);
+  const btnQ = $('#btnCuadreAhora');
+  if (btnQ) btnQ.addEventListener('click', () => abrirCuadre());
   $('#btnConteo').addEventListener('click', abrirConteo);
   $('#btnConteoBaseSig').addEventListener('click', abrirConteoBaseSiguiente);
   $('#btnApertura').addEventListener('click', abrirModalApertura);
@@ -2881,7 +3053,7 @@ setInterval(refrescarSiInactivo, 60000);
 
 (async () => {
   try {
-    await Promise.all([cargarFacturas(), cargarMenu(), cargarConfig(), cargarMesas(), cargarApertura()]);
+    await Promise.all([cargarFacturas(), cargarMenu(), cargarConfig(), cargarMesas(), cargarApertura(), cargarCuadresHoy()]);
     if (state.vista === 'tablero') renderTablero(); // ya con config y menú cargados
     await cargarTotalDia();
     // primera apertura del día: pedir la base contada por denominaciones

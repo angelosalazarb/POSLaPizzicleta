@@ -63,6 +63,20 @@ CREATE TABLE IF NOT EXISTS aperturas (
     conteo_efectivo TEXT NOT NULL DEFAULT '',
     guardado_en TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS cuadres (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL,
+    creado_en TEXT NOT NULL,
+    base INTEGER NOT NULL DEFAULT 0,
+    efectivo_contado INTEGER NOT NULL DEFAULT 0,
+    transferencias_contado INTEGER NOT NULL DEFAULT 0,
+    esperado_efectivo INTEGER NOT NULL DEFAULT 0,
+    esperado_transferencias INTEGER NOT NULL DEFAULT 0,
+    dif_efectivo INTEGER NOT NULL DEFAULT 0,
+    dif_transferencias INTEGER NOT NULL DEFAULT 0,
+    conteo_efectivo TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_cuadres_fecha ON cuadres(fecha);
 CREATE TABLE IF NOT EXISTS mesas (
     nombre TEXT PRIMARY KEY,
     orden INTEGER NOT NULL DEFAULT 0
@@ -788,6 +802,66 @@ def guardar_cierre():
     db.commit()
     row = db.execute("SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()
     return jsonify({"fecha": fecha, "esperados": esp, "cierre": _cierre_dict(row)})
+
+
+# ---------- cuadres de turno (auditoría intermedia de caja) ----------
+
+@app.get("/api/cuadres")
+def listar_cuadres():
+    db = get_db()
+    fecha = request.args.get("fecha") or date.today().isoformat()
+    rows = db.execute(
+        "SELECT * FROM cuadres WHERE fecha = ? ORDER BY id", (fecha,)
+    ).fetchall()
+    out = []
+    for r in rows:
+        c = dict(r)
+        try:
+            c["conteo_efectivo"] = json.loads(c.get("conteo_efectivo") or "{}")
+        except ValueError:
+            c["conteo_efectivo"] = {}
+        out.append(c)
+    return jsonify({"fecha": fecha, "cuadres": out})
+
+
+@app.post("/api/cuadres")
+def crear_cuadre():
+    """Cuadre intermedio del turno: fotografía contado vs esperado en ese
+    momento (base + ventas efectivo − salidas, y transferencias del día)."""
+    db = get_db()
+    data = request.get_json(force=True)
+    fecha = date.today().isoformat()
+
+    def entero(campo):
+        try:
+            return max(int(data.get(campo) or 0), 0)
+        except (TypeError, ValueError):
+            return 0
+
+    efectivo = entero("efectivo_contado")
+    transf = entero("transferencias_contado")
+    conteo = _limpiar_conteo(data.get("conteo_efectivo"))
+
+    esp = _esperados_dia(db, fecha)
+    ap = db.execute("SELECT base FROM aperturas WHERE fecha = ?", (fecha,)).fetchone()
+    base = ap["base"] if ap else 0
+    esperado_ef = base + esp["efectivo"] - esp["salidas_efectivo"]
+    esperado_tr = esp["transferencias"] - esp["salidas_transferencias"]
+
+    cur = db.execute(
+        "INSERT INTO cuadres (fecha, creado_en, base, efectivo_contado,"
+        " transferencias_contado, esperado_efectivo, esperado_transferencias,"
+        " dif_efectivo, dif_transferencias, conteo_efectivo)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?)",
+        (fecha, datetime.now().isoformat(timespec="seconds"), base, efectivo,
+         transf, esperado_ef, esperado_tr,
+         efectivo - esperado_ef, transf - esperado_tr, json.dumps(conteo)),
+    )
+    db.commit()
+    row = db.execute("SELECT * FROM cuadres WHERE id = ?", (cur.lastrowid,)).fetchone()
+    c = dict(row)
+    c["conteo_efectivo"] = conteo
+    return jsonify(c), 201
 
 
 # ---------- ticket 80mm ----------
