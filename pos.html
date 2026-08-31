@@ -826,6 +826,12 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
   font-size:10.5px; font-weight:700; letter-spacing:.22em; text-transform:uppercase;
   color:var(--muted); padding:14px 0 8px;
 }
+.canal-select {
+  width:100%; min-height:48px; padding:0 12px; font-size:15px; font-weight:600;
+  border:1.5px solid var(--linea); border-radius:12px; background:var(--papel);
+}
+.canal-select:focus { border-color:var(--azul); outline:none; }
+.canal-nota { font-size:13.5px; color:var(--muted); padding-bottom:4px; }
 
 /* modal de confirmación del pedido */
 .modal-confirmar { width:min(520px, 100%); }
@@ -1835,7 +1841,10 @@ setInterval(actualizarTimers, 15000);
 // (los tiles de mesa del tablero crean directo porque la mesa ya está elegida)
 function abrirNuevaCuenta() {
   if (document.querySelector('.modal-canal')) return;
-  const mesas = state.mesas || [];
+  // solo las mesas libres: sin cuentas todavía activas encima
+  const ocupadas = new Set(state.facturas
+    .filter(f => !cuentaCompleta(f)).map(f => f.mesa).filter(Boolean));
+  const libres = (state.mesas || []).filter(m => !ocupadas.has(m));
   const overlay = document.createElement('div');
   overlay.className = 'overlay';
   overlay.innerHTML = `
@@ -1850,11 +1859,12 @@ function abrirNuevaCuenta() {
           <button type="button" class="canal-btn" data-canal="Para llevar"><span class="canal-emoji">🛍️</span>Para llevar</button>
           <button type="button" class="canal-btn" data-canal="Domicilio"><span class="canal-emoji">🚲</span>Domicilio</button>
         </div>
-        ${mesas.length ? `
         <p class="canal-titulo">En mesa</p>
-        <div class="mod-pills">${mesas.map(m =>
-          `<button type="button" class="mod-pill" data-canal="${esc(m)}">${esc(m)}</button>`).join('')}
-        </div>` : ''}
+        ${libres.length ? `
+        <select class="canal-select" id="selCanalMesa" aria-label="Mesa disponible">
+          <option value="">Eleg&iacute; la mesa disponible...</option>
+          ${libres.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('')}
+        </select>` : '<p class="canal-nota">No hay mesas libres en este momento.</p>'}
       </div>
     </div>`;
   const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
@@ -1866,6 +1876,12 @@ function abrirNuevaCuenta() {
     cerrar();
     nuevaFactura(b.dataset.canal);
   }));
+  const selMesa = overlay.querySelector('#selCanalMesa');
+  if (selMesa) selMesa.addEventListener('change', () => {
+    if (!selMesa.value) return;
+    cerrar();
+    nuevaFactura(selMesa.value);
+  });
   document.body.appendChild(overlay);
 }
 
