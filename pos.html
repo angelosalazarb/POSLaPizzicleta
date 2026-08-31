@@ -853,7 +853,9 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 
 /* toast */
 #toast {
-  position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(20px);
+  /* por encima del overlay de modales (z-index:100): los avisos de tope de
+     sabores salen con el modal abierto */
+  position:fixed; left:50%; bottom:28px; z-index:200; transform:translateX(-50%) translateY(20px);
   background:var(--tinta); color:var(--papel);
   padding:12px 22px; border-radius:100px; font-weight:600; font-size:14.5px;
   opacity:0; pointer-events:none;
