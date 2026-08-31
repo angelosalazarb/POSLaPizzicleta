@@ -524,8 +524,33 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .desglose { display:grid; gap:6px; margin-top:10px; justify-content:end; }
 .desglose .tot-linea .val { font-size:15px; }
 
-/* acciones */
-.acciones { display:flex; gap:12px; flex-wrap:wrap; margin-top:28px; }
+/* acciones: UNA primaria, secundarias compactas, anular separado */
+.acciones { display:flex; flex-direction:column; gap:10px; margin-top:24px; }
+.acciones .btn-primario { width:100%; max-width:420px; }
+.acciones-sec { display:flex; gap:8px; flex-wrap:wrap; }
+.btn-chico {
+  display:flex; align-items:center; justify-content:center; gap:7px;
+  min-height:46px; padding:0 14px;
+  border:1.5px solid var(--linea); border-radius:100px;
+  background:var(--card); color:var(--tinta);
+  font-weight:600; font-size:13.5px; white-space:nowrap;
+  text-decoration:none;
+  transition:background var(--trans), border-color var(--trans);
+}
+.btn-chico:hover { border-color:var(--tinta); background:var(--azul-dim); }
+.btn-chico svg { width:16px; height:16px; }
+.panel-cuenta .btn-chico { flex:1; }
+.acciones-pie { display:flex; justify-content:flex-end; }
+.btn-anular {
+  display:flex; align-items:center; gap:6px;
+  min-height:44px; padding:0 14px; border-radius:100px;
+  border:1.5px solid transparent;
+  color:var(--error); font-weight:600; font-size:13px;
+  transition:background var(--trans), border-color var(--trans);
+}
+.btn-anular:hover { border-color:var(--error); background:var(--error-dim); }
+.btn-anular.confirmando { background:var(--error); color:#fff; border-color:var(--error); }
+.btn-anular svg { width:15px; height:15px; }
 .btn {
   display:flex; align-items:center; justify-content:center; gap:10px;
   min-height:var(--touch); padding:0 26px;
@@ -541,9 +566,6 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .btn-primario:hover { box-shadow:0 8px 26px rgba(255,138,0,.45); }
 .btn-secundario { border:1.5px solid var(--tinta); background:var(--card); }
 .btn-secundario:hover { background:var(--azul-dim); }
-.btn-peligro { color:var(--error); border:1.5px solid transparent; margin-left:auto; }
-.btn-peligro:hover { border-color:var(--error); background:var(--error-dim); }
-.btn-peligro.confirmando { background:var(--error); color:#fff; border-color:var(--error); }
 
 /* ---------- vista ventas ---------- */
 .ventas-head { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
@@ -794,7 +816,6 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
   .campo-nota input { flex:1; }
   .campo-mesa { margin-left:0; width:100%; }
   .campo-mesa select { flex:1; }
-  .btn-peligro { margin-left:0; }
   .ac-lista { left:0; right:0; }
 }
 </style>
@@ -1203,6 +1224,7 @@ function actualizarPendiente() {
   const total = state.facturas.filter(f => f.estado === 'abierta')
     .reduce((s, f) => s + calcularLocal(f).pagar, 0);
   $('#totalPendiente').textContent = fmt(total);
+  pintarSecciones(); // el badge de Pedidos acompaña cualquier cambio de cuentas
 }
 
 /* ---------- navegación entre vistas ---------- */
@@ -1522,11 +1544,17 @@ function renderFactura() {
         <div class="tot-linea"><span class="lbl">Pago</span><span class="chip">${esc(f.metodo_pago || 'Efectivo')}</span></div>
       </div>
       <div class="acciones">
-        ${entregadaYa ? '' : `<button type="button" class="btn btn-primario" id="btnCocinaRO">${ICONOS.comanda} ${f.etapa === 'en_progreso' ? 'Enviar a cocina' : 'Reimprimir comanda'}</button>`}
-        ${f.etapa === 'enviada' ? `<button type="button" class="btn btn-primario" id="btnEntregadoRO">${ICONOS.entregado} Entregado</button>` : ''}
-        <a class="btn btn-secundario" href="/ticket/${f.id}?print=1" target="_blank">${ICONOS.imprimir} Reimprimir ticket</a>
-        <button type="button" class="btn btn-secundario" id="btnReabrirPagada">${ICONOS.editar} Reabrir para editar</button>
-        <button type="button" class="btn btn-secundario" id="btnCerrarCuenta">${ICONOS.cerrarX} Cerrar cuenta</button>
+        ${f.etapa === 'en_progreso'
+          ? `<button type="button" class="btn btn-primario" id="btnCocinaRO">${ICONOS.comanda} Enviar a cocina</button>`
+          : f.etapa === 'enviada'
+            ? `<button type="button" class="btn btn-primario" id="btnEntregadoRO">${ICONOS.entregado} Entregado</button>`
+            : `<button type="button" class="btn btn-primario" id="btnCerrarCuenta">${ICONOS.cerrarX} Cerrar cuenta</button>`}
+        <div class="acciones-sec">
+          ${f.etapa === 'enviada' ? `<button type="button" class="btn-chico" id="btnCocinaRO">${ICONOS.comanda} Reimprimir comanda</button>` : ''}
+          <a class="btn-chico" href="/ticket/${f.id}?print=1" target="_blank">${ICONOS.imprimir} Reimprimir ticket</a>
+          <button type="button" class="btn-chico" id="btnReabrirPagada">${ICONOS.editar} Reabrir para editar</button>
+          ${entregadaYa ? '' : `<button type="button" class="btn-chico" id="btnCerrarCuenta">${ICONOS.cerrarX} Cerrar cuenta</button>`}
+        </div>
       </div>
       <p class="nota-retencion">${entregadaYa
         ? `Pagada y entregada: la pesta&ntilde;a desaparece sola a los ${state.config.retencion_pagada_min} min, o ci&eacute;rrala ya con <strong>Cerrar cuenta</strong>. Queda en Ventas de hoy.`
@@ -1625,10 +1653,14 @@ function renderFactura() {
     </div>
     <div class="acciones">
       <button type="button" class="btn btn-primario" id="btnCobrar">${ICONOS.cobrar} ${f.reabierta ? 'Guardar cambios e imprimir' : 'Cobrar e imprimir'}</button>
-      <button type="button" class="btn btn-secundario" id="btnCocina">${ICONOS.comanda} ${f.etapa === 'en_progreso' ? 'Enviar a cocina' : 'Reimprimir comanda'}</button>
-      ${f.etapa === 'enviada' ? `<button type="button" class="btn btn-secundario" id="btnEntregado">${ICONOS.entregado} Entregado</button>` : ''}
-      <button type="button" class="btn btn-secundario" id="btnBorrador">${ICONOS.imprimir} Imprimir borrador</button>
-      <button type="button" class="btn btn-peligro" id="btnAnular">${ICONOS.anular} Anular</button>
+      <div class="acciones-sec">
+        <button type="button" class="btn-chico" id="btnCocina" title="${f.etapa === 'en_progreso' ? 'Enviar a cocina e imprimir comanda' : 'Reimprimir la comanda'}">${ICONOS.comanda} ${f.etapa === 'en_progreso' ? 'A cocina' : 'Comanda'}</button>
+        ${f.etapa === 'enviada' ? `<button type="button" class="btn-chico" id="btnEntregado">${ICONOS.entregado} Entregado</button>` : ''}
+        <button type="button" class="btn-chico" id="btnBorrador" title="Imprimir borrador de la cuenta">${ICONOS.imprimir} Borrador</button>
+      </div>
+      <div class="acciones-pie">
+        <button type="button" class="btn-anular" id="btnAnular">${ICONOS.anular} Anular</button>
+      </div>
     </div>
     </div>
     </div>`;
