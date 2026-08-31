@@ -323,16 +323,29 @@ input, select { font:inherit; color:inherit; }
 /* líneas de la cuenta */
 .linea {
   position:relative;
-  display:grid; grid-template-columns:118px minmax(0,1fr) 96px 34px;
-  grid-template-areas:"desc desc desc del" "step precio sub sub";
+  display:grid; grid-template-columns:38px 118px minmax(0,1fr) 96px 34px;
+  grid-template-areas:"chk desc desc desc del" "chk step precio sub sub";
   gap:4px 8px; align-items:center;
   padding:8px 0; border-bottom:1px dashed var(--linea);
 }
+.linea .btn-chk { grid-area:chk; align-self:center; }
 .linea input.desc { grid-area:desc; }
 .linea .btn-borrar { grid-area:del; width:34px; height:34px; justify-self:end; }
 .linea .stepper { grid-area:step; }
 .linea input.precio { grid-area:precio; max-width:120px; }
 .linea .sub-linea { grid-area:sub; text-align:right; font-family:var(--font-mono); font-size:14.5px; white-space:nowrap; }
+/* chulito de entregado por producto */
+.btn-chk {
+  display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:100px;
+  border:1.5px solid var(--linea); color:transparent; background:var(--card);
+  transition:background var(--trans), border-color var(--trans), color var(--trans);
+}
+.btn-chk:hover { border-color:var(--ok); color:var(--ok); }
+.btn-chk.on { background:var(--ok); border-color:var(--ok); color:#fff; }
+.btn-chk svg { width:16px; height:16px; }
+.linea.entregada input.desc, .linea.entregada .sub-linea { color:var(--muted); }
+.chk-ro { color:var(--ok); font-weight:700; margin-right:6px; }
 .linea input {
   min-height:40px; padding:0 10px; width:100%;
   border:1.5px solid transparent; border-radius:8px; background:transparent;
@@ -1243,6 +1256,10 @@ const resumenItems = f => f.items
 function kcardHTML(f) {
   const pagada = f.estado !== 'abierta';
   const detalle = resumenItems(f);
+  const conDesc = f.items.filter(i => (i.descripcion || '').trim());
+  const entregados = conDesc.filter(i => i.entregado).length;
+  const badgeEnt = entregados
+    ? `<span class="badge-etapa entregada">&#10003; ${entregados}/${conDesc.length}</span>` : '';
   let accion = '';
   if (!cuentaCompleta(f)) {
     if (f.etapa === 'en_progreso') accion = `<button type="button" class="kaccion primaria" data-accion="cocina" data-id="${f.id}">${ICONOS.comanda} A cocina</button>`;
@@ -1256,6 +1273,7 @@ function kcardHTML(f) {
       <span class="knum">${f.numero}</span>
       ${f.mesa ? `<span class="mesa-tab">${esc(f.mesa)}</span>` : ''}
       ${pagada ? '<span class="badge-etapa pagada">Pagado</span>' : ''}
+      ${badgeEnt}
       <span class="timer" data-timer="${f.id}"></span>
       <span class="ktot">${fmt(f.total + (f.propina || 0))}</span>
     </div>
@@ -1478,7 +1496,7 @@ function renderFactura() {
     const itemsHtml = f.items.map(i => `
       <div class="item-linea">
         <span class="cant">${i.cantidad}&times;</span>
-        <span>${esc(i.descripcion)}</span>
+        <span>${i.entregado ? '<span class="chk-ro">&#10003;</span>' : ''}${esc(i.descripcion)}</span>
         <span class="val">${fmt(i.subtotal)}</span>
       </div>`).join('');
     const t = calcularLocal(f);
@@ -1730,8 +1748,9 @@ function renderFactura() {
 
 function crearFila(f, it) {
   const fila = document.createElement('div');
-  fila.className = 'linea';
+  fila.className = 'linea' + (it.entregado ? ' entregada' : '');
   fila.innerHTML = `
+    <button type="button" class="btn-chk${it.entregado ? ' on' : ''}" aria-label="Marcar como entregado" title="Entregado al cliente">${ICONOS.entregado}</button>
     <input class="desc" type="text" aria-label="Descripci&oacute;n del &iacute;tem" placeholder="&iacute;tem..." value="">
     <button type="button" class="btn-borrar" aria-label="Quitar &iacute;tem">${ICONOS.borrar}</button>
     <span class="stepper">
@@ -1755,6 +1774,13 @@ function crearFila(f, it) {
     recalcular(f); programarGuardado(f);
   };
 
+  const chk = fila.querySelector('.btn-chk');
+  chk.addEventListener('click', () => {
+    it.entregado = it.entregado ? 0 : 1;
+    chk.classList.toggle('on', !!it.entregado);
+    fila.classList.toggle('entregada', !!it.entregado);
+    programarGuardado(f);
+  });
   fila.querySelectorAll('.stepper button').forEach(b => b.addEventListener('click', () => {
     const nueva = (parseFloat(cant.value.replace(',', '.')) || 0) + Number(b.dataset.d);
     if (nueva <= 0) { quitar(); return; }

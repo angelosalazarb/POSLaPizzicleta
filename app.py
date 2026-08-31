@@ -11,6 +11,7 @@ import io
 import json
 import os
 import sqlite3
+import unicodedata
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -115,6 +116,7 @@ MIGRACIONES = [
     "ALTER TABLE cierres ADD COLUMN base_siguiente INTEGER",
     "ALTER TABLE cierres ADD COLUMN conteo_base_siguiente TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE facturas ADD COLUMN archivada INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE items ADD COLUMN entregado INTEGER NOT NULL DEFAULT 0",
 ]
 
 METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
@@ -165,7 +167,7 @@ def calcular_totales(items, descuento_tipo, descuento_valor,
 
 def factura_dict(db, row):
     items = db.execute(
-        "SELECT id, cantidad, descripcion, precio_unitario, subtotal"
+        "SELECT id, cantidad, descripcion, precio_unitario, subtotal, entregado"
         " FROM items WHERE factura_id = ? ORDER BY id", (row["id"],)
     ).fetchall()
     d = dict(row)
@@ -310,6 +312,7 @@ def guardar_factura(fid):
             continue
         items_in.append({
             "cantidad": cantidad, "descripcion": desc, "precio_unitario": precio,
+            "entregado": 1 if i.get("entregado") else 0,
         })
 
     descuento_tipo = data.get("descuento_tipo", "monto")
@@ -342,10 +345,10 @@ def guardar_factura(fid):
     db.execute("DELETE FROM items WHERE factura_id = ?", (fid,))
     for i in items_in:
         db.execute(
-            "INSERT INTO items (factura_id, cantidad, descripcion, precio_unitario, subtotal)"
-            " VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO items (factura_id, cantidad, descripcion, precio_unitario,"
+            " subtotal, entregado) VALUES (?, ?, ?, ?, ?, ?)",
             (fid, i["cantidad"], i["descripcion"], i["precio_unitario"],
-             int(round(i["cantidad"] * i["precio_unitario"]))),
+             int(round(i["cantidad"] * i["precio_unitario"])), i["entregado"]),
         )
     db.execute(
         "UPDATE facturas SET descuento_tipo=?, descuento_valor=?, subtotal=?, total=?, nota=?,"
@@ -871,7 +874,36 @@ td.v {{ text-align:right; white-space:nowrap; }}
 </body></html>"""
 
 
-# ---------- comanda de cocina 80mm (sin precios; no modifica la BD) ----------
+# ---------- comanda 80mm (sin precios; no modifica la BD) ----------
+# Se imprimen DOS tickets en un solo trabajo: COCINA y BEBIDAS (la impresora
+# corta entre páginas). La clasificación sale de la categoría en menu.json;
+# lo que no esté en el menú (ítems manuales) va a cocina.
+
+CATS_BEBIDAS = {"bebidas", "cervezas", "licor", "adicion de licor",
+                "gaseosas en combo", "notas de sabores"}
+# para ítems manuales que no están en el menú; los del menú se clasifican
+# por su categoría (un combo con gaseosa sigue siendo de cocina)
+PALABRAS_BEBIDA = ("cerveza", "gaseosa", "limonada", "jugo", "soda", "agua",
+                   "michelada", "vino", "licor", "coctel", "cafe", "refajo",
+                   "malteada", "cocacola", "coca cola", "sprite", "quatro",
+                   "ginger", "tonica", "club colombia", "corona", "aguila",
+                   "poker", "heineken", "stella", "budweiser")
+
+
+def _norm(s):
+    s = unicodedata.normalize("NFD", (s or "").lower().strip())
+    return "".join(c for c in s if not unicodedata.combining(c))
+
+
+def _mapa_categorias():
+    if not MENU_JSON.exists():
+        return {}
+    try:
+        menu = json.loads(MENU_JSON.read_text(encoding="utf-8"))
+    except ValueError:
+        return {}
+    return {_norm(i.get("nombre")): _norm(i.get("categoria")) for i in menu}
+
 
 @app.get("/comanda/<int:fid>")
 def comanda(fid):
@@ -883,18 +915,46 @@ def comanda(fid):
     ahora = datetime.now()
     auto_print = request.args.get("print") == "1"
 
-    lineas = "".join(
-        f'<tr><td class="c">{i["cantidad"]:g}×</td>'
-        f'<td class="d">{html.escape(i["descripcion"])}</td></tr>'
-        for i in f["items"]
-        if (i["descripcion"] or "").strip()
-    )
+    items = [i for i in f["items"] if (i["descripcion"] or "").strip()]
+    mapa = _mapa_categorias()
+
+    def es_bebida(desc):
+        n = _norm(desc)
+        cat = mapa.get(n)
+        if cat is not None:
+            return cat in CATS_BEBIDAS
+        return any(p in n for p in PALABRAS_BEBIDA)
+
+    cocina, bebidas = [], []
+    for i in items:
+        (bebidas if es_bebida(i["descripcion"]) else cocina).append(i)
+    secciones = [("COCINA", cocina), ("BEBIDAS", bebidas)]
+    secciones = [s for s in secciones if s[1]] or [("COCINA", items)]
+
     mesa = f'<p class="mesa">{html.escape(f["mesa"])}</p>' if f.get("mesa") else ""
     nota = f'<p class="nota">{html.escape(f["nota"])}</p>' if f["nota"] else ""
     # el frontend marca 'enviada' antes de abrir la comanda, así que fecha_enviada
     # no distingue la primera impresión: la reimpresión la declara la caja con ?re=1
     reimpresion = '<p class="reimp">— REIMPRESIÓN —</p>' if request.args.get("re") == "1" else ""
     script = "<script>window.addEventListener('load',()=>setTimeout(()=>window.print(),150))</script>" if auto_print else ""
+
+    def seccion_html(titulo, its):
+        lineas = "".join(
+            f'<tr><td class="c">{i["cantidad"]:g}×</td>'
+            f'<td class="d">{html.escape(i["descripcion"])}</td></tr>'
+            for i in its
+        )
+        return f"""<section class="pagina">
+<h1>COMANDA · {titulo}</h1>
+{reimpresion}
+<p class="meta">Cuenta {f["numero"]} &middot; {ahora.strftime("%d/%m/%Y %H:%M")}</p>
+{mesa}
+<hr class="sep">
+<table>{lineas}</table>
+{nota}
+</section>"""
+
+    cuerpo = "".join(seccion_html(t, its) for t, its in secciones)
 
     return f"""<!doctype html>
 <html lang="es"><head>
@@ -923,18 +983,15 @@ td {{ vertical-align:top; padding:2px 0; }}
 td.c {{ width:12mm; font-weight:600; font-size:16px; }}
 td.d {{ font-size:15px; word-break:break-word; }}
 .nota {{ text-align:center; font-size:13px; font-weight:600; margin-top:2mm; }}
+.pagina {{ page-break-after:always; }}
+.pagina:last-child {{ page-break-after:auto; }}
 @media screen {{
   body {{ box-shadow:0 2px 24px rgba(0,0,0,.18); margin:24px auto; padding:6mm 4mm 10mm; }}
   html {{ background:#e8e4dd; }}
+  .pagina + .pagina {{ border-top:2px dashed #999; margin-top:8mm; padding-top:6mm; }}
 }}
 </style></head><body>
-<h1>COMANDA · COCINA</h1>
-{reimpresion}
-<p class="meta">Cuenta {f["numero"]} &middot; {ahora.strftime("%d/%m/%Y %H:%M")}</p>
-{mesa}
-<hr class="sep">
-<table>{lineas}</table>
-{nota}
+{cuerpo}
 {script}
 </body></html>"""
 
