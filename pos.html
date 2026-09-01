@@ -82,6 +82,10 @@ input, select { font:inherit; color:inherit; }
 .stat-dia .txt { display:flex; flex-direction:column; line-height:1.3; text-align:center; }
 .stat-dia .lbl { font-size:13px; color:var(--muted); white-space:nowrap; }
 .stat-dia .val { font-family:var(--font-mono); font-weight:600; font-size:20px; font-variant-numeric:tabular-nums; }
+/* semáforo: lo vendido ya está cobrado (verde); lo pendiente alerta en
+   naranja mientras haya deuda abierta y pasa a verde al quedar en $0 */
+.stat-dia.vendido .val { color:var(--ok); }
+.stat-dia.pendiente .val { color:var(--naranja-tx); }
 .stat-dia.pendiente.aldia .val { color:var(--ok); }
 .btn-ventas {
   display:flex; align-items:center; justify-content:center;
