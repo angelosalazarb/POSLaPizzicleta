@@ -48,8 +48,13 @@ libre); precios y tickets térmicos en IBM Plex Mono para que las cifras alineen
   "Ventas de hoy" muestra el desglose del día por método para el cierre de caja.
 - Todo se guarda solo (SQLite en `data/pos.db`): las pestañas sobreviven refrescos
   y se ven igual desde el Mac y desde el PC de caja.
-- Vista **Ventas de hoy** con total del día, reimpresión y **export CSV** por rango
-  de fechas (compatible con Excel, para alimentar el consolidado TERRA).
+- Vista **Ventas de hoy** organizada en tres sub-pestañas con el filtro de fecha
+  compartido: **Ventas** (lista del día con **chips de filtro por método de pago
+  y por mesa/canal** — muestra el total filtrado aparte del total del día —,
+  propinas y desglose), **Caja** (retiros y pagos + cierre de caja con apertura)
+  y **Auditoría** (cuadres de turno, log de excepciones con contador en la
+  pestaña, y **export CSV** por rango de fechas, compatible con Excel para el
+  consolidado TERRA).
 - **Cierre de caja** (al final de Ventas de hoy): se digita la base de inicio y
   lo contado en efectivo, datáfono y transferencias (incluye Nequi); el botón
   de billete junto al campo de efectivo abre el **conteo por denominaciones**

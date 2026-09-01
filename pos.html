@@ -619,6 +619,19 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 }
 .btn-dia:hover:not(:disabled) { border-color:var(--tinta); color:var(--tinta); background:var(--azul-dim); }
 .btn-dia:disabled { opacity:.35; cursor:default; }
+/* sub-pestañas de la vista Ventas: Ventas | Caja | Auditoría */
+.vtabs { display:flex; width:max-content; max-width:100%; border:1.5px solid var(--linea); border-radius:12px; overflow:hidden; margin-bottom:18px; background:var(--card); }
+.vtab {
+  min-height:44px; padding:10px 20px; border:none; background:none; font:inherit;
+  font-size:14px; font-weight:600; color:var(--muted); cursor:pointer;
+  display:flex; align-items:center; gap:8px; white-space:nowrap;
+}
+.vtab + .vtab { border-left:1.5px solid var(--linea); }
+.vtab svg { width:16px; height:16px; }
+.vtab.on { background:var(--tinta); color:var(--papel); }
+.vtab:not(.on):hover { background:var(--azul-dim); color:var(--tinta); }
+.vtab-badge { background:var(--naranja); color:#fff; font-size:11px; border-radius:99px; padding:1px 7px; font-weight:700; }
+.filtros-ventas { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; margin-bottom:14px; }
 .btn-dia.btn-hoy { font-size:14px; color:var(--naranja-tx); border-color:var(--naranja-tx); }
 .btn-dia.btn-hoy:hover { background:var(--naranja-dim); }
 @media (max-width: 760px) { .ventas-fecha { margin-left:0; width:100%; } }
@@ -685,6 +698,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 
 /* cierre de caja */
 .cierre { margin-top:34px; padding-top:22px; border-top:2px solid var(--tinta); }
+.cierre.primero { margin-top:0; padding-top:0; border-top:none; }
 .cierre h3 { font-family:var(--font-display); font-weight:400; font-size:26px; margin-bottom:4px; }
 .cierre .sub-cierre { font-size:13px; color:var(--muted); margin-bottom:16px; }
 .cierre-cab, .cierre-fila {
@@ -1064,6 +1078,9 @@ const state = {
   confirmadas: new Map(), // id -> firma del último pedido confirmado con el cliente
   config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]},
   fechaVentas: hoyISO(), // día mostrado en la vista Ventas (filtrable)
+  ventasTab: 'ventas',   // sub-pestaña de Ventas: 'ventas' | 'caja' | 'auditoria'
+  filtroMetodo: 'Todos', // chip de filtro por método de pago en la lista
+  filtroMesa: 'Todas',   // chip de filtro por mesa/canal en la lista
   catSel: 'Todos',     // categoría elegida en el panel del menú
   buscaProd: '',       // búsqueda del panel del menú
   ventasHoy: 0,        // nº de cuentas cobradas hoy (para sugerir el cuadre)
@@ -3290,8 +3307,19 @@ function renderVentas() {
   const hoy = hoyISO();
   const esHoy = state.fechaVentas === hoy;
   const ciego = esCierreCiego();
+  const tab = state.ventasTab;
   const v = state.ventasVista || {facturas:[], total_dia:0, fecha:state.fechaVentas};
-  const filas = v.facturas.map(f => {
+  // chips de filtro de la lista: método de pago y mesa/canal presentes en el día
+  const metodosDia = [...new Set(v.facturas.map(f => f.metodo_pago || 'Efectivo'))];
+  if (state.filtroMetodo !== 'Todos' && !metodosDia.includes(state.filtroMetodo)) state.filtroMetodo = 'Todos';
+  const mesasDia = [...new Set(v.facturas.map(f => f.mesa || ''))].filter(Boolean);
+  if (state.filtroMesa !== 'Todas' && !mesasDia.includes(state.filtroMesa)) state.filtroMesa = 'Todas';
+  const filtroActivo = state.filtroMetodo !== 'Todos' || state.filtroMesa !== 'Todas';
+  const facturasFiltradas = v.facturas.filter(f =>
+    (state.filtroMetodo === 'Todos' || (f.metodo_pago || 'Efectivo') === state.filtroMetodo) &&
+    (state.filtroMesa === 'Todas' || (f.mesa || '') === state.filtroMesa));
+  const totalFiltrado = facturasFiltradas.reduce((s, f) => s + f.total, 0);
+  const filas = facturasFiltradas.map(f => {
     const hora = new Date(f.fecha_cierre || f.fecha_apertura)
       .toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
     const detalle = f.items.map(i => `${i.cantidad}× ${esc(i.descripcion)}`).join(' &middot; ');
@@ -3314,18 +3342,21 @@ function renderVentas() {
   const tituloDia = esHoy ? 'Ventas de hoy'
     : 'Ventas del ' + new Date(state.fechaVentas + 'T12:00:00')
         .toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'});
-  cont.innerHTML = `
-    <div class="ventas-head">
-      <h2>${tituloDia}</h2>
-      <span class="resumen">${v.num_facturas || 0} cuenta${v.num_facturas === 1 ? '' : 's'} cobrada${v.num_facturas === 1 ? '' : 's'}</span>
-      <span class="ventas-fecha">
-        <button type="button" class="btn-dia" id="diaAntes" aria-label="D&iacute;a anterior">&lsaquo;</button>
-        <input type="date" id="fechaVentasSel" value="${state.fechaVentas}" max="${hoy}" aria-label="Ver otro d&iacute;a">
-        <button type="button" class="btn-dia" id="diaDespues" aria-label="D&iacute;a siguiente" ${esHoy ? 'disabled' : ''}>&rsaquo;</button>
-        ${esHoy ? '' : `<button type="button" class="btn-dia btn-hoy" id="btnVolverHoy">Hoy</button>`}
+  // --- pestaña Ventas: lista con filtros, totales, propinas y desglose ---
+  const htmlVentas = `
+    ${v.facturas.length ? `<div class="filtros-ventas">
+      <span class="metodos" role="group" aria-label="Filtrar por m&eacute;todo de pago">
+        ${['Todos', ...metodosDia].map(m => `<button type="button" class="metodo${state.filtroMetodo === m ? ' on' : ''}" data-fm="${esc(m)}" aria-pressed="${state.filtroMetodo === m}">${esc(m)}</button>`).join('')}
       </span>
-    </div>
-    ${filas || `<p class="sin-ventas">${esHoy ? 'Todavía no hay ventas cerradas hoy.' : 'Sin ventas cerradas ese día.'}</p>`}
+      ${mesasDia.length > 1 ? `<span class="metodos" role="group" aria-label="Filtrar por mesa o canal">
+        ${['Todas', ...mesasDia].map(m => `<button type="button" class="metodo${state.filtroMesa === m ? ' on' : ''}" data-fmesa="${esc(m)}" aria-pressed="${state.filtroMesa === m}">${esc(m)}</button>`).join('')}
+      </span>` : ''}
+    </div>` : ''}
+    ${filas || `<p class="sin-ventas">${v.facturas.length ? 'Ninguna venta coincide con el filtro.' : (esHoy ? 'Todavía no hay ventas cerradas hoy.' : 'Sin ventas cerradas ese día.')}</p>`}
+    ${filtroActivo ? `<div class="tot-linea" style="margin-top:10px">
+      <span class="lbl">Total filtrado (${facturasFiltradas.length} de ${v.facturas.length})</span>
+      <span class="val">${ciego && state.filtroMetodo !== 'Todos' ? '•••' : fmt(totalFiltrado)}</span>
+    </div>` : ''}
     <div class="ventas-total">
       <span class="lbl">Total del d&iacute;a</span>
       <span class="val">${fmt(v.total_dia)}</span>
@@ -3352,8 +3383,11 @@ function renderVentas() {
         </div>`).join('')}
       ${ciego && Object.keys(v.por_metodo || {}).length
         ? '<p class="sin-movs">El desglose por m&eacute;todo se revela al guardar el cierre de caja (cierre ciego).</p>' : ''}
-    </div>
-    <div class="cierre">
+    </div>`;
+
+  // --- pestaña Caja: retiros y pagos + cierre (con apertura) ---
+  const htmlCaja = `
+    <div class="cierre primero">
       <h3>Retiros y pagos</h3>
       <p class="sub-cierre">Salidas del d&iacute;a (retiros, pagos a proveedores, gastos). Cada una se descuenta en el cierre de donde sali&oacute; la plata: efectivo de la caja o transferencia de la cuenta.</p>
       <div id="movLista"></div>
@@ -3372,37 +3406,6 @@ function renderVentas() {
         <span class="lbl">Total salidas${esHoy ? ' hoy' : ''}</span>
         <span class="val">&minus;${fmt(state.movimientos?.total || 0)}</span>
       </div>
-    </div>
-    ${esHoy ? `
-    <div class="cierre">
-      <h3>Cuadres de turno</h3>
-      <p class="sub-cierre">Auditor&iacute;a intermedia: contado vs esperado en ese momento. El sistema la sugiere solo cada ~3 horas cuando la caja est&aacute; tranquila.</p>
-      ${state.cuadresHoy.length ? state.cuadresHoy.map(q => {
-        const h = new Date(q.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
-        const d = v => v === 0 ? '<span class="dif ok">cuadra</span>'
-          : v < 0 ? `<span class="dif falta">&minus;${fmt(-v)}</span>` : `<span class="dif sobra">+${fmt(v)}</span>`;
-        return `<div class="res-fila">
-          <span class="lbl">${h} &middot; efectivo ${fmt(q.efectivo_contado)} &middot; transf. ${fmt(q.transferencias_contado)}</span>
-          <span class="val">ef ${d(q.dif_efectivo)} &nbsp; tr ${d(q.dif_transferencias)}</span>
-        </div>`;
-      }).join('') : '<p class="sin-movs">Sin cuadres hoy.</p>'}
-      <div class="cierre-acciones">
-        <button type="button" class="btn btn-secundario" id="btnCuadreAhora">${ICONOS.billetes} Hacer cuadre ahora</button>
-      </div>
-    </div>` : ''}
-    <div class="cierre">
-      <h3>Excepciones del d&iacute;a</h3>
-      <p class="sub-cierre">Registro permanente de anulaciones, reaperturas, descuentos, salidas eliminadas y correcciones. No se puede editar ni borrar.</p>
-      ${state.excepciones.length ? state.excepciones.map(x => {
-        const h = new Date(x.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
-        return `<div class="mov-fila">
-          <span class="hora">${h}</span>
-          <span><span class="chip">${TIPO_EXCEPCION[x.tipo] || esc(x.tipo)}</span>${x.referencia ? `<span class="chip chip-origen">${esc(x.referencia)}</span>` : ''}</span>
-          <span class="concepto">${esc(x.motivo) || '<span style="color:var(--muted)">autom&aacute;tica</span>'}</span>
-          <span class="monto">${x.monto ? fmt(Math.abs(x.monto)) : ''}</span>
-          <span></span>
-        </div>`;
-      }).join('') : `<p class="sin-movs">Sin excepciones ${esHoy ? 'hoy' : 'ese día'}.</p>`}
     </div>
     <div class="cierre">
       <h3>Cierre de caja</h3>
@@ -3460,6 +3463,40 @@ function renderVentas() {
         <button type="button" class="btn btn-primario" id="btnGuardarCierre">${ICONOS.cobrar} Guardar cierre</button>
         <span class="cierre-guardado" id="cierreGuardado"></span>
       </div>
+    </div>`;
+
+  // --- pestaña Auditoría: cuadres de turno, log de excepciones y export ---
+  const htmlAuditoria = `
+    ${esHoy ? `
+    <div class="cierre primero">
+      <h3>Cuadres de turno</h3>
+      <p class="sub-cierre">Auditor&iacute;a intermedia: contado vs esperado en ese momento. El sistema la sugiere solo cada ~3 horas cuando la caja est&aacute; tranquila.</p>
+      ${state.cuadresHoy.length ? state.cuadresHoy.map(q => {
+        const h = new Date(q.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+        const d = v => v === 0 ? '<span class="dif ok">cuadra</span>'
+          : v < 0 ? `<span class="dif falta">&minus;${fmt(-v)}</span>` : `<span class="dif sobra">+${fmt(v)}</span>`;
+        return `<div class="res-fila">
+          <span class="lbl">${h} &middot; efectivo ${fmt(q.efectivo_contado)} &middot; transf. ${fmt(q.transferencias_contado)}</span>
+          <span class="val">ef ${d(q.dif_efectivo)} &nbsp; tr ${d(q.dif_transferencias)}</span>
+        </div>`;
+      }).join('') : '<p class="sin-movs">Sin cuadres hoy.</p>'}
+      <div class="cierre-acciones">
+        <button type="button" class="btn btn-secundario" id="btnCuadreAhora">${ICONOS.billetes} Hacer cuadre ahora</button>
+      </div>
+    </div>` : ''}
+    <div class="cierre${esHoy ? '' : ' primero'}">
+      <h3>Excepciones del d&iacute;a</h3>
+      <p class="sub-cierre">Registro permanente de anulaciones, reaperturas, descuentos, salidas eliminadas y correcciones. No se puede editar ni borrar.</p>
+      ${state.excepciones.length ? state.excepciones.map(x => {
+        const h = new Date(x.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+        return `<div class="mov-fila">
+          <span class="hora">${h}</span>
+          <span><span class="chip">${TIPO_EXCEPCION[x.tipo] || esc(x.tipo)}</span>${x.referencia ? `<span class="chip chip-origen">${esc(x.referencia)}</span>` : ''}</span>
+          <span class="concepto">${esc(x.motivo) || '<span style="color:var(--muted)">autom&aacute;tica</span>'}</span>
+          <span class="monto">${x.monto ? fmt(Math.abs(x.monto)) : ''}</span>
+          <span></span>
+        </div>`;
+      }).join('') : `<p class="sin-movs">Sin excepciones ${esHoy ? 'hoy' : 'ese día'}.</p>`}
     </div>
     <div class="export-zona">
       <div class="campo">
@@ -3473,12 +3510,45 @@ function renderVentas() {
       <button type="button" class="btn btn-secundario" id="btnExport">${ICONOS.descargar} Exportar CSV</button>
     </div>`;
 
-  $('#btnExport').addEventListener('click', () => {
+  cont.innerHTML = `
+    <div class="ventas-head">
+      <h2>${tituloDia}</h2>
+      <span class="resumen">${v.num_facturas || 0} cuenta${v.num_facturas === 1 ? '' : 's'} cobrada${v.num_facturas === 1 ? '' : 's'}</span>
+      <span class="ventas-fecha">
+        <button type="button" class="btn-dia" id="diaAntes" aria-label="D&iacute;a anterior">&lsaquo;</button>
+        <input type="date" id="fechaVentasSel" value="${state.fechaVentas}" max="${hoy}" aria-label="Ver otro d&iacute;a">
+        <button type="button" class="btn-dia" id="diaDespues" aria-label="D&iacute;a siguiente" ${esHoy ? 'disabled' : ''}>&rsaquo;</button>
+        ${esHoy ? '' : `<button type="button" class="btn-dia btn-hoy" id="btnVolverHoy">Hoy</button>`}
+      </span>
+    </div>
+    <div class="vtabs" role="tablist" aria-label="Secciones de la vista Ventas">
+      <button type="button" class="vtab${tab === 'ventas' ? ' on' : ''}" data-vtab="ventas" role="tab" aria-selected="${tab === 'ventas'}">${ICONOS.cobrar} Ventas</button>
+      <button type="button" class="vtab${tab === 'caja' ? ' on' : ''}" data-vtab="caja" role="tab" aria-selected="${tab === 'caja'}">${ICONOS.billetes} Caja${esHoy && !state.cierre?.cierre ? ' <span class="vtab-badge">sin cierre</span>' : ''}</button>
+      <button type="button" class="vtab${tab === 'auditoria' ? ' on' : ''}" data-vtab="auditoria" role="tab" aria-selected="${tab === 'auditoria'}">${ICONOS.entregado} Auditor&iacute;a${state.excepciones.length ? ` <span class="vtab-badge">${state.excepciones.length}</span>` : ''}</button>
+    </div>
+    ${tab === 'ventas' ? htmlVentas : tab === 'caja' ? htmlCaja : htmlAuditoria}`;
+
+  // sub-pestañas y chips de filtro
+  cont.querySelectorAll('[data-vtab]').forEach(b => {
+    b.addEventListener('click', () => {
+      if (state.ventasTab !== b.dataset.vtab) { state.ventasTab = b.dataset.vtab; renderVentas(); }
+    });
+  });
+  cont.querySelectorAll('[data-fm]').forEach(b => {
+    b.addEventListener('click', () => { state.filtroMetodo = b.dataset.fm; renderVentas(); });
+  });
+  cont.querySelectorAll('[data-fmesa]').forEach(b => {
+    b.addEventListener('click', () => { state.filtroMesa = b.dataset.fmesa; renderVentas(); });
+  });
+
+  // auditoría: export
+  const btnExp = $('#btnExport');
+  if (btnExp) btnExp.addEventListener('click', () => {
     const d = $('#expDesde').value, h = $('#expHasta').value;
     window.open(`/api/export?desde=${d}&hasta=${h}`, '_blank');
   });
 
-  // filtro de fecha
+  // filtro de fecha (compartido por las tres pestañas)
   $('#fechaVentasSel').addEventListener('change', e => cambiarFechaVentas(e.target.value));
   const sumarDia = delta => {
     const d = new Date(state.fechaVentas + 'T12:00:00');
@@ -3495,6 +3565,28 @@ function renderVentas() {
     b.addEventListener('click', () => reabrir(Number(b.dataset.id), b.dataset.num || ''));
   });
 
+  // pagar propinas (pestaña Ventas): salta a Caja con la salida prellenada
+  const btnProp = $('#btnPagarPropinas');
+  if (btnProp) btnProp.addEventListener('click', () => {
+    state.movTipo = 'Propinas';
+    state.ventasTab = 'caja';
+    renderVentas();
+    const mm = $('#movMonto');
+    if (mm) {
+      $('#movConcepto').value = 'Propinas del equipo';
+      mm.value = fmtInputPrecio(String(propPendiente));
+      mm.scrollIntoView({behavior:'smooth', block:'center'});
+      mm.focus();
+      toast('Elegí de dónde sale la plata y tocá Registrar');
+    }
+  });
+
+  const btnQ = $('#btnCuadreAhora');
+  if (btnQ) btnQ.addEventListener('click', () => abrirCuadre());
+
+  // el resto del cableado pertenece a la pestaña Caja
+  if (tab !== 'caja') return;
+
   // cierre de caja: valores, inputs y guardado
   if (!state.cierreForm) state.cierreForm = {base:0, efectivo:0, datafono:0, transferencias:0};
   cont.querySelectorAll('.cierre-fila input').forEach(inp => {
@@ -3508,8 +3600,6 @@ function renderVentas() {
     });
   });
   $('#btnGuardarCierre').addEventListener('click', guardarCierre);
-  const btnQ = $('#btnCuadreAhora');
-  if (btnQ) btnQ.addEventListener('click', () => abrirCuadre());
   $('#btnConteo').addEventListener('click', abrirConteo);
   $('#btnConteoBaseSig').addEventListener('click', abrirConteoBaseSiguiente);
   $('#btnApertura').addEventListener('click', abrirModalApertura);
@@ -3570,22 +3660,6 @@ function renderVentas() {
     movMonto.addEventListener('input', () => { movMonto.value = fmtInputPrecio(movMonto.value); });
     movMonto.addEventListener('keydown', e => { if (e.key === 'Enter') registrarMovimiento(); });
     $('#btnRegistrarMov').addEventListener('click', registrarMovimiento);
-
-    // pago de propinas al equipo: prellena la salida y deja elegir el origen
-    const btnProp = $('#btnPagarPropinas');
-    if (btnProp) btnProp.addEventListener('click', () => {
-      state.movTipo = 'Propinas';
-      tiposCont.querySelectorAll('.metodo').forEach(x => {
-        const on = x.textContent === 'Propinas';
-        x.classList.toggle('on', on);
-        x.setAttribute('aria-pressed', String(on));
-      });
-      $('#movConcepto').value = 'Propinas del equipo';
-      movMonto.value = fmtInputPrecio(String(propPendiente));
-      movMonto.scrollIntoView({behavior:'smooth', block:'center'});
-      movMonto.focus();
-      toast('Elegí de dónde sale la plata y tocá Registrar');
-    });
   }
   const g = state.cierre?.cierre;
   let txtGuardado = g
