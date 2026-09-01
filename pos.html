@@ -26,6 +26,7 @@
   --naranja: #FF8A00;
   --naranja-tx: #B35F00;
   --naranja-dim: rgba(255,138,0,.10);
+  --durazno: #F9E6D5;
   --azul: #2E9CD5;
   --azul-tx: #1F79A8;
   --azul-dim: rgba(46,156,213,.10);
@@ -71,37 +72,26 @@ input, select { font:inherit; color:inherit; }
 .brand h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(26px, 4vw, 34px); line-height:1.05; letter-spacing:.01em; }
 .brand .lema { font-size:11.5px; font-weight:600; letter-spacing:.28em; text-transform:uppercase; color:var(--muted); }
 .topbar .derecha { margin-left:auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.fecha-hoy { margin-top:2px; font-size:12px; color:var(--muted); text-transform:capitalize; white-space:nowrap; }
+.fecha-hoy { margin-top:2px; font-size:12.5px; color:var(--muted); white-space:nowrap; }
 .fecha-hoy .hora { font-family:var(--font-mono); font-weight:600; font-variant-numeric:tabular-nums; color:var(--tinta); }
-.stats-dia {
-  display:flex; align-items:stretch;
-  border:1.5px solid var(--linea); border-radius:16px;
-  background:var(--card); box-shadow:var(--sombra); overflow:hidden;
+.stats-dia { display:flex; align-items:stretch; gap:10px; }
+.stat-dia {
+  display:flex; align-items:center; padding:7px 18px;
+  background:rgba(26,26,26,.05); border-radius:14px;
 }
-.stat-dia { display:flex; align-items:center; gap:11px; padding:7px 18px 7px 12px; }
-.stat-dia + .stat-dia { border-left:1.5px solid var(--linea); }
-.stat-dia .ico {
-  width:38px; height:38px; flex:none; border-radius:12px;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--azul-dim); color:var(--azul-tx);
-}
-.stat-dia .ico svg { width:20px; height:20px; }
-.stat-dia .txt { display:flex; flex-direction:column; line-height:1.25; }
-.stat-dia .lbl { font-size:9.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
-.stat-dia .val { font-family:var(--font-mono); font-weight:600; font-size:18px; font-variant-numeric:tabular-nums; }
-.stat-dia.pendiente .ico { background:var(--naranja-dim); color:var(--naranja-tx); }
-.stat-dia.pendiente .val { color:var(--naranja-tx); }
-.stat-dia.pendiente.aldia .ico { background:rgba(46,125,79,.12); color:var(--ok); }
+.stat-dia .txt { display:flex; flex-direction:column; line-height:1.3; text-align:right; }
+.stat-dia .lbl { font-size:12.5px; color:var(--muted); white-space:nowrap; }
+.stat-dia .val { font-family:var(--font-mono); font-weight:600; font-size:19px; font-variant-numeric:tabular-nums; }
 .stat-dia.pendiente.aldia .val { color:var(--ok); }
 .btn-ventas {
   display:flex; align-items:center; gap:8px;
-  min-height:var(--touch); padding:0 20px;
-  border:1.5px solid var(--tinta); border-radius:100px;
-  font-weight:600; background:var(--card);
+  min-height:var(--touch); padding:0 22px;
+  border:1.5px solid var(--naranja); border-radius:16px;
+  font-weight:700; background:var(--naranja); color:#fff;
   transition:background var(--trans), transform var(--trans);
 }
-.btn-ventas:hover { background:var(--azul-dim); }
-.btn-ventas.activo { background:var(--tinta); color:var(--papel); }
+.btn-ventas:hover { background:#EE7F00; border-color:#EE7F00; }
+.btn-ventas.activo { background:var(--tinta); border-color:var(--tinta); color:var(--papel); }
 .btn-ventas svg { width:19px; height:19px; }
 
 /* selector de sección (Mesas / Pedidos) junto al logo */
@@ -133,28 +123,28 @@ input, select { font:inherit; color:inherit; }
 .tab-head .btn { margin-left:auto; }
 
 .mesas-grid {
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(158px, 1fr));
-  gap:12px; margin-bottom:14px;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(225px, 1fr));
+  gap:16px; margin-bottom:14px;
 }
 .mesa-tile {
-  display:flex; flex-direction:column; gap:8px; text-align:left;
-  min-height:112px; padding:12px;
-  border:1.5px solid var(--linea); border-radius:var(--radius);
+  display:flex; flex-direction:column; justify-content:space-between; gap:10px;
+  text-align:left; min-height:168px; padding:16px 18px;
+  border:1.5px solid var(--linea); border-radius:18px;
   background:var(--card);
 }
 .mesa-tile.libre {
-  align-items:center; justify-content:center;
-  border-style:dashed; background:transparent; color:var(--muted);
+  align-items:stretch; color:var(--tinta);
   cursor:pointer; transition:background var(--trans), color var(--trans), border-color var(--trans);
 }
-.mesa-tile.libre:hover { background:var(--naranja-dim); color:var(--naranja-tx); border-color:var(--naranja-tx); }
-.mesa-tile.libre .mesa-abrir { font-size:12.5px; font-weight:600; }
-.mesa-tile.ocupada { border-color:var(--tinta); box-shadow:var(--sombra); }
+.mesa-tile.libre:hover { background:var(--naranja-dim); border-color:var(--naranja); }
+.mesa-tile.libre .mesa-abrir { font-size:15px; color:var(--muted); }
+.mesa-tile.ocupada { background:var(--durazno); border:2px solid var(--naranja); }
 .mesa-nombre {
-  display:flex; align-items:center; justify-content:space-between; gap:6px;
-  font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  font-size:19px; font-weight:700; line-height:1.15;
 }
-.mesa-tile.libre .mesa-nombre { font-weight:700; color:inherit; }
+.mesa-nombre .nombre-der { display:flex; align-items:center; gap:8px; }
+.mesa-tile.libre .mesa-nombre { color:inherit; }
 .mesa-mas {
   display:flex; align-items:center; justify-content:center;
   width:32px; height:32px; border-radius:100px;
@@ -164,16 +154,20 @@ input, select { font:inherit; color:inherit; }
 }
 .mesa-mas:hover { background:var(--naranja-dim); }
 .mesa-cuenta {
-  display:flex; flex-wrap:wrap; align-items:center; gap:4px 7px; width:100%; text-align:left;
-  min-height:44px; padding:6px 9px;
-  border:1.5px solid var(--linea); border-radius:10px; background:var(--papel);
-  transition:border-color var(--trans), background var(--trans);
+  display:flex; align-items:flex-end; gap:8px; width:100%; text-align:left;
+  min-height:44px; padding:6px 8px; margin:0 -8px -4px; width:calc(100% + 16px);
+  border:none; border-radius:12px; background:transparent;
+  transition:background var(--trans);
 }
-.mesa-cuenta:hover { border-color:var(--tinta); background:var(--card); }
-.mesa-cuenta .num { font-weight:800; font-size:13px; letter-spacing:.05em; }
-.mesa-cuenta .tot { margin-left:auto; font-family:var(--font-mono); font-size:12.5px; white-space:nowrap; }
-.mesa-cuenta .badge-etapa { font-size:9.5px; padding:1px 8px; }
-.mesa-cuenta .timer { font-size:10px; padding:1px 7px; }
+.mesa-cuenta:hover { background:rgba(255,255,255,.65); }
+.mesa-cuenta .cuenta-info {
+  color:var(--muted); font-size:13px; line-height:1.3; overflow-wrap:anywhere;
+}
+.mesa-cuenta .tot {
+  margin-left:auto; font-family:var(--font-mono); font-weight:600; font-size:19px;
+  font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--tinta);
+}
+.mesa-cuenta .timer { font-size:10.5px; padding:2px 9px; align-self:center; }
 
 /* arrastrar cuentas (a una mesa o de columna en el kanban) */
 .mesa-cuenta[draggable="true"], .kcard[draggable="true"] { cursor:grab; }
@@ -425,12 +419,13 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .mesa-tab { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--naranja-tx); }
 
 /* contador con semáforo */
-.timer { font-family:var(--font-mono); font-size:11px; font-weight:600; padding:1px 8px; border-radius:100px; white-space:nowrap; }
+/* semáforo de minutos: pills llenas (verde/naranja/rojo oscuro) con texto blanco */
+.timer { font-family:var(--font-mono); font-size:11.5px; font-weight:600; padding:3px 12px; border-radius:100px; white-space:nowrap; }
 .timer:empty { display:none; }
-.timer.t-ok { background:rgba(46,125,79,.12); color:var(--ok); }
-.timer.t-medio { background:var(--naranja-dim); color:var(--naranja-tx); }
-.timer.t-alto { background:var(--error-dim); color:var(--error); }
-.timer.t-pagada { background:transparent; border:1px solid var(--linea); color:var(--muted); }
+.timer.t-ok { background:var(--ok); color:#fff; }
+.timer.t-medio { background:var(--naranja); color:#fff; }
+.timer.t-alto { background:var(--error); color:#fff; }
+.timer.t-pagada { background:transparent; border:1px solid var(--muted); color:var(--muted); }
 
 /* etapa de la cuenta */
 .badge-etapa { display:inline-flex; align-items:center; padding:2px 10px; border-radius:100px; font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
@@ -598,6 +593,8 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .btn-primario:hover { box-shadow:0 8px 26px rgba(255,138,0,.45); }
 .btn-secundario { border:1.5px solid var(--tinta); background:var(--card); }
 .btn-secundario:hover { background:var(--azul-dim); }
+.btn-tinta { background:var(--tinta); color:var(--papel); border-radius:16px; }
+.btn-tinta:hover { background:#000; }
 
 /* ---------- vista ventas ---------- */
 .ventas-head { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:20px; }
@@ -958,8 +955,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
   <img class="logo" src="/static/logo.png" alt="Sticker La Pizzicleta">
   <div class="brand">
     <h1>La Pizzicleta</h1>
-    <div class="lema">Caja &middot; Sede Sur</div>
-    <div class="fecha-hoy"><span id="fechaHoy"></span> <span class="hora" id="horaHoy"></span></div>
+    <div class="fecha-hoy"><span id="fechaHoy"></span> &middot; <span class="hora" id="horaHoy"></span></div>
   </div>
   <nav class="secciones" aria-label="Secciones">
     <button type="button" class="seccion" id="secMesas">Mesas</button>
@@ -968,18 +964,12 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
   <div class="derecha">
     <div class="stats-dia">
       <div class="stat-dia vendido">
-        <span class="ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
-        </span>
         <span class="txt">
           <span class="lbl">Vendido hoy</span>
           <span class="val" id="totalDia">$0</span>
         </span>
       </div>
       <div class="stat-dia pendiente aldia" id="statPendiente">
-        <span class="ico" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v4.5l3 2"/></svg>
-        </span>
         <span class="txt">
           <span class="lbl">Pendiente por cobrar</span>
           <span class="val" id="totalPendiente">$0</span>
@@ -1695,13 +1685,19 @@ function renderTablero() {
   const nombres = OPCIONES_MESA();
   for (const k of porMesa.keys()) if (k && !nombres.includes(k)) nombres.push(k);
 
-  const chipCuenta = f => `<button type="button" class="mesa-cuenta" draggable="true" data-abrir="${f.id}">
-      <span class="num">${f.numero}</span>
-      ${f.estado !== 'abierta' ? '<span class="badge-etapa pagada">Pagado</span>' : ''}
-      ${ETAPA_LABEL[f.etapa] ? `<span class="badge-etapa ${f.etapa}">${ETAPA_LABEL[f.etapa]}</span>` : ''}
-      <span class="timer" data-timer="${f.id}"></span>
+  // fila de cuenta dentro del tile: "F-005 · En cocina  [timer]  $68.000";
+  // cuando la mesa tiene UNA sola cuenta el timer vive junto al nombre del tile
+  const etapaTile = f => ETAPA_LABEL[f.etapa]
+    || (f.etapa === 'en_progreso' ? 'En progreso' : '');
+  const chipCuenta = (f, unica = false) => {
+    const partes = [f.numero, etapaTile(f), f.estado !== 'abierta' ? 'Pagado' : '']
+      .filter(Boolean).join(' &middot; ');
+    return `<button type="button" class="mesa-cuenta" draggable="true" data-abrir="${f.id}">
+      <span class="cuenta-info">${partes}</span>
+      ${unica ? '' : `<span class="timer" data-timer="${f.id}"></span>`}
       <span class="tot">${fmt(f.total + (f.propina || 0))}</span>
     </button>`;
+  };
 
   const editando = state.editandoMesas && state.seccion === 'mesas';
   const tiles = nombres.map(m => {
@@ -1718,21 +1714,25 @@ function renderTablero() {
       }
       return `<button type="button" class="mesa-tile libre" data-mesa="${esc(m)}" data-drop="${esc(m)}">
       <span class="mesa-nombre">${esc(m)}</span>
-      <span class="mesa-abrir">+ abrir cuenta</span>
+      <span class="mesa-abrir">Disponible</span>
     </button>`;
     }
+    const unica = cs.length === 1;
     return `<div class="mesa-tile ocupada" data-drop="${esc(m)}">
       <span class="mesa-nombre">${esc(m)}
-        ${editando ? '<span class="mesa-fija">en uso</span>' : `<button type="button" class="mesa-mas" data-mesa="${esc(m)}" aria-label="Otra cuenta en ${esc(m)}">+</button>`}
+        <span class="nombre-der">
+          ${unica ? `<span class="timer" data-timer="${cs[0].id}"></span>` : ''}
+          ${editando ? '<span class="mesa-fija">en uso</span>' : `<button type="button" class="mesa-mas" data-mesa="${esc(m)}" aria-label="Otra cuenta en ${esc(m)}">+</button>`}
+        </span>
       </span>
-      ${cs.map(chipCuenta).join('')}
+      ${cs.map(f => chipCuenta(f, unica)).join('')}
     </div>`;
   });
   const sinMesa = porMesa.get('') || [];
   if (sinMesa.length) {
     tiles.push(`<div class="mesa-tile ocupada" data-drop="">
       <span class="mesa-nombre">Sin mesa</span>
-      ${sinMesa.map(chipCuenta).join('')}
+      ${sinMesa.map(f => chipCuenta(f)).join('')}
     </div>`);
   }
   if (editando) {
@@ -1761,8 +1761,9 @@ function renderTablero() {
     : `<div class="mesas-grid">${tiles.join('')}</div>`;
   cont.innerHTML = `<div class="tablero">
     <div class="tab-head">
+      <h2 class="sec-titulo">${state.seccion === 'pedidos' ? 'Pedidos' : 'Mesas'}</h2>
       ${state.seccion === 'mesas' ? `<button type="button" class="btn-volver" id="btnEditarMesas">${editando ? 'Listo' : ICONOS.editar + ' Editar mesas'}</button>` : ''}
-      <button type="button" class="btn btn-primario" id="btnNuevaTablero">${ICONOS.mas} Nueva cuenta</button>
+      <button type="button" class="btn btn-tinta" id="btnNuevaTablero">${ICONOS.mas} Nueva cuenta</button>
     </div>
     ${cuerpo}
   </div>`;
