@@ -62,11 +62,14 @@ input, select { font:inherit; color:inherit; }
 }
 
 /* ---------- header ---------- */
-.topbar {
+/* la franja (fondo + borde) va de punta a punta; el contenido adentro se
+   centra con el mismo ancho máximo que <main>, para que en monitores muy
+   anchos el header no quede pegado al borde derecho de la ventana */
+.topbar { border-bottom:2px solid var(--tinta); background:var(--card); }
+.topbar-inner {
   display:flex; align-items:center; gap:16px; flex-wrap:wrap;
   padding:14px clamp(16px, 4vw, 36px);
-  border-bottom:2px solid var(--tinta);
-  background:var(--card);
+  max-width:1560px; margin:0 auto;
 }
 .topbar img.logo { width:56px; height:56px; display:block; }
 .brand h1 { font-family:var(--font-display); font-weight:400; font-size:clamp(26px, 4vw, 34px); line-height:1.05; letter-spacing:.01em; }
@@ -391,7 +394,9 @@ input, select { font:inherit; color:inherit; }
 .stepper input.cant:focus { outline:none; background:var(--papel); }
 
 /* ---------- lienzo principal ---------- */
-main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
+/* mismo ancho máximo que el header, y CENTRADO (sin margin:auto quedaba
+   pegado a la izquierda con un vacío enorme a la derecha en monitores anchos) */
+main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; margin:0 auto; }
 #vistaVentas { padding-top:20px; }
 .hoja {
   background:var(--card); border:1.5px solid var(--tinta);
@@ -1061,6 +1066,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 <body>
 
 <header class="topbar">
+ <div class="topbar-inner">
   <img class="logo" src="/static/logo.png" alt="Sticker La Pizzicleta">
   <div class="brand">
     <h1>La Pizzicleta</h1>
@@ -1087,6 +1093,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
     </div>
     <button class="btn-ventas" id="btnVentas" type="button" aria-pressed="false">Ventas de hoy</button>
   </div>
+ </div>
 </header>
 
 <main>
