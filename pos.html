@@ -392,7 +392,7 @@ input, select { font:inherit; color:inherit; }
 
 /* ---------- lienzo principal ---------- */
 main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
-#vistaVentas { max-width:1080px; padding-top:20px; }
+#vistaVentas { padding-top:20px; }
 .hoja {
   background:var(--card); border:1.5px solid var(--tinta);
   border-radius:var(--radius);
@@ -617,7 +617,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .btn-dia:hover:not(:disabled) { border-color:var(--tinta); color:var(--tinta); background:var(--azul-dim); }
 .btn-dia:disabled { opacity:.35; cursor:default; }
 /* sub-pestañas de la vista Ventas: Ventas | Caja | Auditoría */
-.vtabs { display:flex; width:max-content; max-width:100%; border:1.5px solid var(--linea); border-radius:12px; overflow:hidden; margin-bottom:18px; background:var(--card); }
+.vtabs { display:flex; flex-wrap:wrap; width:max-content; max-width:100%; border:1.5px solid var(--linea); border-radius:12px; overflow:hidden; margin-bottom:18px; background:var(--card); }
 .vtab {
   min-height:44px; padding:10px 20px; border:none; background:none; font:inherit;
   font-size:14px; font-weight:600; color:var(--muted); cursor:pointer;
@@ -649,7 +649,9 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .mov-form-grid select:focus, .mov-form-grid input:focus, .mov-form-grid2 input:focus { border-color:var(--azul); outline:none; }
 .mov-form-grid2 .btn { min-height:48px; }
 /* movimiento de caja: una sola línea (tipo · concepto (origen, hora)  -monto  ×) */
-.mov-row { display:flex; justify-content:space-between; align-items:center; gap:10px; border-bottom:1px solid var(--linea); padding:9px 0; font-size:14px; }
+.mov-row { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:4px 10px; border-bottom:1px solid var(--linea); padding:9px 0; font-size:14px; }
+.mov-row > span:first-child { flex:1 1 220px; min-width:0; }
+.mov-row-right { margin-left:auto; }
 .mov-row:last-child { border-bottom:none; }
 .mov-row .mut { color:var(--muted); }
 .mov-row-right { display:flex; align-items:center; gap:8px; flex:none; }
@@ -701,6 +703,25 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .dif-banner.cuadra { background:rgba(46,125,79,.1); color:var(--ok); }
 .dif-banner.sobra { background:var(--naranja-dim); color:var(--naranja-tx); }
 .dif-banner.falta { background:var(--error-dim); color:var(--error); }
+/* responsive: en pantallas angostas la fila de venta y los formularios de
+   Caja se apilan en vez de mantener columnas de ancho fijo */
+@media (max-width: 760px) {
+  .vrow {
+    display:flex; flex-wrap:wrap; row-gap:4px;
+    padding:12px 14px;
+  }
+  .vrow .num { order:1; }
+  .vrow .metodo-chip { order:2; margin-left:auto; }
+  .vrow .det { order:3; flex:1 1 100%; }
+  .vrow .prop { order:4; }
+  .vrow .tot { order:5; margin-left:auto; }
+  .vrow > span:last-child { order:6; flex:1 1 100%; justify-content:flex-end; margin-top:4px; }
+  .mov-form-grid { grid-template-columns:1fr; }
+  .mov-form-grid2 { grid-template-columns:1fr; }
+  .cie-campos { grid-template-columns:1fr; }
+  .den-cols { grid-template-columns:1fr; }
+  .cierre-botones-2 { grid-template-columns:1fr; }
+}
 /* log de excepciones como tarjetas con borde rojo */
 .exc-card { border-left:3px solid var(--error); background:rgba(156,53,50,.04); border-radius:0 10px 10px 0; padding:8px 12px; font-size:13px; margin-bottom:8px; }
 .exc-card .cab { display:flex; justify-content:space-between; gap:8px; font-weight:700; }
