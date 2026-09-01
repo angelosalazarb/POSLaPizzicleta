@@ -64,6 +64,21 @@ libre); precios y tickets térmicos en IBM Plex Mono para que las cifras alineen
   reabre como pestaña (sale del total del día mientras tanto), se edita lo que
   sea (ítems, descuento, propina, método) y se vuelve a cobrar con el mismo
   número de cuenta.
+- **Cierre ciego** (práctica antifraude estándar de la industria): mientras el
+  día no tenga cierre guardado, el formulario de cierre, el cuadre de turno y el
+  desglose por método muestran `•••` en vez de lo esperado — se cuenta la plata
+  sin saber contra qué se compara. Al **guardar** se revela la comparación
+  completa (modal de resumen) y el **primer conteo queda congelado** en la base;
+  si después se corrige el cierre, junto al botón queda visible "corregido tras
+  el conteo ciego de las HH:MM (era $X)" y la corrección va al log de
+  excepciones. Se apaga con `CIERRE_CIEGO = False` en `app.py`.
+- **Log de excepciones** (append-only, sin endpoint para editarlo ni borrarlo):
+  toda **anulación**, **reapertura** y **eliminación de salida** exige un motivo
+  (modal con atajos de un toque + texto libre; el servidor rechaza la acción sin
+  motivo), y el sistema registra solo los **descuentos cobrados**, las
+  **correcciones de cierre** y los **cambios de base de la apertura**. La
+  sección "Excepciones del día" en Ventas lista hora, tipo, cuenta/referencia,
+  motivo y monto de cada evento — la primera fuente al investigar un descuadre.
 
 > **¿Correrlo en el computador de la pizzería (Windows)?** Guía completa en
 > **[SETUP-PIZZERIA.md](SETUP-PIZZERIA.md)** — instalación de Python, `run-windows.bat`,
@@ -132,10 +147,11 @@ pos/
 | GET | `/api/facturas?estado=abierta` | cuentas abiertas con sus ítems |
 | POST | `/api/facturas` | nueva cuenta (numeración F-001 reinicia cada día) |
 | PUT | `/api/facturas/<id>` | guardar ítems + descuento + nota |
-| POST | `/api/facturas/<id>/cerrar` · `/anular` · `/reabrir` | cerrar, anular, o reabrir una cerrada/anulada para editarla |
+| POST | `/api/facturas/<id>/cerrar` · `/anular` · `/reabrir` | cerrar, anular, o reabrir una cerrada/anulada para editarla (anular y reabrir exigen `{"motivo": "..."}`) |
+| GET | `/api/excepciones?fecha=` | log append-only del día: anulaciones, reaperturas, descuentos, salidas eliminadas, correcciones |
 | GET | `/api/ventas?fecha=YYYY-MM-DD` | cerradas del día + total |
 | GET | `/api/export?desde=&hasta=` | CSV del rango (una fila por ítem) |
-| GET/POST | `/api/cierre?fecha=` | cierre de caja del día: esperados por método y guardar/actualizar el cuadre |
+| GET/POST | `/api/cierre?fecha=` | cierre de caja del día (el GET omite los esperados mientras el cierre ciego esté activo y el día sin guardar) |
 | GET | `/api/backup` | descarga una copia consistente de `pos.db` (respaldo o migración de equipo) |
 | GET | `/ticket/<id>?print=1` | ticket 80mm; `print=1` lanza la impresión |
 

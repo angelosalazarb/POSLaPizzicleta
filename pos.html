@@ -1067,6 +1067,7 @@ const state = {
   catSel: 'Todos',     // categoría elegida en el panel del menú
   buscaProd: '',       // búsqueda del panel del menú
   ventasHoy: 0,        // nº de cuentas cobradas hoy (para sugerir el cuadre)
+  excepciones: [],     // log de excepciones del día visto en Ventas
   cuadresHoy: [],      // cuadres de turno guardados hoy
   cuadreAbierto: false,
   cuadrePospuesto: 0   // timestamp hasta el que no se vuelve a sugerir
@@ -1564,7 +1565,7 @@ function cambiarFechaVentas(fecha) {
   if (!fecha || fecha === state.fechaVentas) return;
   state.fechaVentas = fecha;
   // cargarCierre recarga el formulario del cierre porque la fecha cambió (cierreFormFecha)
-  Promise.all([cargarVentasVista(), cargarCierre(), cargarMovimientos(), cargarApertura()])
+  Promise.all([cargarVentasVista(), cargarCierre(), cargarMovimientos(), cargarApertura(), cargarExcepciones()])
     .then(renderVentas);
 }
 
@@ -1596,7 +1597,7 @@ function setVista(v) {
   pintarSecciones();
   if (v === 'tablero') renderTablero();
   else if (v === 'cuenta') renderFactura();
-  else { cargarTotalDia(); cargarVentasVista(); cargarCierre(); cargarMovimientos(); cargarApertura(); renderVentas(); }
+  else { cargarTotalDia(); cargarVentasVista(); cargarCierre(); cargarMovimientos(); cargarApertura(); cargarExcepciones(); renderVentas(); }
 }
 
 // marca la sección activa en la barra superior y el contador de pedidos
@@ -2002,7 +2003,7 @@ function renderFactura() {
         ? `Pagada y entregada: la pesta&ntilde;a desaparece sola a los ${state.config.retencion_pagada_min} min, o ci&eacute;rrala ya con <strong>Cerrar cuenta</strong>. Queda en Ventas de hoy.`
         : 'Pagada. La pesta&ntilde;a sigue aqu&iacute; hasta marcarla <strong>Entregado</strong> (o cerrala con <strong>Cerrar cuenta</strong> si ya se entreg&oacute;).'}</p>`;
     $('#btnVolverRO').addEventListener('click', () => setVista('tablero'));
-    $('#btnReabrirPagada').addEventListener('click', () => reabrir(f.id));
+    $('#btnReabrirPagada').addEventListener('click', () => reabrir(f.id, f.numero));
     $('#btnCerrarCuenta').addEventListener('click', () => cerrarCuenta(f));
     const cocinaRO = $('#btnCocinaRO');
     if (cocinaRO) cocinaRO.addEventListener('click', () => enviarCocina(f));
@@ -2531,30 +2532,77 @@ async function imprimirBorrador(f) {
   } catch (e) { toast(e.message, true); }
 }
 
+/* modal para pedir el motivo de una acción sensible; el motivo queda en el
+   log de excepciones del servidor y los presets son atajos de un toque */
+function modalMotivo({titulo, sub = '', presets = [], boton, onAceptar}) {
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true" aria-label="${titulo}">
+      <div class="modal-head">
+        <h3>${titulo}</h3>
+        <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
+      </div>
+      ${sub ? `<p class="modal-sub">${sub}</p>` : ''}
+      <div class="modal-cuerpo">
+        <span class="metodos" role="group" aria-label="Motivos frecuentes">
+          ${presets.map(p => `<button type="button" class="metodo" data-preset="${esc(p)}">${esc(p)}</button>`).join('')}
+        </span>
+        <div class="vuelto-campo" style="margin-top:10px">
+          <label for="motivoInp">Motivo</label>
+          <input id="motivoInp" type="text" maxlength="120" placeholder="escribí el motivo…">
+        </div>
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-primario" id="motivoOk" disabled>${boton}</button>
+        <button type="button" class="btn-limpiar" id="motivoCancelar">Cancelar</button>
+      </div>
+    </div>`;
+  const inp = overlay.querySelector('#motivoInp');
+  const ok = overlay.querySelector('#motivoOk');
+  const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
+  const alEscape = e => { if (e.key === 'Escape') cerrar(); };
+  document.addEventListener('keydown', alEscape);
+  overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(); });
+  overlay.querySelector('.cerrar-modal').addEventListener('click', cerrar);
+  overlay.querySelector('#motivoCancelar').addEventListener('click', cerrar);
+  inp.addEventListener('input', () => { ok.disabled = !inp.value.trim(); });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && inp.value.trim()) ok.click(); });
+  overlay.querySelectorAll('[data-preset]').forEach(b => {
+    b.addEventListener('click', () => {
+      inp.value = b.dataset.preset;
+      ok.disabled = false;
+      ok.focus();
+    });
+  });
+  ok.addEventListener('click', () => {
+    const motivo = inp.value.trim();
+    if (!motivo) return;
+    cerrar();
+    onAceptar(motivo);
+  });
+  document.body.appendChild(overlay);
+  inp.focus();
+}
+
 function armarAnular(f) {
-  const b = $('#btnAnular');
-  let armado = false, timer = null;
-  b.addEventListener('click', async () => {
-    if (!armado) {
-      armado = true;
-      b.classList.add('confirmando');
-      b.innerHTML = ICONOS.anular + ' ¿Seguro? Tocar de nuevo';
-      timer = setTimeout(() => {
-        armado = false;
-        b.classList.remove('confirmando');
-        b.innerHTML = ICONOS.anular + ' Anular';
-      }, 3500);
-      return;
-    }
-    clearTimeout(timer);
-    try {
-      await guardar(f);
-      await api(`/api/facturas/${f.id}/anular`, {method:'POST'});
-      state.facturas = state.facturas.filter(x => x.id !== f.id);
-      state.activaId = state.facturas.length ? state.facturas[state.facturas.length-1].id : null;
-      setVista('tablero');
-      toast(`Cuenta ${f.numero} anulada`);
-    } catch (e) { toast(e.message, true); }
+  $('#btnAnular').addEventListener('click', () => {
+    modalMotivo({
+      titulo: `Anular cuenta ${f.numero}`,
+      sub: 'La anulaci&oacute;n queda en el log de excepciones con su motivo.',
+      presets: ['Error de digitación', 'Cliente canceló', 'Cuenta duplicada', 'Cuenta de prueba'],
+      boton: 'Anular cuenta',
+      onAceptar: async motivo => {
+        try {
+          await guardar(f);
+          await api(`/api/facturas/${f.id}/anular`, {method:'POST', body:{motivo}});
+          state.facturas = state.facturas.filter(x => x.id !== f.id);
+          state.activaId = state.facturas.length ? state.facturas[state.facturas.length-1].id : null;
+          setVista('tablero');
+          toast(`Cuenta ${f.numero} anulada`);
+        } catch (e) { toast(e.message, true); }
+      }
+    });
   });
 }
 
@@ -2588,13 +2636,38 @@ async function registrarMovimiento() {
   } catch (e) { toast(e.message, true); }
 }
 
-async function eliminarMovimiento(id) {
-  try {
-    await api(`/api/movimientos/${id}`, {method:'DELETE'});
-    toast('Salida eliminada');
-    await Promise.all([cargarMovimientos(), cargarCierre()]);
-  } catch (e) { toast(e.message, true); }
+function eliminarMovimiento(id, monto = 0) {
+  modalMotivo({
+    titulo: 'Eliminar salida' + (monto ? ` de ${fmt(monto)}` : ''),
+    sub: 'La salida se borra del d&iacute;a pero queda en el log de excepciones con su motivo.',
+    presets: ['Registrada por error', 'Monto equivocado', 'Salida duplicada'],
+    boton: 'Eliminar salida',
+    onAceptar: async motivo => {
+      try {
+        await api(`/api/movimientos/${id}`, {method:'DELETE', body:{motivo}});
+        toast('Salida eliminada');
+        await Promise.all([cargarMovimientos(), cargarCierre(), cargarExcepciones()]);
+      } catch (e) { toast(e.message, true); }
+    }
+  });
 }
+
+/* ---------- log de excepciones (solo lectura; el servidor no deja borrarlo) */
+async function cargarExcepciones() {
+  try {
+    const fecha = state.fechaVentas;
+    const e = await api('/api/excepciones?fecha=' + fecha);
+    if (fecha !== state.fechaVentas) return; // el usuario ya cambió de día
+    state.excepciones = e.excepciones || [];
+    if (state.vista === 'ventas') renderVentas();
+  } catch {}
+}
+
+const TIPO_EXCEPCION = {
+  anulacion: 'Anulación', reapertura: 'Reapertura', descuento: 'Descuento',
+  salida_eliminada: 'Salida eliminada', cierre_corregido: 'Cierre corregido',
+  apertura_corregida: 'Apertura corregida'
+};
 
 /* ---------- cierre de caja ---------- */
 async function cargarCierre() {
@@ -2659,17 +2732,34 @@ function pintarDif(el, dif) {
   else { el.textContent = '+' + fmt(dif); el.classList.add('sobra'); }
 }
 
+// cierre ciego: el GET /api/cierre no manda esperados hasta que haya un cierre
+// guardado, así que la caja cuenta sin ver contra qué compara
+const esCierreCiego = () => !!(state.cierre && state.cierre.ciego);
+
 function actualizarCierreCalculos() {
   const c = calcularCierre();
-  $('#cEspEf').textContent = fmt(c.espEfCaja);
-  const espTr = $('#cEspTr');
-  if (espTr) espTr.textContent = fmt(c.espTr);
   const ger = $('#cAGerencia');
   if (ger) ger.textContent = '→ gerencia ' + fmt(Math.max((c.f.efectivo || 0) - (c.f.baseSiguiente || 0), 0));
+  $('#cTotalFinal').textContent = fmt(c.totalFinal);
+  const espTr = $('#cEspTr'), espDat = $('#cEspDat');
+  if (esCierreCiego()) {
+    $('#cEspEf').textContent = '•••';
+    if (espDat) espDat.textContent = '•••';
+    if (espTr) espTr.textContent = '•••';
+    $('#cEspTotal').textContent = '•••';
+    for (const id of ['cDifEf', 'cDifDat', 'cDifTr', 'cDifTotal']) {
+      const el = $('#' + id);
+      el.classList.remove('ok', 'falta', 'sobra');
+      el.textContent = '•••';
+    }
+    return;
+  }
+  $('#cEspEf').textContent = fmt(c.espEfCaja);
+  if (espDat) espDat.textContent = fmt(c.esp.datafono || 0);
+  if (espTr) espTr.textContent = fmt(c.espTr);
   pintarDif($('#cDifEf'), c.difEf);
   pintarDif($('#cDifDat'), c.difDat);
   pintarDif($('#cDifTr'), c.difTr);
-  $('#cTotalFinal').textContent = fmt(c.totalFinal);
   $('#cEspTotal').textContent = fmt(c.esperadoTotal);
   pintarDif($('#cDifTotal'), c.difTotal);
 }
@@ -2984,11 +3074,12 @@ async function abrirCuadre(auto = false) {
   let esp, base;
   try {
     const c = await api('/api/cierre?fecha=' + hoyISO());
-    esp = c.esperados;
+    esp = c.esperados; // ausente en modo ciego: se cuenta sin ver lo esperado
     base = c.base_sugerida || 0;
   } catch (e) { state.cuadreAbierto = false; toast(e.message, true); return; }
-  const espEf = base + esp.efectivo - (esp.salidas_efectivo ?? esp.salidas ?? 0);
-  const espTr = esp.transferencias - (esp.salidas_transferencias || 0);
+  const ciego = !esp;
+  const espEf = ciego ? 0 : base + esp.efectivo - (esp.salidas_efectivo ?? esp.salidas ?? 0);
+  const espTr = ciego ? 0 : esp.transferencias - (esp.salidas_transferencias || 0);
   const conteo = {};
 
   const filasDen = Object.entries(DENOMINACIONES).map(([grupo, dens]) =>
@@ -3014,14 +3105,16 @@ async function abrirCuadre(auto = false) {
       <div class="modal-cuerpo">
         ${filasDen}
         <div class="res-fila"><span class="lbl">Efectivo contado</span><span class="val" id="qEf">$0</span></div>
+        ${ciego ? '<p class="modal-sub">Cuadre ciego: la comparaci&oacute;n contra lo esperado se muestra al guardar.</p>' : `
         <div class="res-fila"><span class="lbl">Esperado en caj&oacute;n (base ${fmt(base)} + ventas &minus; salidas)</span><span class="val">${fmt(espEf)}</span></div>
-        <div class="res-fila"><span class="lbl">Diferencia efectivo</span><span class="dif" id="qDifEf">&mdash;</span></div>
+        <div class="res-fila"><span class="lbl">Diferencia efectivo</span><span class="dif" id="qDifEf">&mdash;</span></div>`}
         <div class="vuelto-campo">
           <label for="qTr">Transferencias de hoy seg&uacute;n la app del banco</label>
           <input id="qTr" inputmode="numeric" placeholder="0">
         </div>
+        ${ciego ? '' : `
         <div class="res-fila"><span class="lbl">Transferencias esperadas</span><span class="val">${fmt(espTr)}</span></div>
-        <div class="res-fila"><span class="lbl">Diferencia transferencias</span><span class="dif" id="qDifTr">&mdash;</span></div>
+        <div class="res-fila"><span class="lbl">Diferencia transferencias</span><span class="dif" id="qDifTr">&mdash;</span></div>`}
       </div>
       <div class="modal-acciones">
         <button type="button" class="btn btn-primario" id="qGuardar">Guardar cuadre</button>
@@ -3042,8 +3135,10 @@ async function abrirCuadre(auto = false) {
       sub.classList.toggle('con-valor', c > 0);
     });
     overlay.querySelector('#qEf').textContent = fmt(totalConteo());
-    pintarDif(overlay.querySelector('#qDifEf'), totalConteo() - espEf);
-    pintarDif(overlay.querySelector('#qDifTr'), trContado() - espTr);
+    if (!ciego) {
+      pintarDif(overlay.querySelector('#qDifEf'), totalConteo() - espEf);
+      pintarDif(overlay.querySelector('#qDifTr'), trContado() - espTr);
+    }
   };
 
   // cerrar sin guardar = posponer, para que la sugerencia no vuelva enseguida
@@ -3109,6 +3204,7 @@ async function guardarCierre() {
       conteo_base_siguiente: state.conteoBaseSiguiente || {}
     }});
     toast(`Cierre de caja guardado (${state.fechaVentas})`);
+    cargarExcepciones(); // una corrección del cierre queda en el log
     renderVentas();
     mostrarResumenCierre();
   } catch (e) { toast(e.message, true); }
@@ -3193,6 +3289,7 @@ function renderVentas() {
   const cont = $('#vistaVentas');
   const hoy = hoyISO();
   const esHoy = state.fechaVentas === hoy;
+  const ciego = esCierreCiego();
   const v = state.ventasVista || {facturas:[], total_dia:0, fecha:state.fechaVentas};
   const filas = v.facturas.map(f => {
     const hora = new Date(f.fecha_cierre || f.fecha_apertura)
@@ -3204,7 +3301,7 @@ function renderVentas() {
       <span class="detalle"><span class="chip">${esc(f.metodo_pago || 'Efectivo')}</span>${f.mesa ? `<span class="chip">${esc(f.mesa)}</span>` : ''}${detalle}</span>
       <span class="tot">${fmt(f.total)}</span>
       <a class="btn-reimprimir" href="/ticket/${f.id}?print=1" target="_blank" aria-label="Reimprimir ticket ${f.numero}">${ICONOS.imprimir}</a>
-      ${esHoy ? `<button type="button" class="btn-reimprimir btn-editar" data-id="${f.id}" aria-label="Reabrir y editar ${f.numero}">${ICONOS.editar}</button>` : '<span></span>'}
+      ${esHoy ? `<button type="button" class="btn-reimprimir btn-editar" data-id="${f.id}" data-num="${f.numero}" aria-label="Reabrir y editar ${f.numero}">${ICONOS.editar}</button>` : '<span></span>'}
     </div>`;
   }).join('');
 
@@ -3251,8 +3348,10 @@ function renderVentas() {
       ${Object.entries(v.por_metodo || {}).map(([m, d]) => `
         <div class="tot-linea">
           <span class="lbl">${esc(m)} (${d.num})</span>
-          <span class="val">${fmt(d.total)}</span>
+          <span class="val">${ciego ? '•••' : fmt(d.total)}</span>
         </div>`).join('')}
+      ${ciego && Object.keys(v.por_metodo || {}).length
+        ? '<p class="sin-movs">El desglose por m&eacute;todo se revela al guardar el cierre de caja (cierre ciego).</p>' : ''}
     </div>
     <div class="cierre">
       <h3>Retiros y pagos</h3>
@@ -3292,8 +3391,24 @@ function renderVentas() {
       </div>
     </div>` : ''}
     <div class="cierre">
+      <h3>Excepciones del d&iacute;a</h3>
+      <p class="sub-cierre">Registro permanente de anulaciones, reaperturas, descuentos, salidas eliminadas y correcciones. No se puede editar ni borrar.</p>
+      ${state.excepciones.length ? state.excepciones.map(x => {
+        const h = new Date(x.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+        return `<div class="mov-fila">
+          <span class="hora">${h}</span>
+          <span><span class="chip">${TIPO_EXCEPCION[x.tipo] || esc(x.tipo)}</span>${x.referencia ? `<span class="chip chip-origen">${esc(x.referencia)}</span>` : ''}</span>
+          <span class="concepto">${esc(x.motivo) || '<span style="color:var(--muted)">autom&aacute;tica</span>'}</span>
+          <span class="monto">${x.monto ? fmt(Math.abs(x.monto)) : ''}</span>
+          <span></span>
+        </div>`;
+      }).join('') : `<p class="sin-movs">Sin excepciones ${esHoy ? 'hoy' : 'ese día'}.</p>`}
+    </div>
+    <div class="cierre">
       <h3>Cierre de caja</h3>
-      <p class="sub-cierre">Contá la plata y compar&aacute; contra lo registrado. El "seg&uacute;n POS" incluye propinas y ya descuenta las salidas de arriba.</p>
+      <p class="sub-cierre">${ciego
+        ? 'Cierre ciego: cont&aacute; la plata sin mirar lo esperado. Al guardar se revela la comparaci&oacute;n contra el POS y el primer conteo queda registrado.'
+        : 'Contá la plata y compar&aacute; contra lo registrado. El "seg&uacute;n POS" incluye propinas y ya descuenta las salidas de arriba.'}</p>
       <p class="sub-cierre">${state.apertura?.apertura
         ? `Caja abierta con base <strong>${fmt(state.apertura.apertura.base)}</strong> (conteo guardado a las ${new Date(state.apertura.apertura.guardado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'})}). <button type="button" class="btn-link" id="btnApertura">Editar apertura</button>`
         : `Sin apertura registrada ${esHoy ? 'hoy' : 'ese d&iacute;a'}. <button type="button" class="btn-link" id="btnApertura">Registrar apertura de caja</button>`}</p>
@@ -3326,7 +3441,7 @@ function renderVentas() {
       <div class="cierre-fila">
         <label for="cDat">Dat&aacute;fono<small>cierre del voucher</small></label>
         <input id="cDat" inputmode="numeric" placeholder="0" data-campo="datafono">
-        <span class="esp">${fmt(state.cierre?.esperados?.datafono || 0)}</span>
+        <span class="esp" id="cEspDat">$0</span>
         <span class="dif" id="cDifDat"></span>
       </div>
       <div class="cierre-fila">
@@ -3377,7 +3492,7 @@ function renderVentas() {
   if (btnHoy) btnHoy.addEventListener('click', () => cambiarFechaVentas(hoy));
 
   cont.querySelectorAll('.btn-editar').forEach(b => {
-    b.addEventListener('click', () => reabrir(Number(b.dataset.id)));
+    b.addEventListener('click', () => reabrir(Number(b.dataset.id), b.dataset.num || ''));
   });
 
   // cierre de caja: valores, inputs y guardado
@@ -3408,11 +3523,11 @@ function renderVentas() {
       <span><span class="chip">${esc(m.tipo)}</span><span class="chip chip-origen">${esc(m.origen || 'Efectivo')}</span></span>
       <span class="concepto">${esc(m.concepto) || '<span style="color:var(--muted)">sin concepto</span>'}</span>
       <span class="monto">&minus;${fmt(m.monto)}</span>
-      ${esHoy ? `<button type="button" class="btn-borrar" data-mov="${m.id}" aria-label="Eliminar salida de ${fmt(m.monto)}">${ICONOS.borrar}</button>` : '<span></span>'}
+      ${esHoy ? `<button type="button" class="btn-borrar" data-mov="${m.id}" data-monto="${m.monto}" aria-label="Eliminar salida de ${fmt(m.monto)}">${ICONOS.borrar}</button>` : '<span></span>'}
     </div>`;
   }).join('') : `<p class="sin-movs">Sin salidas registradas ${esHoy ? 'hoy' : 'ese día'}.</p>`;
   cont.querySelectorAll('[data-mov]').forEach(b => {
-    b.addEventListener('click', () => eliminarMovimiento(Number(b.dataset.mov)));
+    b.addEventListener('click', () => eliminarMovimiento(Number(b.dataset.mov), Number(b.dataset.monto) || 0));
   });
   if (esHoy) {
     if (!state.movTipo) state.movTipo = 'Retiro';
@@ -3473,20 +3588,37 @@ function renderVentas() {
     });
   }
   const g = state.cierre?.cierre;
-  $('#cierreGuardado').textContent = g
+  let txtGuardado = g
     ? `Guardado a las ${new Date(g.guardado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'})}`
     : 'Sin guardar todavía';
+  // si el cierre se corrigió después del conteo ciego, se deja ver siempre
+  const cc = g?.conteo_ciego;
+  if (cc && cc.guardado_en && (
+      cc.base !== g.base || cc.efectivo !== g.efectivo_contado ||
+      cc.datafono !== g.datafono_contado || cc.transferencias !== g.transferencias_contado)) {
+    const hcc = new Date(cc.guardado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+    txtGuardado += ` · corregido tras el conteo ciego de las ${hcc} (era ${fmt(cc.total_final)})`;
+  }
+  $('#cierreGuardado').textContent = txtGuardado;
   actualizarCierreCalculos();
 }
 
-async function reabrir(id) {
-  try {
-    const f = await api(`/api/facturas/${id}/reabrir`, {method:'POST'});
-    await cargarFacturas();
-    abrirCuenta(f.id);
-    cargarTotalDia();
-    toast(`Cuenta ${f.numero} reabierta para editar`);
-  } catch (e) { toast(e.message, true); }
+function reabrir(id, numero = '') {
+  modalMotivo({
+    titulo: `Reabrir cuenta${numero ? ' ' + numero : ''}`,
+    sub: 'Reabrir una cuenta cobrada queda en el log de excepciones con su motivo.',
+    presets: ['Error de digitación', 'Cambio de método de pago', 'Faltó o sobró un ítem'],
+    boton: 'Reabrir',
+    onAceptar: async motivo => {
+      try {
+        const f = await api(`/api/facturas/${id}/reabrir`, {method:'POST', body:{motivo}});
+        await cargarFacturas();
+        abrirCuenta(f.id);
+        cargarTotalDia();
+        toast(`Cuenta ${f.numero} reabierta para editar`);
+      } catch (e) { toast(e.message, true); }
+    }
+  });
 }
 
 /* ---------- arranque ---------- */

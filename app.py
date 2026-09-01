@@ -83,6 +83,18 @@ CREATE TABLE IF NOT EXISTS mesas (
     nombre TEXT PRIMARY KEY,
     orden INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS excepciones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL,
+    creado_en TEXT NOT NULL,
+    tipo TEXT NOT NULL,
+    factura_id INTEGER,
+    referencia TEXT NOT NULL DEFAULT '',
+    monto INTEGER NOT NULL DEFAULT 0,
+    motivo TEXT NOT NULL DEFAULT '',
+    detalle TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_excepciones_fecha ON excepciones(fecha);
 CREATE TABLE IF NOT EXISTS cierres (
     fecha TEXT PRIMARY KEY,
     base INTEGER NOT NULL DEFAULT 0,
@@ -133,6 +145,7 @@ MIGRACIONES = [
     "ALTER TABLE cierres ADD COLUMN conteo_base_siguiente TEXT NOT NULL DEFAULT ''",
     "ALTER TABLE facturas ADD COLUMN archivada INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE items ADD COLUMN entregado INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE cierres ADD COLUMN conteo_ciego TEXT NOT NULL DEFAULT ''",
 ]
 
 METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
@@ -142,6 +155,9 @@ ORIGENES_MOVIMIENTO = ("Efectivo", "Transferencia")  # de dónde sale la plata
 NUM_MESAS = 8              # solo la semilla inicial; las mesas se editan desde la UI
 MESAS_FIJAS = ("Para llevar", "Domicilio")  # canales fijos, no son mesas editables
 RETENCION_PAGADA_MIN = 10  # minutos que una cuenta pagada sigue visible en caja
+# cierre ciego: mientras el día no tenga cierre guardado, la caja cuenta sin
+# ver lo esperado; la comparación se revela al guardar (antifraude estándar)
+CIERRE_CIEGO = True
 SEMAFORO_MIN = [10, 18]    # verde < 10 min, amarillo 10–18, rojo > 18
 # ciclo operativo de la cuenta; solo avanza, nunca retrocede
 ETAPAS = ("en_progreso", "enviada", "entregada", "pagada")
@@ -232,7 +248,39 @@ def get_config():
         "num_mesas": NUM_MESAS,
         "retencion_pagada_min": RETENCION_PAGADA_MIN,
         "semaforo_min": SEMAFORO_MIN,
+        "cierre_ciego": CIERRE_CIEGO,
     })
+
+
+def _registrar_excepcion(db, tipo, motivo="", factura_id=None, referencia="",
+                         monto=0, detalle=None):
+    """Log append-only de eventos sensibles (no hay endpoint para borrarlos)."""
+    ahora = datetime.now()
+    db.execute(
+        "INSERT INTO excepciones (fecha, creado_en, tipo, factura_id,"
+        " referencia, monto, motivo, detalle) VALUES (?,?,?,?,?,?,?,?)",
+        (ahora.date().isoformat(), ahora.isoformat(timespec="seconds"), tipo,
+         factura_id, referencia, monto, (motivo or "").strip()[:120],
+         json.dumps(detalle or {}, ensure_ascii=False)),
+    )
+
+
+@app.get("/api/excepciones")
+def listar_excepciones():
+    db = get_db()
+    fecha = request.args.get("fecha") or date.today().isoformat()
+    rows = db.execute(
+        "SELECT * FROM excepciones WHERE fecha = ? ORDER BY id", (fecha,)
+    ).fetchall()
+    out = []
+    for r in rows:
+        e = dict(r)
+        try:
+            e["detalle"] = json.loads(e.get("detalle") or "{}")
+        except ValueError:
+            e["detalle"] = {}
+        out.append(e)
+    return jsonify({"fecha": fecha, "excepciones": out})
 
 
 # ---------- mesas configurables ----------
@@ -399,7 +447,7 @@ def guardar_factura(fid):
     return jsonify(factura_dict(db, row))
 
 
-def _cambiar_estado(fid, nuevo):
+def _cambiar_estado(fid, nuevo, motivo=""):
     db = get_db()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     if row is None:
@@ -412,6 +460,18 @@ def _cambiar_estado(fid, nuevo):
         "UPDATE facturas SET estado=?, fecha_cierre=?, reabierta=0 WHERE id=?",
         (nuevo, datetime.now().isoformat(timespec="seconds"), fid),
     )
+    numero = f"F-{row['numero_dia']:03d}"
+    if nuevo == "anulada":
+        _registrar_excepcion(
+            db, "anulacion", motivo, factura_id=fid, referencia=numero,
+            monto=row["total"] + row["propina"])
+    elif nuevo == "cerrada" and row["subtotal"] > row["total"]:
+        # todo descuento cobrado queda en el log (auditoría de cortesías)
+        _registrar_excepcion(
+            db, "descuento", factura_id=fid, referencia=numero,
+            monto=row["subtotal"] - row["total"],
+            detalle={"tipo": row["descuento_tipo"],
+                     "valor": row["descuento_valor"], "total": row["total"]})
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))
@@ -470,7 +530,11 @@ def cerrar_factura(fid):
 
 @app.post("/api/facturas/<int:fid>/anular")
 def anular_factura(fid):
-    return _cambiar_estado(fid, "anulada")
+    motivo = str((request.get_json(force=True, silent=True) or {})
+                 .get("motivo") or "").strip()
+    if not motivo:
+        return jsonify({"error": "anular necesita un motivo"}), 400
+    return _cambiar_estado(fid, "anulada", motivo)
 
 
 @app.post("/api/facturas/<int:fid>/archivar")
@@ -503,6 +567,10 @@ def reabrir_factura(fid):
         return jsonify({"error": "factura no existe"}), 404
     if row["estado"] == "abierta":
         return jsonify(factura_dict(db, row))
+    motivo = str((request.get_json(force=True, silent=True) or {})
+                 .get("motivo") or "").strip()
+    if not motivo:
+        return jsonify({"error": "reabrir necesita un motivo"}), 400
     # la etapa se conserva; solo el legado etapa='pagada' se normaliza a
     # 'entregada' para que el re-cobro fluya normal; reabrir des-archiva
     db.execute(
@@ -510,6 +578,11 @@ def reabrir_factura(fid):
         " archivada=0,"
         " etapa=CASE WHEN etapa='pagada' THEN 'entregada' ELSE etapa END"
         " WHERE id=?", (fid,))
+    _registrar_excepcion(
+        db, "reapertura", motivo, factura_id=fid,
+        referencia=f"F-{row['numero_dia']:03d}",
+        monto=row["total"] + row["propina"],
+        detalle={"estado_anterior": row["estado"]})
     db.commit()
     row = db.execute("SELECT * FROM facturas WHERE id = ?", (fid,)).fetchone()
     return jsonify(factura_dict(db, row))
@@ -659,7 +732,16 @@ def eliminar_movimiento(mid):
     row = db.execute("SELECT * FROM movimientos WHERE id = ?", (mid,)).fetchone()
     if row is None:
         return jsonify({"error": "movimiento no existe"}), 404
+    motivo = str((request.get_json(force=True, silent=True) or {})
+                 .get("motivo") or "").strip()
+    if not motivo:
+        return jsonify({"error": "eliminar una salida necesita un motivo"}), 400
     db.execute("DELETE FROM movimientos WHERE id = ?", (mid,))
+    _registrar_excepcion(
+        db, "salida_eliminada", motivo, monto=row["monto"],
+        referencia=row["tipo"],
+        detalle={"concepto": row["concepto"], "origen": row["origen"],
+                 "creado_en": row["creado_en"], "fecha": row["fecha"]})
     db.commit()
     return jsonify({"ok": True})
 
@@ -670,7 +752,9 @@ def _cierre_dict(row):
     if row is None:
         return None
     c = dict(row)
-    for campo in ("conteo_efectivo", "conteo_base_siguiente"):
+    for campo in ("conteo_efectivo", "conteo_base_siguiente", "conteo_ciego"):
+        if campo not in c:
+            continue
         try:
             c[campo] = json.loads(c.get(campo) or "{}")
         except ValueError:
@@ -711,6 +795,12 @@ def guardar_apertura():
     except (TypeError, ValueError):
         base = 0
     conteo = _limpiar_conteo(data.get("conteo_efectivo"))
+    previa = db.execute(
+        "SELECT base FROM aperturas WHERE fecha = ?", (fecha,)).fetchone()
+    if previa and previa["base"] != base:
+        _registrar_excepcion(
+            db, "apertura_corregida", referencia=fecha, monto=base,
+            detalle={"base_anterior": previa["base"], "base_nueva": base})
     db.execute(
         "INSERT INTO aperturas (fecha, base, conteo_efectivo, guardado_en)"
         " VALUES (?,?,?,?)"
@@ -766,9 +856,14 @@ def get_cierre():
     ).fetchone()
     base_sugerida = (apertura["base"] if apertura
                      else anterior["b"] if anterior else 0)
-    return jsonify({"fecha": fecha, "esperados": esperados,
-                    "cierre": _cierre_dict(row),
-                    "base_sugerida": base_sugerida})
+    # cierre ciego: mientras no haya cierre guardado no se manda lo esperado;
+    # el POST lo calcula, lo guarda y ahí sí lo revela
+    ciego = CIERRE_CIEGO and row is None
+    out = {"fecha": fecha, "cierre": _cierre_dict(row),
+           "base_sugerida": base_sugerida, "ciego": ciego}
+    if not ciego:
+        out["esperados"] = esperados
+    return jsonify(out)
 
 
 @app.post("/api/cierre")
@@ -805,12 +900,36 @@ def guardar_cierre():
                       - esp["salidas"])
     diferencia = total_final - esperado_total
 
+    ahora = datetime.now().isoformat(timespec="seconds")
+    # el primer guardado del día es el conteo ciego: queda congelado aparte;
+    # correcciones posteriores (ya con el esperado revelado) van al log
+    existente = db.execute(
+        "SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()
+    if existente is None:
+        conteo_ciego = json.dumps({
+            "base": base, "efectivo": efectivo, "datafono": datafono,
+            "transferencias": transf, "total_final": total_final,
+            "guardado_en": ahora})
+    else:
+        conteo_ciego = existente["conteo_ciego"]
+        antes = {"base": existente["base"],
+                 "efectivo": existente["efectivo_contado"],
+                 "datafono": existente["datafono_contado"],
+                 "transferencias": existente["transferencias_contado"]}
+        despues = {"base": base, "efectivo": efectivo,
+                   "datafono": datafono, "transferencias": transf}
+        if antes != despues:
+            _registrar_excepcion(
+                db, "cierre_corregido", referencia=fecha,
+                monto=total_final - existente["total_final"],
+                detalle={"antes": antes, "despues": despues})
+
     db.execute(
         "INSERT INTO cierres (fecha, base, efectivo_contado, datafono_contado,"
         " transferencias_contado, esperado_efectivo, esperado_datafono,"
         " esperado_transferencias, total_final, diferencia, guardado_en, conteo_efectivo,"
-        " salidas, base_siguiente, conteo_base_siguiente)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        " salidas, base_siguiente, conteo_base_siguiente, conteo_ciego)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
         " ON CONFLICT(fecha) DO UPDATE SET base=excluded.base,"
         " efectivo_contado=excluded.efectivo_contado,"
         " datafono_contado=excluded.datafono_contado,"
@@ -824,9 +943,8 @@ def guardar_cierre():
         " conteo_base_siguiente=excluded.conteo_base_siguiente",
         (fecha, base, efectivo, datafono, transf,
          esp["efectivo"], esp["datafono"], esp["transferencias"],
-         total_final, diferencia,
-         datetime.now().isoformat(timespec="seconds"), json.dumps(conteo),
-         esp["salidas"], base_siguiente, json.dumps(conteo_bs)),
+         total_final, diferencia, ahora, json.dumps(conteo),
+         esp["salidas"], base_siguiente, json.dumps(conteo_bs), conteo_ciego),
     )
     db.commit()
     row = db.execute("SELECT * FROM cierres WHERE fecha = ?", (fecha,)).fetchone()
