@@ -592,13 +592,21 @@ def reabrir_factura(fid):
 def ventas_dia():
     db = get_db()
     fecha = request.args.get("fecha") or date.today().isoformat()
+    # además de las cobradas, se listan las ANULADAS con peso real: tenían
+    # productos y la cuenta vivió más de 5 minutos (las anuladas "de dedo"
+    # solo quedan en el log de excepciones); nunca cuentan en los totales
     rows = db.execute(
-        "SELECT * FROM facturas WHERE estado='cerrada' AND date(fecha_apertura)=?"
+        "SELECT * FROM facturas WHERE date(fecha_apertura)=? AND ("
+        " estado='cerrada' OR (estado='anulada'"
+        "   AND EXISTS (SELECT 1 FROM items WHERE factura_id=facturas.id)"
+        "   AND fecha_cierre IS NOT NULL"
+        "   AND (julianday(fecha_cierre)-julianday(fecha_apertura))*1440 > 5))"
         " ORDER BY numero_dia", (fecha,)
     ).fetchall()
     facturas = [factura_dict(db, r) for r in rows]
+    cerradas = [f for f in facturas if f["estado"] == "cerrada"]
     por_metodo = {}
-    for f in facturas:
+    for f in cerradas:
         m = f.get("metodo_pago") or "Efectivo"
         acc = por_metodo.setdefault(m, {"total": 0, "propinas": 0, "num": 0})
         acc["total"] += f["total"]
@@ -607,10 +615,10 @@ def ventas_dia():
     return jsonify({
         "fecha": fecha,
         "facturas": facturas,
-        "total_dia": sum(f["total"] for f in facturas),
-        "propinas_dia": sum(f.get("propina", 0) for f in facturas),
+        "total_dia": sum(f["total"] for f in cerradas),
+        "propinas_dia": sum(f.get("propina", 0) for f in cerradas),
         "por_metodo": por_metodo,
-        "num_facturas": len(facturas),
+        "num_facturas": len(cerradas),
     })
 
 
