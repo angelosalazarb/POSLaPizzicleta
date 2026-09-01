@@ -503,6 +503,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; margin:0 auto; }
 .tot-linea .lbl { font-size:11.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
 .tot-linea .val { font-family:var(--font-mono); font-size:15px; }
 .desc-ctl { display:flex; align-items:center; gap:6px; }
+.desc-ctl[hidden] { display:none; }
 .desc-ctl input {
   min-height:38px; width:90px; padding:0 10px; text-align:right;
   font-family:var(--font-mono); font-size:14px;
@@ -904,6 +905,28 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; margin:0 auto; }
 .modal-total .lbl { font-size:13px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
 .modal-total .val { font-family:var(--font-mono); font-weight:600; font-size:24px; }
 .modal-sub { padding:0 22px 4px; font-size:13px; color:var(--muted); }
+
+/* modal de cobro: método de pago (grilla 2×2), propina, descuento y totales.
+   Escribe sobre los MISMOS campos que el panel lateral (f.metodo_pago,
+   f.propina_*, f.descuento_*) — es una segunda superficie para el mismo
+   estado, no una copia aparte. */
+.modal-cobro { width:min(480px, 100%); }
+.cobro-seccion { margin:14px 0; }
+.cobro-titulo { font-weight:700; font-size:14.5px; margin-bottom:9px; }
+.cobro-titulo .cobro-nota { font-weight:400; color:var(--muted); font-size:12.5px; text-transform:none; letter-spacing:0; }
+.cobro-metodos-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.metodo-pago-btn {
+  min-height:52px; border-radius:14px; border:1.5px solid var(--linea);
+  background:var(--card); font-weight:700; font-size:15px; color:var(--tinta);
+  transition:background var(--trans), border-color var(--trans), color var(--trans);
+}
+.metodo-pago-btn:hover:not(.on) { border-color:var(--tinta); }
+.metodo-pago-btn.on { background:var(--tinta); color:var(--papel); border-color:var(--tinta); }
+.cobro-desc-fila { display:flex; align-items:center; gap:8px; }
+.cobro-desc-fila .desc-ctl { flex:1; }
+.cobro-desc-fila .desc-ctl input { width:100%; text-align:left; }
+.cobro-totales { border-top:2px solid var(--tinta); padding-top:12px; margin-top:4px; display:grid; gap:6px; }
+.modal-acciones .btn[disabled] { opacity:.45; cursor:default; }
 
 /* calculadora de vuelto */
 .pagar-con-vuelto { display:flex; align-items:center; gap:10px; }
@@ -2611,6 +2634,12 @@ async function cobrar(f) {
   }
   if (!exigirCanal(f)) return;
   if (necesitaConfirmacion(f)) { abrirConfirmarPedido(f, () => cobrar(f)); return; }
+  abrirModalCobro(f);
+}
+
+// devuelve true/false: el que llama decide qué hacer con el resultado
+// (p.ej. el modal de cobro solo se cierra si esto tuvo éxito)
+async function finalizarCobro(f) {
   try {
     await guardar(f);
     const r = await api(`/api/facturas/${f.id}/cerrar`, {method:'POST'});
@@ -2620,7 +2649,205 @@ async function cobrar(f) {
     renderTabs(); renderFactura();
     cargarTotalDia();
     toast(`Cuenta ${f.numero} cobrada`);
-  } catch (e) { toast(e.message, true); }
+    return true;
+  } catch (e) { toast(e.message, true); return false; }
+}
+
+/* modal de cobro: método de pago, propina y descuento en un solo paso al
+   cobrar (además del panel lateral, no en su lugar — escribe sobre los
+   mismos campos de f, así que ambas superficies quedan siempre sincronizadas).
+   El ícono de vuelto (💵) solo aparece con Efectivo: reabre la misma
+   calculadora de vuelto/billetes de siempre. */
+function abrirModalCobro(f) {
+  if (document.querySelector('.overlay')) return;
+  if (!f.metodo_pago) f.metodo_pago = 'Efectivo';
+  if (!f.propina_tipo) f.propina_tipo = 'porcentaje';
+  if (!f.descuento_tipo) f.descuento_tipo = 'monto';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal modal-cobro" role="dialog" aria-modal="true" aria-label="Cobrar ${f.numero}">
+      <div class="modal-head">
+        <h3>Cobrar ${f.numero}</h3>
+        <button type="button" class="cerrar-modal" aria-label="Cerrar">${ICONOS.cerrarX}</button>
+      </div>
+      <div class="modal-cuerpo">
+        <div class="cobro-seccion">
+          <div class="cobro-titulo">M&eacute;todo de pago</div>
+          <div class="cobro-metodos-grid" id="payMetodos">
+            ${METODOS_PAGO.map(m => `<button type="button" class="metodo-pago-btn${f.metodo_pago === m ? ' on' : ''}" data-metodo="${esc(m)}">${esc(m)}</button>`).join('')}
+          </div>
+        </div>
+        <div class="cobro-seccion">
+          <div class="cobro-titulo">Propina</div>
+          <div class="metodos" id="payPropPills" style="justify-content:flex-start">
+            <button type="button" class="metodo" data-prop="sin">Sin propina</button>
+            <button type="button" class="metodo" data-prop="10">10%</button>
+            <button type="button" class="metodo" data-prop="otro">Otro $</button>
+          </div>
+          <div class="desc-ctl" id="payPropOtroWrap" style="margin-top:8px" hidden>
+            <input id="payPropOtro" inputmode="numeric" placeholder="0" aria-label="Propina en pesos">
+          </div>
+        </div>
+        <div class="cobro-seccion">
+          <div class="cobro-titulo">Descuento <span class="cobro-nota">(opcional, queda en el log)</span></div>
+          <div class="cobro-desc-fila">
+            <span class="desc-ctl">
+              <input id="payDescValor" inputmode="numeric" placeholder="0" aria-label="Valor del descuento">
+            </span>
+            <span class="toggle" role="group" aria-label="Tipo de descuento">
+              <button type="button" id="payDescMonto" aria-pressed="true">$</button>
+              <button type="button" id="payDescPct" aria-pressed="false">%</button>
+            </span>
+          </div>
+        </div>
+        <div class="cobro-totales">
+          <div class="tot-linea"><span class="lbl">Total con descuento</span><span class="val" id="payTotal">$0</span></div>
+          <div class="tot-linea"><span class="lbl">Propina</span><span class="val prop-monto" id="payPropina">+$0</span></div>
+          <div class="tot-linea gran-total">
+            <span class="lbl">A pagar</span>
+            <span class="pagar-con-vuelto">
+              <span class="val" id="payAPagar">$0</span>
+              <button type="button" class="btn-conteo" id="payVuelto" aria-label="Calcular el vuelto" title="Calcular vuelto" hidden>${ICONOS.billetes}</button>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-acciones">
+        <button type="button" class="btn btn-primario" id="btnPayConfirmar" style="width:100%">${ICONOS.cobrar} ${f.reabierta ? 'Guardar cambios e imprimir' : 'Cobrar e imprimir ticket'}</button>
+      </div>
+    </div>`;
+
+  // refleja el estado actual de f en los controles (útil también si se
+  // reabre el modal tras usar la calculadora de vuelto)
+  const pintar = () => {
+    overlay.querySelectorAll('#payMetodos .metodo-pago-btn').forEach(b => {
+      b.classList.toggle('on', b.dataset.metodo === f.metodo_pago);
+    });
+    overlay.querySelector('#payVuelto').hidden = f.metodo_pago !== 'Efectivo';
+
+    // "10%" solo se marca si la propina ES exactamente ese 10% sugerido; si
+    // el panel lateral dejó otro % o un monto fijo, cae en "Otro $" (con el
+    // valor calculado en pesos, no el % crudo, para que el campo siempre
+    // muestre lo que realmente se va a cobrar)
+    const valorProp = f.propina_valor || 0;
+    const es10 = f.propina_tipo === 'porcentaje' && valorProp === 10;
+    const esSinProp = valorProp <= 0;
+    const esOtroProp = valorProp > 0 && !es10;
+    overlay.querySelectorAll('#payPropPills .metodo').forEach(b => {
+      const activo = (b.dataset.prop === 'sin' && esSinProp)
+        || (b.dataset.prop === '10' && es10)
+        || (b.dataset.prop === 'otro' && esOtroProp);
+      b.classList.toggle('on', activo);
+    });
+    overlay.querySelector('#payPropOtroWrap').hidden = !esOtroProp;
+    const otroInp = overlay.querySelector('#payPropOtro');
+    if (document.activeElement !== otroInp) {
+      otroInp.value = esOtroProp ? fmtInputPrecio(String(Math.round(calcularLocal(f).propina))) : '';
+    }
+
+    overlay.querySelector('#payDescMonto').classList.toggle('on', f.descuento_tipo !== 'porcentaje');
+    overlay.querySelector('#payDescPct').classList.toggle('on', f.descuento_tipo === 'porcentaje');
+    const descInp = overlay.querySelector('#payDescValor');
+    if (document.activeElement !== descInp) {
+      descInp.value = f.descuento_valor
+        ? (f.descuento_tipo === 'monto' ? fmtInputPrecio(String(Math.round(f.descuento_valor))) : String(f.descuento_valor))
+        : '';
+    }
+
+    const t = calcularLocal(f);
+    overlay.querySelector('#payTotal').textContent = fmt(t.total);
+    overlay.querySelector('#payPropina').textContent = '+' + fmt(t.propina);
+    overlay.querySelector('#payAPagar').textContent = fmt(t.pagar);
+  };
+
+  const cerrar = () => { overlay.remove(); document.removeEventListener('keydown', alEscape); };
+  const alEscape = e => { if (e.key === 'Escape') cerrar(); };
+  document.addEventListener('keydown', alEscape);
+  overlay.addEventListener('click', e => { if (e.target === overlay) cerrar(); });
+  overlay.querySelector('.cerrar-modal').addEventListener('click', cerrar);
+
+  // recalcular(f) ya sincroniza los totales del panel lateral (toca esos
+  // nodos directo), pero el pill de "Pago" del panel es puro estado visual
+  // que solo se actualiza en SU propio click — hay que empujarlo a mano
+  const sincronizarPagoPanel = () => {
+    document.querySelectorAll('#metodos .metodo').forEach(b => {
+      const on = b.textContent === f.metodo_pago;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+  };
+
+  overlay.querySelectorAll('#payMetodos .metodo-pago-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      f.metodo_pago = b.dataset.metodo;
+      programarGuardado(f);
+      sincronizarPagoPanel();
+      pintar();
+    });
+  });
+
+  overlay.querySelectorAll('#payPropPills .metodo').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.dataset.prop === 'sin') {
+        f.propina_tipo = 'porcentaje'; f.propina_valor = 0;
+      } else if (b.dataset.prop === '10') {
+        f.propina_tipo = 'porcentaje'; f.propina_valor = 10;
+      } else {
+        // al pasar de % a $ se convierte lo que YA se estaba cobrando de
+        // propina (en pesos), no el número crudo del % anterior
+        const actual = calcularLocal(f).propina;
+        f.propina_tipo = 'monto';
+        f.propina_valor = actual;
+      }
+      recalcular(f); programarGuardado(f);
+      pintar();
+      if (b.dataset.prop === 'otro') overlay.querySelector('#payPropOtro').focus();
+    });
+  });
+  overlay.querySelector('#payPropOtro').addEventListener('input', e => {
+    e.target.value = fmtInputPrecio(e.target.value);
+    f.propina_tipo = 'monto';
+    f.propina_valor = Number(soloDigitos(e.target.value)) || 0;
+    recalcular(f); programarGuardado(f);
+    pintar();
+  });
+
+  const descInp = overlay.querySelector('#payDescValor');
+  descInp.addEventListener('input', () => {
+    if (f.descuento_tipo === 'monto') {
+      descInp.value = fmtInputPrecio(descInp.value);
+      f.descuento_valor = Number(soloDigitos(descInp.value)) || 0;
+    } else {
+      descInp.value = descInp.value.replace(/[^\d.,]/g, '');
+      f.descuento_valor = Math.min(parseFloat(descInp.value.replace(',', '.')) || 0, 100);
+    }
+    recalcular(f); programarGuardado(f);
+    pintar();
+  });
+  overlay.querySelector('#payDescMonto').addEventListener('click', () => {
+    f.descuento_tipo = 'monto'; descInp.value = ''; f.descuento_valor = 0;
+    recalcular(f); programarGuardado(f); pintar();
+  });
+  overlay.querySelector('#payDescPct').addEventListener('click', () => {
+    f.descuento_tipo = 'porcentaje'; descInp.value = ''; f.descuento_valor = 0;
+    recalcular(f); programarGuardado(f); pintar();
+  });
+
+  overlay.querySelector('#payVuelto').addEventListener('click', () => {
+    abrirVuelto(f, pintar);
+  });
+
+  overlay.querySelector('#btnPayConfirmar').addEventListener('click', async () => {
+    const btn = overlay.querySelector('#btnPayConfirmar');
+    btn.disabled = true;
+    const ok = await finalizarCobro(f);
+    if (ok) cerrar(); else btn.disabled = false;
+  });
+
+  document.body.appendChild(overlay);
+  pintar();
 }
 
 async function enviarCocina(f) {
@@ -3076,7 +3303,7 @@ function modalConteo({titulo, subtitulo = '', conteo, boton, onAceptar}) {
 
 /* calculadora de vuelto: la cuenta vale $X, el cliente dice cuánto va a pagar
    (la propina es la diferencia y se guarda sola) y con qué billete paga */
-function abrirVuelto(f) {
+function abrirVuelto(f, onCerrar) {
   const t = calcularLocal(f);
   const total = t.total;        // lo que vale la cuenta (sin propina)
   let vaAPagar = t.pagar;       // arranca en el a-pagar actual; lo decide el cliente
@@ -3180,6 +3407,7 @@ function abrirVuelto(f) {
     }
     overlay.remove();
     document.removeEventListener('keydown', alEscape);
+    if (onCerrar) onCerrar();
   };
   const alEscape = e => { if (e.key === 'Escape') cerrar(); };
   document.addEventListener('keydown', alEscape);

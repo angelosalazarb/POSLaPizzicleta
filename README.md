@@ -40,12 +40,20 @@ libre); precios y tickets térmicos en IBM Plex Mono para que las cifras alineen
   **vuelve sola a "En cocina"** y la comanda imprime **solo lo pendiente** con
   el banner "— ADICIÓN AL PEDIDO —" (si todo está entregado, la reimpresión
   sale completa).
-- **Descuento** por cuenta en $ o %, el total nunca baja de 0.
-- **Propina** debajo del descuento, en % (típico 10) o $ fijo: muestra el valor
-  calculado y el **A pagar** = total + propina. Sale en el ticket y en el export.
-- **Método de pago** por cuenta (Efectivo / Datáfono / Nequi / Transferencia,
-  Efectivo por defecto): sale en el ticket ("Pago: ..."), en el export CSV y
-  "Ventas de hoy" muestra el desglose del día por método para el cierre de caja.
+- **Descuento** por cuenta en $ o %, el total nunca baja de 0. **Propina**
+  en % (típico 10) o $ fijo. **Método de pago** (Efectivo / Datáfono / Nequi /
+  Transferencia, Efectivo por defecto). Los tres viven como controles
+  permanentes en el panel lateral mientras se arma el pedido (auto-guardado) —
+  sale en el ticket, el export CSV y el desglose de "Ventas de hoy".
+- **Modal de cobro**: al tocar "Cobrar e imprimir" se abre un modal de
+  confirmación (además del panel, no en su lugar — escribe sobre los mismos
+  campos de la cuenta, así que ambas superficies quedan siempre sincronizadas)
+  con método de pago en grilla, propina por pills (Sin propina / 10% / Otro $)
+  y descuento, más los totales en vivo. Con **Efectivo** aparece el ícono de
+  vuelto (💵) que reabre la **calculadora de vuelto** existente: "La cuenta
+  vale" → "Va a pagar" (lo que decide el cliente; la propina es la diferencia)
+  → billetes rápidos → "El cliente entrega" → devuelta calculada. Al cerrar
+  esa calculadora, la propina vuelve al modal de cobro ya actualizada.
 - Todo se guarda solo (SQLite en `data/pos.db`): las pestañas sobreviven refrescos
   y se ven igual desde el Mac y desde el PC de caja.
 - Vista **Ventas de hoy** organizada en tres sub-pestañas con el filtro de fecha
