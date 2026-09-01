@@ -629,6 +629,33 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .vtab:not(.on):hover { background:var(--azul-dim); color:var(--tinta); }
 .vtab-badge { background:var(--naranja); color:#fff; font-size:11px; border-radius:99px; padding:1px 7px; font-weight:700; }
 .filtros-ventas { display:flex; flex-wrap:wrap; gap:10px 12px; align-items:center; margin-bottom:14px; }
+/* fila combinada: pestañas Ventas/Caja/Auditoría + selector de fecha (sin título aparte) */
+.ventas-topbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:18px; }
+/* selector de fecha como pill de tinta; el <input type=date> real queda superpuesto
+   e invisible para que el clic abra el selector nativo del navegador */
+.fecha-pill-wrap { position:relative; display:inline-flex; }
+.fecha-pill-wrap input[type=date] { position:absolute; inset:0; opacity:0; cursor:pointer; border:none; }
+.fecha-pill-txt {
+  min-height:44px; padding:0 20px; border-radius:100px; background:var(--tinta); color:var(--papel);
+  font-size:14px; font-weight:600; display:flex; align-items:center; white-space:nowrap; pointer-events:none;
+}
+/* formulario de salida: selects nativos en fila (tipo | origen | monto), luego concepto + registrar */
+.mov-form-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px; }
+.mov-form-grid2 { display:grid; grid-template-columns:1fr auto; gap:8px; margin-top:8px; }
+.mov-form-grid select, .mov-form-grid input, .mov-form-grid2 input {
+  min-height:48px; border:1.5px solid var(--linea); border-radius:10px; padding:0 12px;
+  background:var(--papel); font-size:14px; box-sizing:border-box; width:100%;
+}
+.mov-form-grid select:focus, .mov-form-grid input:focus, .mov-form-grid2 input:focus { border-color:var(--azul); outline:none; }
+.mov-form-grid2 .btn { min-height:48px; }
+/* movimiento de caja: una sola línea (tipo · concepto (origen, hora)  -monto  ×) */
+.mov-row { display:flex; justify-content:space-between; align-items:center; gap:10px; border-bottom:1px solid var(--linea); padding:9px 0; font-size:14px; }
+.mov-row:last-child { border-bottom:none; }
+.mov-row .mut { color:var(--muted); }
+.mov-row-right { display:flex; align-items:center; gap:8px; flex:none; }
+.mov-row .monto { font-family:var(--font-mono); color:var(--error); white-space:nowrap; }
+.btn-x { border:none; background:none; color:var(--error); cursor:pointer; font-size:18px; line-height:1; padding:0 4px; }
+.cierre-botones-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
 .chip-sep { width:1.5px; background:var(--linea); align-self:stretch; margin:4px 2px; }
 /* tarjetas de las sub-pestañas Ventas / Caja / Auditoría */
 .tarjeta { background:var(--card); border:1px solid var(--linea); border-radius:14px; padding:16px; }
@@ -652,7 +679,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 .vrow .prop { font-family:var(--font-mono); font-size:13px; color:var(--muted); white-space:nowrap; }
 .vrow .tot { font-family:var(--font-mono); font-weight:600; text-align:right; white-space:nowrap; }
 .badge-anulada { color:var(--error); background:var(--error-dim); border-radius:100px; font-size:11px; padding:2px 8px; margin-left:6px; font-weight:700; white-space:nowrap; }
-.btn-fila { min-height:40px; padding:4px 12px; border-radius:10px; border:1.5px solid var(--linea); background:var(--card); font-weight:600; font-size:13px; display:inline-flex; align-items:center; transition:border-color var(--trans); }
+.btn-fila { min-height:40px; padding:4px 12px; border-radius:10px; border:1.5px solid var(--linea); background:var(--card); color:var(--tinta); font-weight:600; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; transition:border-color var(--trans); }
 .btn-fila:hover { border-color:var(--tinta); }
 .btn-fila.rojo { color:var(--error); }
 .btn-fila svg { width:16px; height:16px; flex:none; }
@@ -1065,6 +1092,8 @@ const fmtInputPrecio = s => {
 };
 
 const METODOS_PAGO = ['Efectivo', 'Datáfono', 'Nequi', 'Transferencia'];
+const TIPOS_MOVIMIENTO = ['Retiro', 'Pago proveedor', 'Gasto', 'Propinas'];
+const ORIGENES_MOVIMIENTO = ['Efectivo', 'Transferencia'];
 
 // la etapa es el ciclo de la comida; el pago es aparte (badge "Pagado" por estado).
 // 'pagada' es etapa legada de cuentas viejas: sin etiqueta propia.
@@ -1127,8 +1156,8 @@ const state = {
   config: {num_mesas: 8, retencion_pagada_min: 10, semaforo_min: [10, 18]},
   fechaVentas: hoyISO(), // día mostrado en la vista Ventas (filtrable)
   ventasTab: 'ventas',   // sub-pestaña de Ventas: 'ventas' | 'caja' | 'auditoria'
-  filtroMetodo: 'Todos', // chip de filtro por método de pago en la lista
-  filtroMesa: 'Todas',   // chip de filtro por mesa/canal en la lista
+  filtroMetodo: null,    // chip de filtro por método de pago (null = todos); toggle
+  filtroMesa: null,      // chip de filtro por canal (null = todos); toggle
   catSel: 'Todos',     // categoría elegida en el panel del menú
   buscaProd: '',       // búsqueda del panel del menú
   ventasHoy: 0,        // nº de cuentas cobradas hoy (para sugerir el cuadre)
@@ -3438,20 +3467,16 @@ function renderVentas() {
   const tab = state.ventasTab;
   const v = state.ventasVista || {facturas:[], total_dia:0, fecha:state.fechaVentas};
   const horaDe = iso => new Date(iso).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
-  // chips de filtro: método de pago y canal agrupado (Mesas / Para llevar / Domicilio);
-  // la lista incluye anuladas con peso real (el servidor ya filtra cuáles), pero
-  // filtrar por método las excluye porque una anulada no tiene pago
-  const cerradasV = v.facturas.filter(f => f.estado === 'cerrada');
-  const metodosDia = [...new Set(cerradasV.map(f => f.metodo_pago || 'Efectivo'))];
-  if (state.filtroMetodo !== 'Todos' && !metodosDia.includes(state.filtroMetodo)) state.filtroMetodo = 'Todos';
+  // chips de filtro: método de pago (lista fija, como METODOS_PAGO del backend) y
+  // canal agrupado (Mesas / Para llevar / Domicilio); ambos toggles nulificables
+  // (tocar el chip activo lo apaga). La lista incluye anuladas con peso real (el
+  // servidor ya decide cuáles), pero filtrar por método las excluye: no tienen pago.
   const canalDe = f => (f.mesa === 'Para llevar' || f.mesa === 'Domicilio') ? f.mesa : 'Mesas';
-  const canalesDia = [...new Set(v.facturas.map(canalDe))];
-  if (state.filtroMesa !== 'Todas' && !canalesDia.includes(state.filtroMesa)) state.filtroMesa = 'Todas';
-  const filtroActivo = state.filtroMetodo !== 'Todos' || state.filtroMesa !== 'Todas';
+  const CANALES_FIJOS = ['Mesas', 'Para llevar', 'Domicilio'];
+  const filtroActivo = !!state.filtroMetodo || !!state.filtroMesa;
   const facturasFiltradas = v.facturas.filter(f =>
-    (state.filtroMetodo === 'Todos' ||
-      (f.estado === 'cerrada' && (f.metodo_pago || 'Efectivo') === state.filtroMetodo)) &&
-    (state.filtroMesa === 'Todas' || canalDe(f) === state.filtroMesa));
+    (!state.filtroMetodo || (f.estado === 'cerrada' && (f.metodo_pago || 'Efectivo') === state.filtroMetodo)) &&
+    (!state.filtroMesa || canalDe(f) === state.filtroMesa));
   const totalFiltrado = facturasFiltradas.filter(f => f.estado === 'cerrada')
     .reduce((s, f) => s + f.total, 0);
   const filas = facturasFiltradas.map(f => {
@@ -3461,11 +3486,11 @@ function renderVentas() {
       <span class="num">${f.numero}</span>
       <span class="det">${esc(f.mesa || 'Sin canal')} <span class="mut">&middot; ${horaDe(f.fecha_cierre || f.fecha_apertura)} &middot; ${n} &iacute;tem${n === 1 ? '' : 's'}</span>${anulada ? '<span class="badge-anulada">anulada</span>' : ''}</span>
       <span class="metodo-chip">${anulada ? '&mdash;' : esc(f.metodo_pago || 'Efectivo')}</span>
-      <span class="prop">${f.propina ? 'prop ' + fmt(f.propina) : ''}</span>
+      <span class="prop">prop ${fmt(f.propina || 0)}</span>
       <span class="tot">${fmt(f.total)}</span>
       <span style="display:flex;gap:6px;justify-content:flex-end">
         <a class="btn-fila" href="/ticket/${f.id}?print=1" target="_blank">Reimprimir</a>
-        ${esHoy && !anulada ? `<button type="button" class="btn-fila rojo" data-reab="${f.id}" data-num="${f.numero}">Reabrir</button>` : ''}
+        ${esHoy ? `<button type="button" class="btn-fila rojo" data-reab="${f.id}" data-num="${f.numero}">Reabrir</button>` : ''}
       </span>
     </div>`;
   }).join('');
@@ -3476,39 +3501,33 @@ function renderVentas() {
     .filter(m => m.tipo === 'Propinas').reduce((s, m) => s + (m.monto || 0), 0);
   const propPendiente = propRecibidas - propPagadas;
 
-  const tituloDia = esHoy ? 'Ventas de hoy'
-    : 'Ventas del ' + new Date(state.fechaVentas + 'T12:00:00')
-        .toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'});
-  // --- pestaña Ventas: filtros, lista-tarjeta, desglose en tarjetas y propinas ---
+  // --- pestaña Ventas: filtros (listas fijas), lista-tarjeta, desglose en
+  // tarjetas (4 métodos siempre) y propinas ---
   const htmlVentas = `
     ${v.facturas.length ? `<div class="filtros-ventas">
       <span class="metodos" role="group" aria-label="Filtrar por m&eacute;todo de pago">
-        ${['Todos', ...metodosDia].map(m => `<button type="button" class="metodo${state.filtroMetodo === m ? ' on' : ''}" data-fm="${esc(m)}" aria-pressed="${state.filtroMetodo === m}">${esc(m)}</button>`).join('')}
+        ${METODOS_PAGO.map(m => `<button type="button" class="metodo${state.filtroMetodo === m ? ' on' : ''}" data-fm="${esc(m)}" aria-pressed="${state.filtroMetodo === m}">${esc(m)}</button>`).join('')}
       </span>
-      ${canalesDia.length > 1 ? `<span class="chip-sep"></span>
+      <span class="chip-sep"></span>
       <span class="metodos" role="group" aria-label="Filtrar por canal">
-        ${['Todas', ...canalesDia].map(m => `<button type="button" class="metodo${state.filtroMesa === m ? ' on' : ''}" data-fmesa="${esc(m)}" aria-pressed="${state.filtroMesa === m}">${esc(m)}</button>`).join('')}
-      </span>` : ''}
+        ${CANALES_FIJOS.map(m => `<button type="button" class="metodo${state.filtroMesa === m ? ' on' : ''}" data-fmesa="${esc(m)}" aria-pressed="${state.filtroMesa === m}">${esc(m)}</button>`).join('')}
+      </span>
     </div>` : ''}
-    ${filtroActivo ? `<p class="sub-cierre" style="margin-bottom:10px">Total filtrado (${facturasFiltradas.length} de ${v.facturas.length}): <b style="font-family:var(--font-mono);color:var(--tinta)">${ciego && state.filtroMetodo !== 'Todos' ? '•••' : fmt(totalFiltrado)}</b></p>` : ''}
+    ${filtroActivo ? `<p class="sub-cierre" style="margin-bottom:10px">Total filtrado (${facturasFiltradas.length} de ${v.facturas.length}): <b style="font-family:var(--font-mono);color:var(--tinta)">${ciego && state.filtroMetodo ? '•••' : fmt(totalFiltrado)}</b></p>` : ''}
     ${filas ? `<div class="vlista">${filas}</div>` : `<p class="sin-ventas">${v.facturas.length ? 'Ninguna venta coincide con el filtro.' : (esHoy ? 'Todavía no hay ventas cerradas hoy.' : 'Sin ventas cerradas ese día.')}</p>`}
     <div class="desglose-cards">
-      <div class="dcard total">
-        <div class="lbl">Total del d&iacute;a</div>
-        <div class="val">${fmt(v.total_dia)}</div>
-        <div class="sub">${v.num_facturas || 0} venta${v.num_facturas === 1 ? '' : 's'} cobrada${v.num_facturas === 1 ? '' : 's'}</div>
-      </div>
-      ${Object.entries(v.por_metodo || {}).map(([m, d]) => `
-      <div class="dcard">
-        <div class="lbl">${esc(m)}</div>
-        <div class="val">${ciego ? '•••' : fmt(d.total)}</div>
-        <div class="sub">${d.num} venta${d.num === 1 ? '' : 's'}</div>
-      </div>`).join('')}
+      ${METODOS_PAGO.map(m => {
+        const d = (v.por_metodo || {})[m] || {total: 0, num: 0};
+        return `<div class="dcard">
+          <div class="lbl">${m}</div>
+          <div class="val">${ciego ? '•••' : fmt(d.total)}</div>
+          <div class="sub">${d.num} venta${d.num === 1 ? '' : 's'}</div>
+        </div>`;
+      }).join('')}
     </div>
-    ${ciego && Object.keys(v.por_metodo || {}).length
-      ? '<p class="sin-movs" style="margin:-8px 0 16px">El desglose por m&eacute;todo se revela al guardar el cierre de caja (cierre ciego).</p>' : ''}
+    ${ciego ? '<p class="sin-movs" style="margin:-8px 0 16px">El desglose por m&eacute;todo se revela al guardar el cierre de caja (cierre ciego).</p>' : ''}
     ${(propRecibidas || propPagadas) ? `<div class="tarjeta prop-card">
-      <span style="font-size:14px">Propinas del d&iacute;a: <b style="font-family:var(--font-mono)">${fmt(propRecibidas)}</b>${propPagadas ? ` &middot; entregadas al equipo <b style="font-family:var(--font-mono)">&minus;${fmt(propPagadas)}</b>` : ''} &middot; por entregar <b class="prop-monto" style="font-family:var(--font-mono)">${fmt(propPendiente)}</b></span>
+      <span style="font-size:14px">Propinas del d&iacute;a: <b style="font-family:var(--font-mono)">${fmt(propRecibidas)}</b>${propPagadas ? ` &middot; entregadas al equipo <b style="font-family:var(--font-mono)">&minus;${fmt(propPagadas)}</b>` : ''}</span>
       ${esHoy && propPendiente > 0 ? `<button type="button" class="btn-fila" id="btnPagarPropinas" style="color:var(--ok);border-color:var(--ok)">Pagar al equipo &rarr;</button>` : ''}
     </div>` : ''}`;
 
@@ -3519,7 +3538,6 @@ function renderVentas() {
     : (state.cierreForm?.base || state.cierre?.base_sugerida || 0);
   const espEfCaja = espC ? baseCierre + espC.efectivo - (espC.salidas_efectivo ?? espC.salidas ?? 0) : null;
   const espTrC = espC ? espC.transferencias - (espC.salidas_transferencias || 0) : null;
-  const espTotalC = espC ? espC.efectivo + espC.datafono + espC.transferencias - espC.salidas : null;
   const filaCie = (lbl, e, c) => `<div class="cie-fila"><span>${lbl}</span><span class="der"><span class="esperado">esperado ${e}</span><span class="contado">${c}</span></span></div>`;
   const ccC = g?.conteo_ciego;
   const corregido = !!(g && ccC && ccC.guardado_en && (
@@ -3534,15 +3552,18 @@ function renderVentas() {
         ? `Apertura ${horaDe(state.apertura.apertura.guardado_en)} &middot; base declarada <strong style="font-family:var(--font-mono)">${fmt(state.apertura.apertura.base)}</strong> <button type="button" class="btn-link" id="btnApertura">Editar</button>`
         : `Sin apertura registrada ${esHoy ? 'hoy' : 'ese d&iacute;a'}. <button type="button" class="btn-link" id="btnApertura">Registrar apertura</button>`}</p>
       ${esHoy ? `
-      <div class="mov-form">
-        <span class="metodos" id="movTipos" role="group" aria-label="Tipo de salida"></span>
+      <div class="mov-form-grid">
+        <select id="movTipo" aria-label="Tipo de salida">
+          ${TIPOS_MOVIMIENTO.map(t => `<option ${state.movTipo === t ? 'selected' : ''}>${t}</option>`).join('')}
+        </select>
+        <select id="movOrigen" aria-label="&iquest;De d&oacute;nde sale?">
+          ${ORIGENES_MOVIMIENTO.map(o => `<option ${state.movOrigen === o ? 'selected' : ''}>${o}</option>`).join('')}
+        </select>
+        <input class="monto-mov" id="movMonto" inputmode="numeric" placeholder="$ 0" aria-label="Monto de la salida">
       </div>
-      <div class="mov-form">
-        <span class="lbl-origen">&iquest;De d&oacute;nde sale?</span>
-        <span class="metodos" id="movOrigenes" role="group" aria-label="Origen de la plata"></span>
-        <input type="text" id="movConcepto" maxlength="120" placeholder="concepto (ej. retiro, pago gas)" aria-label="Concepto de la salida">
-        <input class="monto-mov" id="movMonto" inputmode="numeric" placeholder="$ monto" aria-label="Monto de la salida">
-        <button type="button" class="btn btn-tinta" id="btnRegistrarMov">${ICONOS.mas} Registrar</button>
+      <div class="mov-form-grid2">
+        <input type="text" id="movConcepto" maxlength="120" placeholder="Concepto (ej. Harina Il Molino)" aria-label="Concepto de la salida">
+        <button type="button" class="btn btn-tinta" id="btnRegistrarMov">Registrar</button>
       </div>` : '<p class="sin-movs">Las salidas solo se registran el d&iacute;a en curso.</p>'}
       <div id="movLista"></div>
       <div class="total-salidas">
@@ -3559,19 +3580,18 @@ function renderVentas() {
         espC ? fmt(espEfCaja) : '•••', g ? fmt(g.efectivo_contado) : '&mdash;')}
       ${filaCie('Dat&aacute;fono', espC ? fmt(espC.datafono) : '•••', g ? fmt(g.datafono_contado) : '&mdash;')}
       ${filaCie('Transferencias + Nequi', espC ? fmt(espTrC) : '•••', g ? fmt(g.transferencias_contado) : '&mdash;')}
-      ${filaCie('<b>Total del d&iacute;a (sin la base)</b>', espC ? fmt(espTotalC) : '•••', g ? fmt(g.total_final) : '&mdash;')}
       ${g ? `
       <div class="dif-banner ${difC === 0 ? 'cuadra' : difC > 0 ? 'sobra' : 'falta'}" style="margin-top:12px">${difC === 0 ? 'Caja cuadrada &middot; diferencia $0' : difC > 0 ? 'Sobra ' + fmt(difC) : 'Falta ' + fmt(-difC)}</div>
       <p class="sub-cierre" style="margin:8px 0 0">Guardado a las ${horaDe(g.guardado_en)}${corregido ? ` &middot; corregido tras el conteo ciego de las ${horaDe(ccC.guardado_en)} (era ${fmt(ccC.total_final)})` : ''}</p>
-      <div class="cierre-acciones" style="margin-top:12px;flex-wrap:wrap">
-        <button type="button" class="btn btn-secundario" id="btnCorregirCierre">Corregir cierre</button>
-        <button type="button" class="btn btn-secundario" id="btnVerReparto">Ver reparto</button>
+      <div class="cierre-botones-2">
+        <button type="button" class="btn-fila" id="btnVerReparto" style="justify-content:center;min-height:48px">Ver reparto del cierre</button>
+        <button type="button" class="btn-fila" id="btnCorregirCierre" style="justify-content:center;min-height:48px">Corregir cierre</button>
       </div>` : `
       <p class="sub-cierre" style="margin-top:12px">${ciego
         ? 'Cont&aacute; el efectivo sin saber contra qu&eacute; compara: los esperados se revelan al guardar y el primer conteo queda congelado.'
         : 'Cont&aacute; la plata del d&iacute;a y guard&aacute; el cierre.'}</p>
-      <button type="button" class="btn btn-primario" id="btnAbrirCierre" style="width:100%">${ICONOS.billetes} Contar y cerrar caja</button>`}
-      ${esHoy ? `<button type="button" class="btn-fila" id="btnCuadreCaja" style="margin-top:12px">Cuadre intermedio de turno</button>` : ''}
+      <button type="button" class="btn btn-primario" id="btnAbrirCierre" style="width:100%">${ICONOS.billetes} Contar y cerrar caja</button>
+      ${esHoy ? `<button type="button" class="btn-fila" id="btnCuadreCaja" style="width:100%;justify-content:center;margin-top:10px;color:var(--muted)">Cuadre intermedio de turno</button>` : ''}`}
     </section>
     </div>`;
 
@@ -3582,11 +3602,12 @@ function renderVentas() {
       <h3>Cuadres de turno</h3>
       <p class="sub-cierre">Auditor&iacute;a intermedia: contado vs esperado en ese momento. El sistema la sugiere solo cada ~3 horas cuando la caja est&aacute; tranquila.</p>
       ${esHoy ? (state.cuadresHoy.length ? state.cuadresHoy.map(q => {
-        const d = vd => vd === 0 ? '<span class="dif ok">cuadra</span>'
-          : vd < 0 ? `<span class="dif falta">&minus;${fmt(-vd)}</span>` : `<span class="dif sobra">+${fmt(vd)}</span>`;
+        const estado = q.dif_efectivo === 0 ? 'cuadrado'
+          : q.dif_efectivo > 0 ? 'sobra ' + fmt(q.dif_efectivo) : 'falta ' + fmt(-q.dif_efectivo);
+        const color = q.dif_efectivo === 0 ? 'var(--ok)' : q.dif_efectivo > 0 ? 'var(--naranja-tx)' : 'var(--error)';
         return `<div class="res-fila">
-          <span class="lbl">${horaDe(q.creado_en)} &middot; efectivo ${fmt(q.efectivo_contado)} &middot; transf. ${fmt(q.transferencias_contado)}</span>
-          <span class="val">ef ${d(q.dif_efectivo)} &nbsp; tr ${d(q.dif_transferencias)}</span>
+          <span class="lbl">${horaDe(q.creado_en)} &middot; efectivo contado <b style="font-family:var(--font-mono)">${fmt(q.efectivo_contado)}</b></span>
+          <span class="val" style="color:${color};font-weight:700">${estado}</span>
         </div>`;
       }).join('') : '<p class="sin-movs">Sin cuadres hoy.</p>')
       : '<p class="sin-movs">Los cuadres se registran y consultan el d&iacute;a en curso.</p>'}
@@ -3610,21 +3631,27 @@ function renderVentas() {
     </section>
     </div>`;
 
+  // pill de fecha: "Hoy · 1 de sept" (o solo la fecha en días pasados)
+  const dPill = new Date(state.fechaVentas + 'T12:00:00');
+  const mesCorto = dPill.toLocaleDateString('es-CO', {month: 'short'}).replace('.', '');
+  const fechaPillTxt = (esHoy ? 'Hoy &middot; ' : '') + dPill.getDate() + ' de ' + mesCorto;
+
   cont.innerHTML = `
-    <div class="ventas-head">
-      <h2>${tituloDia}</h2>
-      <span class="resumen">${v.num_facturas || 0} cuenta${v.num_facturas === 1 ? '' : 's'} cobrada${v.num_facturas === 1 ? '' : 's'}</span>
+    <div class="ventas-topbar">
+      <div class="vtabs" role="tablist" aria-label="Secciones de la vista Ventas">
+        <button type="button" class="vtab${tab === 'ventas' ? ' on' : ''}" data-vtab="ventas" role="tab" aria-selected="${tab === 'ventas'}">${ICONOS.cobrar} Ventas</button>
+        <button type="button" class="vtab${tab === 'caja' ? ' on' : ''}" data-vtab="caja" role="tab" aria-selected="${tab === 'caja'}">${ICONOS.billetes} Caja${esHoy && !state.cierre?.cierre ? ' <span class="vtab-badge">sin cierre</span>' : ''}</button>
+        <button type="button" class="vtab${tab === 'auditoria' ? ' on' : ''}" data-vtab="auditoria" role="tab" aria-selected="${tab === 'auditoria'}">${ICONOS.entregado} Auditor&iacute;a${state.excepciones.length ? ` <span class="vtab-badge">${state.excepciones.length}</span>` : ''}</button>
+      </div>
       <span class="ventas-fecha">
         <button type="button" class="btn-dia" id="diaAntes" aria-label="D&iacute;a anterior">&lsaquo;</button>
-        <input type="date" id="fechaVentasSel" value="${state.fechaVentas}" max="${hoy}" aria-label="Ver otro d&iacute;a">
+        <span class="fecha-pill-wrap">
+          <span class="fecha-pill-txt">${fechaPillTxt}</span>
+          <input type="date" id="fechaVentasSel" value="${state.fechaVentas}" max="${hoy}" aria-label="Ver otro d&iacute;a">
+        </span>
         <button type="button" class="btn-dia" id="diaDespues" aria-label="D&iacute;a siguiente" ${esHoy ? 'disabled' : ''}>&rsaquo;</button>
-        ${esHoy ? '' : `<button type="button" class="btn-dia btn-hoy" id="btnVolverHoy">Hoy</button>`}
+        ${esHoy ? '' : `<button type="button" class="btn-link" id="btnVolverHoy" style="margin-left:4px">Volver a hoy</button>`}
       </span>
-    </div>
-    <div class="vtabs" role="tablist" aria-label="Secciones de la vista Ventas">
-      <button type="button" class="vtab${tab === 'ventas' ? ' on' : ''}" data-vtab="ventas" role="tab" aria-selected="${tab === 'ventas'}">${ICONOS.cobrar} Ventas</button>
-      <button type="button" class="vtab${tab === 'caja' ? ' on' : ''}" data-vtab="caja" role="tab" aria-selected="${tab === 'caja'}">${ICONOS.billetes} Caja${esHoy && !state.cierre?.cierre ? ' <span class="vtab-badge">sin cierre</span>' : ''}</button>
-      <button type="button" class="vtab${tab === 'auditoria' ? ' on' : ''}" data-vtab="auditoria" role="tab" aria-selected="${tab === 'auditoria'}">${ICONOS.entregado} Auditor&iacute;a${state.excepciones.length ? ` <span class="vtab-badge">${state.excepciones.length}</span>` : ''}</button>
     </div>
     ${tab === 'ventas' ? htmlVentas : tab === 'caja' ? htmlCaja : htmlAuditoria}`;
 
@@ -3634,11 +3661,18 @@ function renderVentas() {
       if (state.ventasTab !== b.dataset.vtab) { state.ventasTab = b.dataset.vtab; renderVentas(); }
     });
   });
+  // tocar un chip activo lo apaga (filtro nulo = sin filtrar)
   cont.querySelectorAll('[data-fm]').forEach(b => {
-    b.addEventListener('click', () => { state.filtroMetodo = b.dataset.fm; renderVentas(); });
+    b.addEventListener('click', () => {
+      state.filtroMetodo = state.filtroMetodo === b.dataset.fm ? null : b.dataset.fm;
+      renderVentas();
+    });
   });
   cont.querySelectorAll('[data-fmesa]').forEach(b => {
-    b.addEventListener('click', () => { state.filtroMesa = b.dataset.fmesa; renderVentas(); });
+    b.addEventListener('click', () => {
+      state.filtroMesa = state.filtroMesa === b.dataset.fmesa ? null : b.dataset.fmesa;
+      renderVentas();
+    });
   });
 
   // auditoría: export
@@ -3694,58 +3728,25 @@ function renderVentas() {
   if (btnVR) btnVR.addEventListener('click', mostrarResumenCierre);
   $('#btnApertura').addEventListener('click', abrirModalApertura);
 
-  // retiros y pagos: lista, selector de tipo y registro (registro solo el día en curso)
+  // retiros y pagos: lista en una línea, selects de tipo/origen y registro
+  // (registro solo el día en curso)
   const movs = state.movimientos?.movimientos || [];
-  $('#movLista').innerHTML = movs.length ? movs.map(m => {
-    const hora = new Date(m.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
-    return `<div class="mov-fila">
-      <span class="hora">${hora}</span>
-      <span><span class="chip">${esc(m.tipo)}</span><span class="chip chip-origen">${esc(m.origen || 'Efectivo')}</span></span>
-      <span class="concepto">${esc(m.concepto) || '<span style="color:var(--muted)">sin concepto</span>'}</span>
-      <span class="monto">&minus;${fmt(m.monto)}</span>
-      ${esHoy ? `<button type="button" class="btn-borrar" data-mov="${m.id}" data-monto="${m.monto}" aria-label="Eliminar salida de ${fmt(m.monto)}">${ICONOS.borrar}</button>` : '<span></span>'}
-    </div>`;
-  }).join('') : `<p class="sin-movs">Sin salidas registradas ${esHoy ? 'hoy' : 'ese día'}.</p>`;
+  $('#movLista').innerHTML = movs.length ? movs.map(m => `
+    <div class="mov-row">
+      <span><b>${esc(m.tipo)}</b> &middot; ${esc(m.concepto) || 'sin concepto'} <span class="mut">(${esc(m.origen || 'Efectivo')}, ${horaDe(m.creado_en)})</span></span>
+      <span class="mov-row-right">
+        <span class="monto">&minus;${fmt(m.monto)}</span>
+        ${esHoy ? `<button type="button" class="btn-x" data-mov="${m.id}" data-monto="${m.monto}" aria-label="Eliminar salida de ${fmt(m.monto)}">&times;</button>` : ''}
+      </span>
+    </div>`).join('') : `<p class="sin-movs">Sin salidas registradas ${esHoy ? 'hoy' : 'ese día'}.</p>`;
   cont.querySelectorAll('[data-mov]').forEach(b => {
     b.addEventListener('click', () => eliminarMovimiento(Number(b.dataset.mov), Number(b.dataset.monto) || 0));
   });
   if (esHoy) {
     if (!state.movTipo) state.movTipo = 'Retiro';
-    const tiposCont = $('#movTipos');
-    for (const t of ['Retiro', 'Pago proveedor', 'Gasto', 'Propinas']) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'metodo' + (state.movTipo === t ? ' on' : '');
-      b.textContent = t;
-      b.setAttribute('aria-pressed', String(state.movTipo === t));
-      b.addEventListener('click', () => {
-        state.movTipo = t;
-        tiposCont.querySelectorAll('.metodo').forEach(x => {
-          const on = x.textContent === t;
-          x.classList.toggle('on', on);
-          x.setAttribute('aria-pressed', String(on));
-        });
-      });
-      tiposCont.appendChild(b);
-    }
     if (!state.movOrigen) state.movOrigen = 'Efectivo';
-    const origCont = $('#movOrigenes');
-    for (const o of ['Efectivo', 'Transferencia']) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'metodo' + (state.movOrigen === o ? ' on' : '');
-      b.textContent = o;
-      b.setAttribute('aria-pressed', String(state.movOrigen === o));
-      b.addEventListener('click', () => {
-        state.movOrigen = o;
-        origCont.querySelectorAll('.metodo').forEach(x => {
-          const on = x.textContent === o;
-          x.classList.toggle('on', on);
-          x.setAttribute('aria-pressed', String(on));
-        });
-      });
-      origCont.appendChild(b);
-    }
+    $('#movTipo').addEventListener('change', e => { state.movTipo = e.target.value; });
+    $('#movOrigen').addEventListener('change', e => { state.movOrigen = e.target.value; });
     const movMonto = $('#movMonto');
     movMonto.addEventListener('input', () => { movMonto.value = fmtInputPrecio(movMonto.value); });
     movMonto.addEventListener('keydown', e => { if (e.key === 'Enter') registrarMovimiento(); });
