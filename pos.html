@@ -392,7 +392,7 @@ input, select { font:inherit; color:inherit; }
 
 /* ---------- lienzo principal ---------- */
 main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
-#vistaVentas { max-width:1080px; }
+#vistaVentas { max-width:1080px; padding-top:20px; }
 .hoja {
   background:var(--card); border:1.5px solid var(--tinta);
   border-radius:var(--radius);
@@ -1071,7 +1071,7 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; }
 <main>
   <section id="vistaTablero" aria-label="Tablero de mesas y pedidos"></section>
   <section id="vistaFactura" class="hoja" hidden></section>
-  <section id="vistaVentas" class="hoja" hidden></section>
+  <section id="vistaVentas" hidden></section>
 </main>
 
 <div id="toast" role="status" aria-live="polite"></div>
