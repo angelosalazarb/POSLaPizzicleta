@@ -42,7 +42,13 @@ libre); precios y tickets térmicos en IBM Plex Mono para que las cifras alineen
   sale completa).
 - **Descuento** por cuenta en $ o %, el total nunca baja de 0. **Propina**
   en % (típico 10) o $ fijo. **Método de pago** (Efectivo / Datáfono / Nequi /
-  Transferencia, Efectivo por defecto). Los tres viven como controles
+  **Transf. Bold** / **Transf. Bancolombia**, Efectivo por defecto): las
+  transferencias se piden por cuenta de destino porque el QR de Bold cae en Bold
+  (junto con el datáfono) y el resto en Bancolombia — sin esa separación el
+  cierre no se puede cuadrar contra cada cuenta. El método viejo
+  "Transferencia" se sigue aceptando en las cuentas ya cobradas y cuenta como
+  Bancolombia; aparece en filtros y desglose solo en los días que lo usaron.
+  Los tres viven como controles
   permanentes en el panel lateral mientras se arma el pedido (auto-guardado) —
   sale en el ticket, el export CSV y el desglose de "Ventas de hoy".
 - **Modal de cobro**: al tocar "Cobrar e imprimir" se abre un modal de
@@ -64,7 +70,9 @@ libre); precios y tickets térmicos en IBM Plex Mono para que las cifras alineen
   pestaña, y **export CSV** por rango de fechas, compatible con Excel para el
   consolidado TERRA).
 - **Cierre de caja** (al final de Ventas de hoy): se digita la base de inicio y
-  lo contado en efectivo, datáfono y transferencias (incluye Nequi); el botón
+  lo contado en efectivo, datáfono, **Transf. Bold (QR)** y **Transf.
+  Bancolombia + Nequi** — una casilla por cuenta, que es como se cuadra contra
+  la app de Bold y la del banco por separado; el botón
   de billete junto al campo de efectivo abre el **conteo por denominaciones**
   (billetes $2.000–$100.000 y monedas $50–$1.000): se pone la cantidad de cada
   una, muestra subtotales y el total, y "Usar total" llena el campo; el conteo
@@ -73,6 +81,20 @@ libre); precios y tickets térmicos en IBM Plex Mono para que las cifras alineen
   "cuadra", falta (rojo) o sobra (naranja), calcula el total final del día sin
   la base, y **Guardar cierre** deja el registro del día en la base de datos
   (uno por fecha; volver a guardar lo actualiza).
+- **Resumen del cierre** (modal al guardar): además de lo contado y el reparto
+  de la plata, trae **dos tablas de venta/propina por método**. La primera,
+  *Lo que se recibió según el POS*, es la clasificación que marcó la caja. La
+  segunda, *Para la contabilidad (sobre lo contado)*, se arma con la plata que
+  de verdad entró: `venta = entró − propina`, donde `entró` es el efectivo
+  contado sin la base más las salidas, el datáfono contado y las transferencias
+  contadas. **Esa segunda tabla es la que se asienta en el libro** — el desglose
+  de propinas es exacto (el POS las guarda por factura) y la venta es el resto.
+  Las filas son una por cuenta de destino: Efectivo, Datáfono, Transf. Bold y
+  Transf. Banco + Nequi, que mapean 1:1 a Caja local, Bold, Bold y Bancolombia.
+  Cuando las dos tablas no coinciden en la venta aparece un aviso: significa que
+  alguna cuenta se cobró por un medio y quedó marcada por otro, típico de
+  reaperturas con cambio de método. El aviso sale solo cuando los desvíos por
+  método se cancelan entre sí (un cruce real) y no por un descuadre pequeño.
 - **Corregir una cuenta ya cobrada**: el botón de lápiz en Ventas de hoy la
   reabre como pestaña (sale del total del día mientras tanto), se edita lo que
   sea (ítems, descuento, propina, método) y se vuelve a cobrar con el mismo

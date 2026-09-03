@@ -971,12 +971,37 @@ main { padding:0 clamp(16px, 4vw, 36px) 48px; max-width:1560px; margin:0 auto; }
 }
 .res-fila .lbl { font-size:13.5px; color:var(--muted); }
 .res-fila .val { font-family:var(--font-mono); font-weight:600; white-space:nowrap; }
+.res-fila .val.ok { color:var(--ok); }
+.res-fila .val.falta { color:var(--error); }
+.res-fila .val.sobra { color:var(--naranja-tx); }
 .res-fila.res-destacada { border-bottom:none; margin:2px -10px 0; padding:9px 10px; border-radius:10px; background:var(--naranja-dim); }
 .res-fila.res-destacada .lbl { color:var(--naranja-tx); font-weight:700; }
 .res-fila.res-destacada .val { color:var(--naranja-tx); font-size:16px; }
 .res-fila.res-propinas { background:var(--azul-dim); border-bottom:none; margin:2px -10px 0; padding:9px 10px; border-radius:10px; }
 .res-fila.res-propinas .lbl { color:var(--azul-tx); font-weight:700; }
 .res-fila.res-propinas .val { color:var(--azul-tx); }
+
+/* tabla venta/propina por método dentro del resumen del cierre */
+.res-tabla { width:100%; border-collapse:collapse; margin:2px 0 4px; }
+.res-tabla th, .res-tabla td { padding:6px 0; border-bottom:1px dashed var(--linea); }
+.res-tabla thead th {
+  font-size:10.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); text-align:right; padding-bottom:5px;
+}
+.res-tabla thead th:first-child { text-align:left; }
+.res-tabla td { font-family:var(--font-mono); font-size:13.5px; text-align:right; white-space:nowrap; }
+.res-tabla td:first-child { font-family:inherit; font-size:13.5px; color:var(--muted); text-align:left; }
+.res-tabla td.col-total { font-weight:700; }
+.res-tabla tfoot td { border-bottom:none; font-weight:700; padding-top:8px; }
+.res-tabla tfoot td:first-child { color:var(--tinta); font-weight:700; }
+.res-tabla .col-prop { color:var(--azul-tx); }
+.res-nota {
+  font-size:12px; color:var(--muted); line-height:1.45; padding:8px 10px; margin:6px -10px 0;
+  border-radius:10px; background:var(--naranja-dim); color:var(--naranja-tx);
+}
+@media (max-width:520px) {
+  .res-tabla thead th, .res-tabla td { font-size:12.5px; }
+}
 
 .modal-acciones { display:flex; gap:10px; padding:0 22px 20px; flex-wrap:wrap; }
 .modal-acciones .btn-limpiar { margin-left:auto; color:var(--muted); font-weight:600; min-height:44px; padding:0 14px; border-radius:100px; }
@@ -1148,7 +1173,16 @@ const fmtInputPrecio = s => {
   return d ? Number(d).toLocaleString('es-CO') : '';
 };
 
-const METODOS_PAGO = ['Efectivo', 'Datáfono', 'Nequi', 'Transferencia'];
+// Las transferencias se piden por cuenta de destino: el QR de Bold cae en Bold
+// (con el datáfono) y el resto en Bancolombia; así el cierre cuadra contra cada
+// cuenta. 'Transferencia' es el método viejo: se sigue mostrando en los días que
+// ya lo usaron y cuenta como Bancolombia.
+const METODOS_PAGO = ['Efectivo', 'Datáfono', 'Nequi', 'Transf. Bold', 'Transf. Bancolombia'];
+const METODO_TRANSFERENCIA_LEGADO = 'Transferencia';
+// métodos a mostrar en filtros y desglose de un día: los fijos + el viejo si ese día lo usó
+const metodosDelDia = porMetodo =>
+  (porMetodo || {})[METODO_TRANSFERENCIA_LEGADO]
+    ? [...METODOS_PAGO, METODO_TRANSFERENCIA_LEGADO] : METODOS_PAGO;
 const TIPOS_MOVIMIENTO = ['Retiro', 'Pago proveedor', 'Gasto', 'Propinas'];
 const ORIGENES_MOVIMIENTO = ['Efectivo', 'Transferencia'];
 
@@ -3048,9 +3082,16 @@ async function cargarCierre() {
     if (state.cierreFormFecha !== fecha) {
       const c = cierre.cierre;
       if (c) {
+        // cierres anteriores a la separación Bold/Bancolombia solo tienen el
+        // total: se precarga en Bancolombia, que es donde caían entonces
+        const trBold = c.transferencias_bold_contado || 0;
+        const trBanco = c.transferencias_banco_contado
+          || ((trBold || 0) ? 0 : (c.transferencias_contado || 0));
         state.cierreForm = {
           base: c.base, efectivo: c.efectivo_contado,
-          datafono: c.datafono_contado, transferencias: c.transferencias_contado,
+          datafono: c.datafono_contado,
+          transferenciasBold: trBold, transferenciasBanco: trBanco,
+          transferencias: trBold + trBanco,
           baseSiguiente: c.base_siguiente ?? c.base
         };
         state.conteoEfectivo = (c.conteo_efectivo && Object.keys(c.conteo_efectivo).length)
@@ -3060,7 +3101,7 @@ async function cargarCierre() {
       } else {
         // base fija: arranca con la base que quedó del cierre anterior
         const sug = cierre.base_sugerida || 0;
-        state.cierreForm = {base: sug, efectivo:0, datafono:0, transferencias:0, baseSiguiente: sug};
+        state.cierreForm = {base: sug, efectivo:0, datafono:0, transferenciasBold:0, transferenciasBanco:0, transferencias:0, baseSiguiente: sug};
         state.conteoEfectivo = null;
         state.conteoBaseSiguiente = null;
       }
@@ -3072,20 +3113,30 @@ async function cargarCierre() {
 
 function calcularCierre() {
   const f = state.cierreForm || {base:0, efectivo:0, datafono:0, transferencias:0};
-  const esp = state.cierre?.esperados || {efectivo:0, datafono:0, transferencias:0, salidas:0};
+  const esp = state.cierre?.esperados
+    || {efectivo:0, datafono:0, transferencias:0, transferencias_bold:0, transferencias_banco:0, salidas:0};
   // cada salida se descuenta de donde salió la plata (efectivo o transferencia)
   const salEf = esp.salidas_efectivo ?? esp.salidas ?? 0;
   const salTr = esp.salidas_transferencias || 0;
   // lo que debería haber en la caja: base + ventas en efectivo − salidas en efectivo
   const espEfCaja = (f.base||0) + esp.efectivo - salEf;
+  // las salidas por transferencia salen de Bancolombia
+  const espTrBold = esp.transferencias_bold || 0;
+  const espTrBanco = (esp.transferencias_banco || 0) - salTr;
   const espTr = esp.transferencias - salTr;
-  const totalFinal = ((f.efectivo||0) - (f.base||0)) + (f.datafono||0) + (f.transferencias||0);
+  const trBold = f.transferenciasBold || 0;
+  const trBanco = f.transferenciasBanco || 0;
+  const trTotal = (trBold || trBanco) ? trBold + trBanco : (f.transferencias || 0);
+  const totalFinal = ((f.efectivo||0) - (f.base||0)) + (f.datafono||0) + trTotal;
   const esperadoTotal = esp.efectivo + esp.datafono + esp.transferencias - salEf - salTr;
   return {
-    f, esp, espEfCaja, espTr, salEf, salTr,
+    f, esp, espEfCaja, espTr, espTrBold, espTrBanco, salEf, salTr,
+    trBold, trBanco, trTotal,
     difEf: (f.efectivo||0) - espEfCaja,
     difDat: (f.datafono||0) - esp.datafono,
-    difTr: (f.transferencias||0) - espTr,
+    difTrBold: trBold - espTrBold,
+    difTrBanco: trBanco - espTrBanco,
+    difTr: trTotal - espTr,
     totalFinal, esperadoTotal,
     difTotal: totalFinal - esperadoTotal
   };
@@ -3151,8 +3202,10 @@ function abrirModalCierre() {
             </span></label>
           <label>Dat&aacute;fono (cierre del voucher)
             <input id="mcDat" inputmode="numeric" placeholder="0" value="${f.datafono ? fmtInputPrecio(String(f.datafono)) : ''}"></label>
-          <label>Transferencias + Nequi (app del banco)
-            <input id="mcTr" inputmode="numeric" placeholder="0" value="${f.transferencias ? fmtInputPrecio(String(f.transferencias)) : ''}"></label>
+          <label>Transf. Bold &mdash; QR (app de Bold)
+            <input id="mcTrBold" inputmode="numeric" placeholder="0" value="${f.transferenciasBold ? fmtInputPrecio(String(f.transferenciasBold)) : ''}"></label>
+          <label>Transf. Bancolombia + Nequi (app del banco)
+            <input id="mcTrBanco" inputmode="numeric" placeholder="0" value="${f.transferenciasBanco ? fmtInputPrecio(String(f.transferenciasBanco)) : ''}"></label>
         </div>
       </div>
       <div class="modal-acciones">
@@ -3187,7 +3240,7 @@ function abrirModalCierre() {
       pintar();
     });
   });
-  for (const id of ['mcBase', 'mcBaseSig', 'mcDat', 'mcTr']) {
+  for (const id of ['mcBase', 'mcBaseSig', 'mcDat', 'mcTrBold', 'mcTrBanco']) {
     const inp = overlay.querySelector('#' + id);
     inp.addEventListener('input', () => { inp.value = fmtInputPrecio(inp.value); });
   }
@@ -3196,13 +3249,15 @@ function abrirModalCierre() {
   overlay.querySelector('#mcGuardar').addEventListener('click', async () => {
     const val = id => Number(soloDigitos(overlay.querySelector('#' + id).value)) || 0;
     const efectivo = totalConteo();
-    if (!efectivo && !val('mcDat') && !val('mcTr')) {
+    const trBold = val('mcTrBold'), trBanco = val('mcTrBanco');
+    if (!efectivo && !val('mcDat') && !trBold && !trBanco) {
       toast('Contá algo antes de guardar el cierre', true);
       return;
     }
     state.cierreForm = {
       base: val('mcBase'), efectivo, datafono: val('mcDat'),
-      transferencias: val('mcTr'), baseSiguiente: val('mcBaseSig')
+      transferenciasBold: trBold, transferenciasBanco: trBanco,
+      transferencias: trBold + trBanco, baseSiguiente: val('mcBaseSig')
     };
     state.conteoEfectivo = {...conteo};
     const btn = overlay.querySelector('#mcGuardar');
@@ -3635,7 +3690,10 @@ async function guardarCierre() {
   state.cierre = await api('/api/cierre', {method:'POST', body:{
     fecha: state.fechaVentas,
     base: f.base||0, efectivo_contado: f.efectivo||0,
-    datafono_contado: f.datafono||0, transferencias_contado: f.transferencias||0,
+    datafono_contado: f.datafono||0,
+    transferencias_bold_contado: f.transferenciasBold||0,
+    transferencias_banco_contado: f.transferenciasBanco||0,
+    transferencias_contado: f.transferencias||0,
     base_siguiente: f.baseSiguiente ?? f.base ?? 0,
     conteo_efectivo: state.conteoEfectivo || {},
     conteo_base_siguiente: state.conteoBaseSiguiente || {}
@@ -3663,6 +3721,55 @@ function mostrarResumenCierre() {
 
   const fila = (lbl, val, cls = '') =>
     `<div class="res-fila${cls ? ' ' + cls : ''}"><span class="lbl">${lbl}</span><span class="val">${val}</span></div>`;
+
+  // Desglose venta/propina por método. Dos vistas de lo mismo:
+  //  · segunPOS: como quedó marcado en las cuentas.
+  //  · contable: sobre lo que de verdad entró (lo contado). Es la que se
+  //    asienta en el libro; ver "El reparto del cierre manda, no el método del
+  //    POS" en administracion/contabilidad/README.md.
+  const propEf = esp.propina_efectivo || 0;
+  const propDat = esp.propina_datafono || 0;
+  const propTrBold = esp.propina_transferencias_bold || 0;
+  const propTrBanco = esp.propina_transferencias_banco || 0;
+  // "entró" = lo contado devuelto a bruto: el efectivo sin la base y con las
+  // salidas que se pagaron de ahí; las salidas por transferencia salen de Bancolombia
+  const entroEf = ((f.efectivo || 0) - (f.base || 0)) + c.salEf;
+  const entroDat = f.datafono || 0;
+  const entroTrBold = c.trBold;
+  const entroTrBanco = c.trBanco + c.salTr;
+  const metodos = [
+    ['Efectivo', esp.venta_efectivo || 0, propEf, esp.efectivo || 0, entroEf - propEf, entroEf],
+    ['Dat&aacute;fono', esp.venta_datafono || 0, propDat, esp.datafono || 0, entroDat - propDat, entroDat],
+    ['Transf. Bold', esp.venta_transferencias_bold || 0, propTrBold, esp.transferencias_bold || 0, entroTrBold - propTrBold, entroTrBold],
+    ['Transf. Banco + Nequi', esp.venta_transferencias_banco || 0, propTrBanco, esp.transferencias_banco || 0, entroTrBanco - propTrBanco, entroTrBanco],
+  ];
+  const suma = i => metodos.reduce((s, m) => s + m[i], 0);
+  // Desvío por medio = lo que entró de verdad − lo que dice el POS. Si los
+  // desvíos se cancelan entre sí, la plata del día está completa y lo único
+  // mal clasificado es POR CUÁL MEDIO entró.
+  const desvios = metodos.map(m => m[5] - m[3]);
+  const sumaAbs = desvios.reduce((s, d) => s + Math.abs(d), 0);
+  const neto = desvios.reduce((s, d) => s + d, 0);
+  const hayCruce = sumaAbs - Math.abs(neto) > 1000;
+  const signo = v => (v > 0 ? '+' : '&minus;') + fmt(Math.abs(v));
+  const filasDesvio = metodos
+    .map((m, i) => [m[0], desvios[i]])
+    .filter(([, d]) => d !== 0)
+    .map(([lbl, d]) => `<div class="res-fila"><span class="lbl">${lbl}</span>
+      <span class="val ${d > 0 ? 'sobra' : 'falta'}">${signo(d)}</span></div>`)
+    .join('');
+  const tabla = (cabecera, colVenta, colProp, colTotal) => `
+    <table class="res-tabla">
+      <thead><tr><th>M&eacute;todo</th><th>Venta</th><th>Propina</th><th>${cabecera}</th></tr></thead>
+      <tbody>${metodos.map(m => `<tr>
+        <td>${m[0]}</td><td>${fmt(m[colVenta])}</td>
+        <td class="col-prop">${m[colProp] ? fmt(m[colProp]) : '&mdash;'}</td>
+        <td class="col-total">${fmt(m[colTotal])}</td></tr>`).join('')}</tbody>
+      <tfoot><tr>
+        <td>Total</td><td>${fmt(suma(colVenta))}</td>
+        <td class="col-prop">${fmt(suma(colProp))}</td>
+        <td>${fmt(suma(colTotal))}</td></tr></tfoot>
+    </table>`;
   const difTxt = c.difTotal === 0
     ? '<span class="dif ok">cuadra</span>'
     : c.difTotal < 0
@@ -3683,14 +3790,28 @@ function mostrarResumenCierre() {
         <div class="den-grupo">Lo que se cont&oacute;</div>
         ${fila('Efectivo en caja (incluye la base)', fmt(f.efectivo || 0))}
         ${fila('Dat&aacute;fono', fmt(f.datafono || 0))}
-        ${fila('Transferencias + Nequi', fmt(f.transferencias || 0))}
+        ${fila('Transf. Bold (QR)', fmt(c.trBold))}
+        ${fila('Transf. Bancolombia + Nequi', fmt(c.trBanco))}
 
         <div class="den-grupo">Lo que se recibi&oacute; seg&uacute;n el POS</div>
-        ${fila('Efectivo (venta + propina)', fmt(esp.efectivo || 0))}
-        ${fila('Dat&aacute;fono (venta + propina)', fmt(esp.datafono || 0))}
-        ${fila('Transferencias + Nequi (venta + propina)', fmt(esp.transferencias || 0))}
+        ${tabla('Total', 1, 2, 3)}
         ${c.salEf ? fila('Salidas en efectivo (retiros y pagos)', '&minus;' + fmt(c.salEf)) : ''}
         ${c.salTr ? fila('Salidas por transferencia', '&minus;' + fmt(c.salTr)) : ''}
+
+        <div class="den-grupo">Para la contabilidad (sobre lo contado)</div>
+        ${tabla('Entr&oacute;', 4, 2, 5)}
+        ${hayCruce ? `
+        <div class="den-grupo">Por qu&eacute; no coinciden</div>
+        ${filasDesvio}
+        <div class="res-fila"><span class="lbl"><b>Neto del d&iacute;a</b></span>
+          <span class="val ${neto === 0 ? 'ok' : neto > 0 ? 'sobra' : 'falta'}">${neto === 0 ? 'cuadra' : signo(neto)}</span></div>
+        <p class="res-nota"><strong>La plata del d&iacute;a est&aacute; completa</strong> (el neto es de
+          solo ${fmt(Math.abs(neto))}). Lo que no cuadra es <strong>por cu&aacute;l medio entr&oacute;</strong>:
+          los desv&iacute;os de arriba se cancelan entre s&iacute;. Suele pasar cuando el dat&aacute;fono
+          rechaza y la cuenta se termina pagando en efectivo, cuando una cuenta se paga entre dos medios,
+          o cuando lo que se digit&oacute; del dat&aacute;fono no es el total del d&iacute;a de la app.
+          <strong>En el libro manda esta tabla</strong>, no la del POS: la plata est&aacute; donde dice
+          "Entr&oacute;".</p>` : ''}
 
         <div class="den-grupo">Total de dineros del d&iacute;a</div>
         ${fila('Total contado (sin la base)', fmt(c.totalFinal))}
@@ -3703,8 +3824,8 @@ function mostrarResumenCierre() {
         <div class="den-grupo">Reparto de la plata</div>
         ${fila('Queda en Caja local (base para el d&iacute;a siguiente)', fmt(baseQueda))}
         ${fila('Va a Caja gerencia (efectivo)', fmt(aGerencia), 'res-destacada')}
-        ${fila('Qued&oacute; en la cuenta (transferencias + Nequi)', fmt(f.transferencias || 0))}
-        ${fila('Dat&aacute;fono (llega a la cuenta del banco)', fmt(f.datafono || 0))}
+        ${fila('Llega a Bold (dat&aacute;fono + QR)', fmt((f.datafono || 0) + c.trBold))}
+        ${fila('Llega a Bancolombia (transferencias + Nequi)', fmt(c.trBanco))}
       </div>
       <div class="modal-acciones">
         <button type="button" class="btn btn-primario" id="btnResumenListo">Listo</button>
@@ -3764,11 +3885,11 @@ function renderVentas() {
   const propPendiente = propRecibidas - propPagadas;
 
   // --- pestaña Ventas: filtros (listas fijas), lista-tarjeta, desglose en
-  // tarjetas (4 métodos siempre) y propinas ---
+  // tarjetas (un método por cuenta de destino) y propinas ---
   const htmlVentas = `
     ${v.facturas.length ? `<div class="filtros-ventas">
       <span class="metodos" role="group" aria-label="Filtrar por m&eacute;todo de pago">
-        ${METODOS_PAGO.map(m => `<button type="button" class="metodo${state.filtroMetodo === m ? ' on' : ''}" data-fm="${esc(m)}" aria-pressed="${state.filtroMetodo === m}">${esc(m)}</button>`).join('')}
+        ${metodosDelDia(v.por_metodo).map(m => `<button type="button" class="metodo${state.filtroMetodo === m ? ' on' : ''}" data-fm="${esc(m)}" aria-pressed="${state.filtroMetodo === m}">${esc(m)}</button>`).join('')}
       </span>
       <span class="chip-sep"></span>
       <span class="metodos" role="group" aria-label="Filtrar por canal">
@@ -3778,7 +3899,7 @@ function renderVentas() {
     ${filtroActivo ? `<p class="sub-cierre" style="margin-bottom:10px">Total filtrado (${facturasFiltradas.length} de ${v.facturas.length}): <b style="font-family:var(--font-mono);color:var(--tinta)">${ciego && state.filtroMetodo ? '•••' : fmt(totalFiltrado)}</b></p>` : ''}
     ${filas ? `<div class="vlista">${filas}</div>` : `<p class="sin-ventas">${v.facturas.length ? 'Ninguna venta coincide con el filtro.' : (esHoy ? 'Todavía no hay ventas cerradas hoy.' : 'Sin ventas cerradas ese día.')}</p>`}
     <div class="desglose-cards">
-      ${METODOS_PAGO.map(m => {
+      ${metodosDelDia(v.por_metodo).map(m => {
         const d = (v.por_metodo || {})[m] || {total: 0, num: 0};
         return `<div class="dcard">
           <div class="lbl">${m}</div>
@@ -3799,7 +3920,6 @@ function renderVentas() {
   const baseCierre = g ? g.base
     : (state.cierreForm?.base || state.cierre?.base_sugerida || 0);
   const espEfCaja = espC ? baseCierre + espC.efectivo - (espC.salidas_efectivo ?? espC.salidas ?? 0) : null;
-  const espTrC = espC ? espC.transferencias - (espC.salidas_transferencias || 0) : null;
   const filaCie = (lbl, e, c) => `<div class="cie-fila"><span>${lbl}</span><span class="der"><span class="esperado">esperado ${e}</span><span class="contado">${c}</span></span></div>`;
   const ccC = g?.conteo_ciego;
   const corregido = !!(g && ccC && ccC.guardado_en && (
@@ -3841,7 +3961,10 @@ function renderVentas() {
       ${filaCie(`Efectivo en caja <span style="color:var(--muted)">(incluye base ${fmt(baseCierre)})</span>`,
         espC ? fmt(espEfCaja) : '•••', g ? fmt(g.efectivo_contado) : '&mdash;')}
       ${filaCie('Dat&aacute;fono', espC ? fmt(espC.datafono) : '•••', g ? fmt(g.datafono_contado) : '&mdash;')}
-      ${filaCie('Transferencias + Nequi', espC ? fmt(espTrC) : '•••', g ? fmt(g.transferencias_contado) : '&mdash;')}
+      ${filaCie('Transf. Bold (QR)', espC ? fmt(espC.transferencias_bold || 0) : '•••',
+        g ? fmt(g.transferencias_bold_contado || 0) : '&mdash;')}
+      ${filaCie('Transf. Bancolombia + Nequi', espC ? fmt((espC.transferencias_banco || 0) - (espC.salidas_transferencias || 0)) : '•••',
+        g ? fmt(g.transferencias_banco_contado || (g.transferencias_bold_contado ? 0 : g.transferencias_contado)) : '&mdash;')}
       ${g ? `
       <div class="dif-banner ${difC === 0 ? 'cuadra' : difC > 0 ? 'sobra' : 'falta'}" style="margin-top:12px">${difC === 0 ? 'Caja cuadrada &middot; diferencia $0' : difC > 0 ? 'Sobra ' + fmt(difC) : 'Falta ' + fmt(-difC)}</div>
       <p class="sub-cierre" style="margin:8px 0 0">Guardado a las ${horaDe(g.guardado_en)}${corregido ? ` &middot; corregido tras el conteo ciego de las ${horaDe(ccC.guardado_en)} (era ${fmt(ccC.total_final)})` : ''}</p>

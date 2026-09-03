@@ -13,3 +13,6 @@ __pycache__/
 
 # Respaldos puntuales de la carta
 data/menu.json.bak-*
+
+# Documentación local que no va al repo
+PROMPT-SISTEMA.md

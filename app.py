@@ -146,9 +146,19 @@ MIGRACIONES = [
     "ALTER TABLE facturas ADD COLUMN archivada INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE items ADD COLUMN entregado INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE cierres ADD COLUMN conteo_ciego TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE cierres ADD COLUMN transferencias_bold_contado INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE cierres ADD COLUMN transferencias_banco_contado INTEGER NOT NULL DEFAULT 0",
 ]
 
-METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi", "Transferencia")
+# Las transferencias se piden por cuenta de destino: el QR de Bold cae en Bold
+# (junto con el datáfono) y el resto en Bancolombia. Sin esa separación el cierre
+# no se puede cuadrar contra cada cuenta — ver el README de contabilidad.
+METODOS_PAGO = ("Efectivo", "Datáfono", "Nequi",
+                "Transf. Bold", "Transf. Bancolombia")
+# "Transferencia" es el método viejo (antes de separar Bold de Bancolombia): se
+# sigue aceptando para no romper las cuentas ya cobradas y cuenta como Bancolombia.
+METODO_TRANSFERENCIA_LEGADO = "Transferencia"
+METODOS_VALIDOS = METODOS_PAGO + (METODO_TRANSFERENCIA_LEGADO,)
 TIPOS_MOVIMIENTO = ("Retiro", "Pago proveedor", "Gasto", "Propinas")
 ORIGENES_MOVIMIENTO = ("Efectivo", "Transferencia")  # de dónde sale la plata
 
@@ -414,7 +424,7 @@ def guardar_factura(fid):
         propina_valor = 0
 
     metodo_pago = data.get("metodo_pago", "Efectivo")
-    if metodo_pago not in METODOS_PAGO:
+    if metodo_pago not in METODOS_VALIDOS:
         metodo_pago = "Efectivo"
 
     subtotal, total, _, propina = calcular_totales(
@@ -823,13 +833,22 @@ def guardar_apertura():
 
 
 def _esperados_dia(db, fecha):
-    """Dinero recibido por método (venta + propina) de las cerradas del día."""
+    """Dinero recibido por método de las cerradas del día.
+
+    Devuelve el total por método (venta + propina) y además el desglose
+    venta/propina de cada uno: la contabilidad asienta la venta y la propina en
+    filas distintas, y la propina es la única cifra por método en la que se
+    puede confiar (el POS la guarda por factura). Ver el README de contabilidad.
+    """
     rows = db.execute(
-        "SELECT metodo_pago, SUM(total + propina) AS t FROM facturas"
+        "SELECT metodo_pago, SUM(total + propina) AS t, SUM(total) AS v,"
+        " SUM(propina) AS p FROM facturas"
         " WHERE estado='cerrada' AND date(fecha_apertura)=? GROUP BY metodo_pago",
         (fecha,),
     ).fetchall()
     por = {r["metodo_pago"] or "Efectivo": r["t"] or 0 for r in rows}
+    ventas = {r["metodo_pago"] or "Efectivo": r["v"] or 0 for r in rows}
+    props = {r["metodo_pago"] or "Efectivo": r["p"] or 0 for r in rows}
     sal_rows = db.execute(
         "SELECT origen, COALESCE(SUM(monto), 0) AS t FROM movimientos"
         " WHERE fecha = ? GROUP BY origen", (fecha,),
@@ -837,14 +856,33 @@ def _esperados_dia(db, fecha):
     sal = {r["origen"] or "Efectivo": r["t"] or 0 for r in sal_rows}
     sal_efectivo = sal.get("Efectivo", 0)
     sal_transf = sal.get("Transferencia", 0)
-    return {
+    bold = lambda d: d.get("Transf. Bold", 0)
+    # Nequi y las transferencias del método viejo caen en Bancolombia
+    banco = lambda d: (d.get("Transf. Bancolombia", 0) + d.get("Nequi", 0)
+                       + d.get(METODO_TRANSFERENCIA_LEGADO, 0))
+    out = {
         "efectivo": por.get("Efectivo", 0),
         "datafono": por.get("Datáfono", 0),
-        "transferencias": por.get("Nequi", 0) + por.get("Transferencia", 0),
+        "transferencias_bold": bold(por),
+        "transferencias_banco": banco(por),
+        "venta_efectivo": ventas.get("Efectivo", 0),
+        "venta_datafono": ventas.get("Datáfono", 0),
+        "venta_transferencias_bold": bold(ventas),
+        "venta_transferencias_banco": banco(ventas),
+        "propina_efectivo": props.get("Efectivo", 0),
+        "propina_datafono": props.get("Datáfono", 0),
+        "propina_transferencias_bold": bold(props),
+        "propina_transferencias_banco": banco(props),
         "salidas": sal_efectivo + sal_transf,
         "salidas_efectivo": sal_efectivo,
         "salidas_transferencias": sal_transf,
     }
+    # totales de transferencias (las dos cuentas juntas): los usa el cuadre
+    # general y el histórico anterior a la separación Bold/Bancolombia
+    for suf in ("", "venta_", "propina_"):
+        k = suf + "transferencias"
+        out[k] = out[k + "_bold"] + out[k + "_banco"]
+    return out
 
 
 @app.get("/api/cierre")
@@ -889,7 +927,12 @@ def guardar_cierre():
     base = entero("base")
     efectivo = entero("efectivo_contado")
     datafono = entero("datafono_contado")
-    transf = entero("transferencias_contado")
+    # las transferencias se cuentan por cuenta; el total se sigue guardando
+    # aparte para el cuadre general y para los cierres viejos
+    tr_bold = entero("transferencias_bold_contado")
+    tr_banco = entero("transferencias_banco_contado")
+    transf = (tr_bold + tr_banco) if (tr_bold or tr_banco) \
+        else entero("transferencias_contado")
 
     # base que se deja en la caja para abrir el día siguiente (NULL = no declarada)
     bs = data.get("base_siguiente")
@@ -916,16 +959,21 @@ def guardar_cierre():
     if existente is None:
         conteo_ciego = json.dumps({
             "base": base, "efectivo": efectivo, "datafono": datafono,
-            "transferencias": transf, "total_final": total_final,
+            "transferencias": transf, "transferencias_bold": tr_bold,
+            "transferencias_banco": tr_banco, "total_final": total_final,
             "guardado_en": ahora})
     else:
         conteo_ciego = existente["conteo_ciego"]
         antes = {"base": existente["base"],
                  "efectivo": existente["efectivo_contado"],
                  "datafono": existente["datafono_contado"],
-                 "transferencias": existente["transferencias_contado"]}
+                 "transferencias": existente["transferencias_contado"],
+                 "transferencias_bold": existente["transferencias_bold_contado"],
+                 "transferencias_banco": existente["transferencias_banco_contado"]}
         despues = {"base": base, "efectivo": efectivo,
-                   "datafono": datafono, "transferencias": transf}
+                   "datafono": datafono, "transferencias": transf,
+                   "transferencias_bold": tr_bold,
+                   "transferencias_banco": tr_banco}
         if antes != despues:
             _registrar_excepcion(
                 db, "cierre_corregido", referencia=fecha,
@@ -934,14 +982,17 @@ def guardar_cierre():
 
     db.execute(
         "INSERT INTO cierres (fecha, base, efectivo_contado, datafono_contado,"
-        " transferencias_contado, esperado_efectivo, esperado_datafono,"
+        " transferencias_contado, transferencias_bold_contado,"
+        " transferencias_banco_contado, esperado_efectivo, esperado_datafono,"
         " esperado_transferencias, total_final, diferencia, guardado_en, conteo_efectivo,"
         " salidas, base_siguiente, conteo_base_siguiente, conteo_ciego)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
         " ON CONFLICT(fecha) DO UPDATE SET base=excluded.base,"
         " efectivo_contado=excluded.efectivo_contado,"
         " datafono_contado=excluded.datafono_contado,"
         " transferencias_contado=excluded.transferencias_contado,"
+        " transferencias_bold_contado=excluded.transferencias_bold_contado,"
+        " transferencias_banco_contado=excluded.transferencias_banco_contado,"
         " esperado_efectivo=excluded.esperado_efectivo,"
         " esperado_datafono=excluded.esperado_datafono,"
         " esperado_transferencias=excluded.esperado_transferencias,"
@@ -949,7 +1000,7 @@ def guardar_cierre():
         " guardado_en=excluded.guardado_en, conteo_efectivo=excluded.conteo_efectivo,"
         " salidas=excluded.salidas, base_siguiente=excluded.base_siguiente,"
         " conteo_base_siguiente=excluded.conteo_base_siguiente",
-        (fecha, base, efectivo, datafono, transf,
+        (fecha, base, efectivo, datafono, transf, tr_bold, tr_banco,
          esp["efectivo"], esp["datafono"], esp["transferencias"],
          total_final, diferencia, ahora, json.dumps(conteo),
          esp["salidas"], base_siguiente, json.dumps(conteo_bs), conteo_ciego),
